@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: tool
+
+  datasource:
+    url: jdbc:sqlite:./data.db
+    driver-class-name: org.sqlite.JDBC
+    # SQLite 不需要用户名密码，保留空值即可
+    username:
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update            # 自动更新表结构（推荐开发环境使用）
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: true                # 打印 SQL，方便调试
+
+  docker:
+    compose:
+      enabled: false
