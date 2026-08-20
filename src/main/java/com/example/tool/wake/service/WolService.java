@@ -2,6 +2,8 @@ package com.example.tool.wake.service;
 
 
 import com.example.tool.wake.entity.Device;
+import com.example.tool.wake.entity.DeviceStatus;
+import com.example.tool.wake.exception.IdNotDetectedException;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.util.MacUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -20,16 +22,21 @@ public class WolService {
     @Autowired
     private DeviceRepository deviceRepository;
 
-    @Value("${wol.broadcast-address:255.255.255.255}")
+    @Value("${wol.broadcast-address: 255.255.255.255}")
     private String broadcastAddress;
 
-    @Value("${wol.port:9}")
+    @Value("${wol.port: 9}")
     private int wolPort;
 
     public void wakeDevice(Integer deviceId) {
+        if (deviceId == null) {
+            throw new IdNotDetectedException("deviceId is null");
+        }
         Device device = deviceRepository.findById(deviceId).orElseThrow(() -> new RuntimeException("device not found"));
         byte[] payload = MacUtils.parse(device.getMac());
         sendMagicPacket(payload);
+        device.setStatus(DeviceStatus.PENDING);
+        deviceRepository.save(device);
     }
     private void sendMagicPacket(byte[] payload) {
         try {
