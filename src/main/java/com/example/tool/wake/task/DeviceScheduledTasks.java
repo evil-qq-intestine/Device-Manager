@@ -1,6 +1,7 @@
 package com.example.tool.wake.task;
 
 import com.example.tool.wake.entity.Device;
+import com.example.tool.wake.entity.DeviceMonitorMode;
 import com.example.tool.wake.entity.DeviceStatus;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.service.DeviceHealthChecker;
@@ -29,7 +30,7 @@ public class DeviceScheduledTasks {
     public void healthCheck() {
         List<Device> devices = deviceRepository.findAll();
         for (Device device : devices) {
-            if ("PING".equals(device.getMonitorMode())){
+            if (device.getMonitorMode() == DeviceMonitorMode.PING) {
                 Long lastPing = lastPingMap.get(device.getId());
                 long now = System.currentTimeMillis();
                 if (lastPing != null && (now - lastPing) < device.getPingInterval() * 1000L) {
@@ -56,12 +57,12 @@ public class DeviceScheduledTasks {
                 }
                 // 无论结果如何，都记录当前时间
                 lastPingMap.put(device.getId(), now);
-            } else if ("HEARTBEAT".equals(device.getMonitorMode())){
-                if (checkerMap.get("heartbeatChecker") == null) {
+            } else if (device.getMonitorMode() == DeviceMonitorMode.HEARTBEAT) {
+                if (checkerMap.get("heartbeatHealthChecker") == null) {
                     log.error("heartbeatChecker checkerMap is null, ID : {}", device.getId());
                     continue;
                 }
-                boolean alive = checkerMap.get("heartbeatChecker").isAlive(device);
+                boolean alive = checkerMap.get("heartbeatHealthChecker").isAlive(device);
                 if (alive) {
                     device.setStatus(DeviceStatus.ONLINE);
                     deviceRepository.save(device);

@@ -29,7 +29,10 @@ public class Device {
     private DeviceIpMode ipMode;
 
     private String deviceName;
-    private String monitorMode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "monitormode")
+    private DeviceMonitorMode monitorMode;
 
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer pingInterval;
@@ -55,7 +58,7 @@ public class Device {
                   String ipv6,
                   DeviceIpMode ipMode,
                   String deviceName,
-                  String monitorMode,
+                  DeviceMonitorMode monitorMode,
                   Integer pingInterval,
                   Integer heartbeatTimeout,
                   Integer pingTimeout,
@@ -129,10 +132,10 @@ public class Device {
         this.deviceName = deviceName;
     }
 
-    public String getMonitorMode() {
+    public DeviceMonitorMode getMonitorMode() {
         return monitorMode;
     }
-    public void setMonitorMode(String monitorMode) {
+    public void setMonitorMode(DeviceMonitorMode monitorMode) {
         this.monitorMode = monitorMode;
     }
 
