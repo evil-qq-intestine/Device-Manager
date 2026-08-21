@@ -56,7 +56,7 @@ public class DeviceScheduledTasks {
                 }
                 // 无论结果如何，都记录当前时间
                 lastPingMap.put(device.getId(), now);
-            } else if ("HEALTH".equals(device.getMonitorMode())){
+            } else if ("HEARTBEAT".equals(device.getMonitorMode())){
                 if (checkerMap.get("heartbeatChecker") == null) {
                     log.error("heartbeatChecker checkerMap is null, ID : {}", device.getId());
                     continue;

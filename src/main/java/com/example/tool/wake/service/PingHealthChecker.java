@@ -5,10 +5,8 @@ import com.example.tool.wake.util.SystemPingUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Slf4j
-@Component("ping")
+@Component("pingHealthChecker")
 public class PingHealthChecker implements DeviceHealthChecker {
     @Override
     public boolean isAlive(Device device){
@@ -20,6 +18,6 @@ public class PingHealthChecker implements DeviceHealthChecker {
         if (device.getPingTimeout() != null){
             timeoutSeconds = device.getPingTimeout();
         }
-        return SystemPingUtil.ping(device.getIp(), timeoutSeconds);
+        return SystemPingUtil.ping(device.getIpv4(), timeoutSeconds);
     }
 }

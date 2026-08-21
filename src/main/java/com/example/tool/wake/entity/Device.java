@@ -1,5 +1,6 @@
 package com.example.tool.wake.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 
@@ -11,6 +12,7 @@ public class Device {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // 自增ID
+    @JsonIgnore
     private Integer id;
 
     @Column(name = "user_id")
@@ -19,8 +21,14 @@ public class Device {
     @Column(nullable = false, unique = true)
     private String mac;
 
-    private String ip;
-    private String name;
+    private String ipv4;
+    private String ipv6;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ipmode", length = 10)
+    private DeviceIpMode ipMode;
+
+    private String deviceName;
     private String monitorMode;
 
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
@@ -29,6 +37,7 @@ public class Device {
     private Integer heartbeatTimeout;
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer pingTimeout;
+    @JsonIgnore
     private LocalDateTime lastOnlineTime;
 
     @Enumerated(EnumType.STRING)
@@ -36,16 +45,16 @@ public class Device {
     private DeviceStatus status;
     //private Integer heartbeatThreshold;
 
-    // JPA 要求的无参构造器
     public Device() {
     }
 
-    // 业务用的全参构造器（不含id，id由数据库生成）
     public Device(Integer id,
                   Integer userId,
                   String mac,
-                  String ip,
-                  String name,
+                  String ipv4,
+                  String ipv6,
+                  DeviceIpMode ipMode,
+                  String deviceName,
                   String monitorMode,
                   Integer pingInterval,
                   Integer heartbeatTimeout,
@@ -57,8 +66,10 @@ public class Device {
         this.id = id;
         this.userId = userId;
         this.mac = mac;
-        this.ip = ip;
-        this.name = name;
+        this.ipv4 = ipv4;
+        this.ipv6 = ipv6;
+        this.ipMode = ipMode;
+        this.deviceName = deviceName;
         this.monitorMode = monitorMode;
         this.pingInterval = pingInterval;
         this.heartbeatTimeout = heartbeatTimeout;
@@ -90,18 +101,32 @@ public class Device {
         this.mac = mac;
     }
 
-    public String getIp() {
-        return ip;
+    public String getIpv4() {
+        return ipv4;
     }
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setIpv4(String ipv4) {
+        this.ipv4 = ipv4;
     }
 
-    public String getName() {
-        return name;
+    public String getIpv6() {
+        return ipv6;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setIpv6(String ipv6) {
+        this.ipv6 = ipv6;
+    }
+
+    public DeviceIpMode getIpMode() {
+        return ipMode;
+    }
+    public void setIpMode(DeviceIpMode ipMode) {
+        this.ipMode = ipMode;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getMonitorMode() {

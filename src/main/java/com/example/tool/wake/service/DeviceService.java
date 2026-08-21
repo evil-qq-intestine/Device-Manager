@@ -1,6 +1,7 @@
 package com.example.tool.wake.service;
 
 import com.example.tool.wake.entity.Device;
+import com.example.tool.wake.entity.DeviceStatus;
 import com.example.tool.wake.exception.IdNotDetectedException;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.task.DeviceScheduledTasks;
@@ -46,6 +47,9 @@ public class DeviceService {
         MacUtils.checkMac(device.getMac());
         if(deviceRepository.existsByMac(device.getMac())) {
             throw new RuntimeException("设备MAC地址已存在：" + device.getMac());
+        }
+        if (device.getStatus() == null) {
+            device.setStatus(DeviceStatus.UNKNOWN);
         }
         Device savedDevice = deviceRepository.save(device);
         log.info("设备保存成功，ID：{}", savedDevice.getId());

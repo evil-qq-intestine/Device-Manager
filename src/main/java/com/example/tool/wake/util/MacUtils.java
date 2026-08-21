@@ -11,14 +11,14 @@ public class MacUtils {
 
     //解析mac
     public static byte[] parse(String mac) {
+        checkMac(mac);
+        
+        String hex = mac.replaceAll("[^0-9A-Fa-f]", "");
+
         byte[] macBytes = new byte[MAC_SIZE];
-        try {
-            for (int i = 0; i < macBytes.length; i++) {
-                int start = i * 2;
-                macBytes[i] = (byte) Integer.parseInt(mac.replaceAll("[^0-9A-Fa-f]", "").substring(start, start + 2), 16);
-            }
-        } catch (NumberFormatException e) {
-            throw new MACAnalysisException(1001, "Failed to parse MAC bytes from: " + mac, e);
+        for (int i = 0; i < MAC_SIZE; i++) {
+            int start = i * 2;
+            macBytes[i] = (byte) Integer.parseInt(hex.substring(start, start + 2), 16);
         }
         return macBytes;
     }

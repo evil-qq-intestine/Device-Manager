@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Slf4j
-@Component("heartbeat")
+@Component("heartbeatHealthChecker")
 public class HeartbeatHealthChecker implements DeviceHealthChecker {
     @Override
     public boolean isAlive(Device device){
