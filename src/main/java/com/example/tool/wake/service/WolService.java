@@ -3,7 +3,6 @@ package com.example.tool.wake.service;
 
 import com.example.tool.wake.entity.Device;
 import com.example.tool.wake.entity.DeviceStatus;
-import com.example.tool.wake.exception.BusinessException;
 import com.example.tool.wake.exception.IdNotDetectedException;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.util.MacUtils;
@@ -25,7 +24,7 @@ public class WolService {
     @Autowired
     private DeviceRepository deviceRepository;
 
-    @Value("${wol.broadcast-address: 255.255.255.255}")
+    @Value("${wol.ipv4-broadcast-address: 255.255.255.255}")
     private String broadcastAddress;
 
     private byte[] ipAddressBytes;

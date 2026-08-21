@@ -1,6 +1,7 @@
 package com.example.tool.wake.validator;
 
 import com.example.tool.wake.entity.Device;
+import com.example.tool.wake.entity.DeviceMonitorMode;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.util.MacUtils;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class DeviceValidator {
         }
 
         if (device.getMonitorMode() != null) {
-            if (!"PING".equals(device.getMonitorMode()) && !"HEARTBEAT".equals(device.getMonitorMode())) {
+            if (DeviceMonitorMode.PING != device.getMonitorMode() && DeviceMonitorMode.HEARTBEAT != device.getMonitorMode()) {
                 throw new RuntimeException("监控模式只能为 PING 或 HEARTBEAT");
             }
         }

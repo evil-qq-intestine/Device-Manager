@@ -4,7 +4,7 @@ import com.example.tool.wake.entity.Device;
 import com.example.tool.wake.entity.DeviceMonitorMode;
 import com.example.tool.wake.entity.DeviceStatus;
 import com.example.tool.wake.repository.DeviceRepository;
-import com.example.tool.wake.service.DeviceHealthChecker;
+import com.example.tool.wake.service.checker.DeviceHealthChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

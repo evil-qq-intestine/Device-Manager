@@ -1,4 +1,4 @@
-package com.example.tool.wake.service;
+package com.example.tool.wake.service.checker;
 
 import com.example.tool.wake.entity.Device;
 
