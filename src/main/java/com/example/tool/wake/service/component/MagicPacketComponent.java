@@ -14,7 +14,7 @@ import java.net.InetAddress;
 public class MagicPacketComponent {
 
     @Value("${spring.wol.port:9}")
-    private static int wolPort;
+    private int wolPort;
 
     public void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {
         try {

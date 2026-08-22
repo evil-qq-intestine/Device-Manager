@@ -22,7 +22,7 @@ spring:
   wol:
     ipv6:
       multicast-address: ff02::1
-      networkCard: w
+      networkCard: wlp1s0
     ipv4:
       broadcast-address: "255.255.255.255"
     port: 9
