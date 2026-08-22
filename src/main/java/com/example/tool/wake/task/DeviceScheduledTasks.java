@@ -22,11 +22,14 @@ public class DeviceScheduledTasks {
     private DeviceRepository deviceRepository;
 
     @Autowired
-    private Map<String, DeviceHealthChecker> checkerMap;
+    private Map<String, DeviceHealthChecker> healthCheckerMap;
+
+    //@Value("${spring.ping.task-time:30}000")
+    //private int deviceTaskTime;
 
     private static final Map<Integer, Long> lastPingMap = new ConcurrentHashMap<>();
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelayString = "${spring.ping.task-time:30}000")
     public void healthCheck() {
         List<Device> devices = deviceRepository.findAll();
         for (Device device : devices) {
@@ -36,11 +39,11 @@ public class DeviceScheduledTasks {
                 if (lastPing != null && (now - lastPing) < device.getPingInterval() * 1000L) {
                     continue;
                 }
-                if (checkerMap.get("pingHealthChecker") == null){
+                if (healthCheckerMap.get("pingHealthChecker") == null){
                     log.error("pingHealthChecker checkerMap is null, ID : {}", device.getId());
                     continue;
                 }
-                boolean alive = checkerMap.get("pingHealthChecker").isAlive(device);
+                boolean alive = healthCheckerMap.get("pingHealthChecker").isAlive(device);
                 if (alive){
                     device.setStatus(DeviceStatus.ONLINE);
                     device.setLastOnlineTime(LocalDateTime.now());
@@ -58,11 +61,11 @@ public class DeviceScheduledTasks {
                 // 无论结果如何，都记录当前时间
                 lastPingMap.put(device.getId(), now);
             } else if (device.getMonitorMode() == DeviceMonitorMode.HEARTBEAT) {
-                if (checkerMap.get("heartbeatHealthChecker") == null) {
+                if (healthCheckerMap.get("heartbeatHealthChecker") == null) {
                     log.error("heartbeatChecker checkerMap is null, ID : {}", device.getId());
                     continue;
                 }
-                boolean alive = checkerMap.get("heartbeatHealthChecker").isAlive(device);
+                boolean alive = healthCheckerMap.get("heartbeatHealthChecker").isAlive(device);
                 if (alive) {
                     device.setStatus(DeviceStatus.ONLINE);
                     deviceRepository.save(device);
@@ -76,6 +79,8 @@ public class DeviceScheduledTasks {
                         log.info("heartbeatChecker is dead, ID : {}", device.getId());
                     }
                 }
+            } else {
+                throw new RuntimeException("unknown device monitor mode");
             }
         }
     }

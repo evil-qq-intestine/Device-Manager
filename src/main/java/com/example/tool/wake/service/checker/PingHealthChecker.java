@@ -18,6 +18,6 @@ public class PingHealthChecker implements DeviceHealthChecker {
         if (device.getPingTimeout() != null){
             timeoutSeconds = device.getPingTimeout();
         }
-        return SystemPingUtil.ping(device.getIpv4(), timeoutSeconds);
+        return SystemPingUtil.ping(device.getIp(), timeoutSeconds);
     }
 }

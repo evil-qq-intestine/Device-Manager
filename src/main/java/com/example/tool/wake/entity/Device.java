@@ -21,8 +21,8 @@ public class Device {
     @Column(nullable = false, unique = true)
     private String mac;
 
-    private String ipv4;
-    private String ipv6;
+    private String ip;
+    //private String ipv6;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ipmode", length = 10)
@@ -54,8 +54,8 @@ public class Device {
     public Device(Integer id,
                   Integer userId,
                   String mac,
-                  String ipv4,
-                  String ipv6,
+                  String ip,
+                  //String ipv6,
                   DeviceIpMode ipMode,
                   String deviceName,
                   DeviceMonitorMode monitorMode,
@@ -69,8 +69,8 @@ public class Device {
         this.id = id;
         this.userId = userId;
         this.mac = mac;
-        this.ipv4 = ipv4;
-        this.ipv6 = ipv6;
+        this.ip = ip;
+        //this.ipv6 = ipv6;
         this.ipMode = ipMode;
         this.deviceName = deviceName;
         this.monitorMode = monitorMode;
@@ -104,19 +104,19 @@ public class Device {
         this.mac = mac;
     }
 
-    public String getIpv4() {
-        return ipv4;
+    public String getIp() {
+        return ip;
     }
-    public void setIpv4(String ipv4) {
-        this.ipv4 = ipv4;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
-    public String getIpv6() {
-        return ipv6;
-    }
-    public void setIpv6(String ipv6) {
-        this.ipv6 = ipv6;
-    }
+//    public String getIpv6() {
+//        return ipv6;
+//    }
+//    public void setIpv6(String ipv6) {
+//        this.ipv6 = ipv6;
+//    }
 
     public DeviceIpMode getIpMode() {
         return ipMode;

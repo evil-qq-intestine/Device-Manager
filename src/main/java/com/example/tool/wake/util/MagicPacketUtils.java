@@ -11,10 +11,17 @@ import java.net.InetAddress;
 @Slf4j
 public class MagicPacketUtils {
 
-    @Value("${wol.port: 9}")
+//    @Value("${spring.wol.port: 9}")
+//    private static int wolPort;
+
     private static int wolPort;
 
-    private static void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {
+    @Value("${spring.wol.port:9}")
+    public void setWolPort(int port) {
+        wolPort = port;
+    }
+
+    public static void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {
         try {
             byte[] payload = new byte[102];
 
