@@ -14,7 +14,7 @@ import java.net.InetAddress;
 @Component("deviceIpv4Checker")
 public class DeviceIpv4Checker implements DeviceIpChecker {
 
-    @Value("${spring.wol.ipv4-broadcast-address: 255.255.255.255}")
+    @Value("${spring.wol.ipv4.broadcast-address: 255.255.255.255}")
     private String broadcastAddress;
 
     private byte[] ipAddressBytes;

@@ -1,7 +1,8 @@
-package com.example.tool.wake.util;
+package com.example.tool.wake.service.component;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,19 +10,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 @Slf4j
-public class MagicPacketUtils {
-
-//    @Value("${spring.wol.port: 9}")
-//    private static int wolPort;
-
-    private static int wolPort;
+@Component
+public class MagicPacketComponent {
 
     @Value("${spring.wol.port:9}")
-    public void setWolPort(int port) {
-        wolPort = port;
-    }
+    private static int wolPort;
 
-    public static void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {
+    public void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {
         try {
             byte[] payload = new byte[102];
 

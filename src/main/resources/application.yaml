@@ -20,9 +20,12 @@ spring:
       enabled: false
 
   wol:
-    ipv4-broadcast-address: "255.255.255.255"
-    ipv4-multicast-address: "ff02: :1"
+    ipv6:
+      multicast-address: ff02::1
+      networkCard: w
+    ipv4:
+      broadcast-address: "255.255.255.255"
     port: 9
 
   ping:
-    task-time: 1
+    task-time: 10

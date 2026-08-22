@@ -12,10 +12,10 @@ import java.net.UnknownHostException;
 @Component("deviceIpv6Checker")
 public class DeviceIpv6Checker implements DeviceIpChecker {
 
-    @Value("${spring.wol.ipv6-multicast-address: ff02: :1}")
+    @Value("${spring.wol.ipv6.multicast-address: ff02::1}")
     private String multicastAddress;
 
-    @Value("${spring.wol.ipv4-networkCard:}")
+    @Value("${spring.wol.ipv6.networkCard:}")
     private String networkCard;
 
     @Override
@@ -26,7 +26,7 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
         }
         InetAddress multicast;
         try {
-            multicast = InetAddress.getByName(multicastAddress + "#" + networkCard);
+            multicast = InetAddress.getByName(multicastAddress + "%" + networkCard);
         } catch (UnknownHostException e) {
             log.error("构建InetAddress对象失败，ID：{}", deviceId, e);
             throw new RuntimeException("Failed to construct object 'InetAddress'", e);

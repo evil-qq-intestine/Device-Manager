@@ -8,7 +8,7 @@ import com.example.tool.wake.exception.BusinessException;
 import com.example.tool.wake.repository.DeviceRepository;
 import com.example.tool.wake.service.checker.DeviceIpChecker;
 import com.example.tool.wake.util.MacUtils;
-import com.example.tool.wake.util.MagicPacketUtils;
+import com.example.tool.wake.service.component.MagicPacketComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,9 @@ import java.util.Map;
 public class WolService {
     @Autowired
     private DeviceRepository deviceRepository;
+
+    @Autowired
+    private MagicPacketComponent magicPacketComponent;
 
     @Autowired
     private Map<String, DeviceIpChecker> ipCheckerMap;
@@ -57,7 +60,7 @@ public class WolService {
             return false;
         }
         try {
-            MagicPacketUtils.sendMagicPacket(payload, ipCheckerMap.get("deviceIpv" + ipGrade + "Checker").resolveDestinationAddress(device.getId()));
+            magicPacketComponent.sendMagicPacket(payload, ipCheckerMap.get("deviceIpv" + ipGrade + "Checker").resolveDestinationAddress(device.getId()));
             return true;
         } catch (Exception e) {
             log.error("send magic packet error", e);
