@@ -36,7 +36,7 @@ public class Device {
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer pingInterval;
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
-    private Integer heartbeatTimeout;
+    private Integer responseTimeout;
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer pingTimeout;
     @JsonIgnore
@@ -49,8 +49,6 @@ public class Device {
     @Column(name = "status")
     private DeviceStatus status;
 
-    private Integer responseTimeout;
-
     public Device() {}
 
     public Device(Integer deviceId,
@@ -61,12 +59,11 @@ public class Device {
                   String deviceName,
                   DeviceMonitorMode monitorMode,
                   Integer pingInterval,
-                  Integer heartbeatTimeout,
+                  Integer responseTimeout,
                   Integer pingTimeout,
                   LocalDateTime lastOnlineTime,
                   LocalDateTime probeStartTime,
-                  DeviceStatus deviceStatus,
-                  Integer responseTimeout)
+                  DeviceStatus deviceStatus)
                   {
         this.deviceId = deviceId;
         this.userId = userId;
@@ -76,12 +73,11 @@ public class Device {
         this.deviceName = deviceName;
         this.monitorMode = monitorMode;
         this.pingInterval = pingInterval;
-        this.heartbeatTimeout = heartbeatTimeout;
+        this.responseTimeout = responseTimeout;
         this.pingTimeout = pingTimeout;
         this.lastOnlineTime = lastOnlineTime;
         this.probeStartTime = probeStartTime;
         this.status = deviceStatus;
-        this.responseTimeout = responseTimeout;
     }
 
     // 所有 getter/setter
@@ -141,12 +137,12 @@ public class Device {
         this.pingInterval = pingInterval;
     }
 
-    public Integer getHeartbeatTimeout() {
-        return heartbeatTimeout;
+    public Integer getResponseTimeout() {
+        return responseTimeout;
     }
 
-    public void setHeartbeatTimeout(Integer onlineTimeout) {
-        this.heartbeatTimeout = onlineTimeout;
+    public void setResponseTimeout(Integer onlineTimeout) {
+        this.responseTimeout = onlineTimeout;
     }
 
     public Integer getPingTimeout() {
@@ -177,10 +173,4 @@ public class Device {
         this.probeStartTime = probeStartTime;
     }
 
-    public Integer getResponseTimeout() {
-        return responseTimeout;
-    }
-    public void setResponseTimeout(Integer responseTimeout) {
-        this.responseTimeout = responseTimeout;
-    }
 }

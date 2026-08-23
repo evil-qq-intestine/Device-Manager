@@ -20,6 +20,6 @@ public class HeartbeatHealthChecker implements DeviceHealthChecker {
             log.error("无设备心跳超时设定，请检查是否已设置心跳超时时间");
             return false;
         }
-        return device.getHeartbeatTimeout() > Duration.between(lastOnlineTime, LocalDateTime.now()).getSeconds();
+        return device.getResponseTimeout() > Duration.between(lastOnlineTime, LocalDateTime.now()).getSeconds();
     }
 }
