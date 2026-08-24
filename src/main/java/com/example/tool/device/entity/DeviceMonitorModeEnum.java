@@ -1,6 +1,6 @@
 package com.example.tool.device.entity;
 
-public enum DeviceMonitorMode {
+public enum DeviceMonitorModeEnum {
     PING,
     HEARTBEAT,
 }

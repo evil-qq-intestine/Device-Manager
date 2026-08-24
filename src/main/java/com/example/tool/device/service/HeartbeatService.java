@@ -1,7 +1,7 @@
 package com.example.tool.device.service;
 
 import com.example.tool.device.entity.Device;
-import com.example.tool.device.entity.DeviceStatus;
+import com.example.tool.device.entity.DeviceStatusEnum;
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.util.MacUtils;
@@ -22,7 +22,7 @@ public class HeartbeatService {
                 .orElseThrow(() -> new BusinessException("设备未找到，MAC: " + mac));
 
         device.setLastOnlineTime(LocalDateTime.now());
-        device.setStatus(DeviceStatus.ONLINE);
+        device.setStatus(DeviceStatusEnum.ONLINE);
         return deviceRepository.save(device);
     }
 }

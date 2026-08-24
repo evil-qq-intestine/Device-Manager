@@ -1,8 +1,8 @@
 package com.example.tool.device.task;
 
 import com.example.tool.device.entity.Device;
-import com.example.tool.device.entity.DeviceMonitorMode;
-import com.example.tool.device.entity.DeviceStatus;
+import com.example.tool.device.entity.DeviceMonitorModeEnum;
+import com.example.tool.device.entity.DeviceStatusEnum;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.service.checker.DeviceHealthChecker;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class DeviceScheduledTasks {
     public void healthCheck() {
         List<Device> devices = deviceRepository.findAll();
         for (Device device : devices) {
-            if (device.getMonitorMode() == DeviceMonitorMode.PING) {
+            if (device.getMonitorMode() == DeviceMonitorModeEnum.PING) {
                 Long lastPing = lastPingMap.get(device.getDeviceId());
                 long now = System.currentTimeMillis();
                 if (lastPing != null && (now - lastPing) < device.getPingInterval() * 1000L) {
@@ -42,7 +42,7 @@ public class DeviceScheduledTasks {
 
                 // 无论结果如何，都记录当前时间
                 lastPingMap.put(device.getDeviceId(), now);
-            } else if (device.getMonitorMode() == DeviceMonitorMode.HEARTBEAT) {
+            } else if (device.getMonitorMode() == DeviceMonitorModeEnum.HEARTBEAT) {
 
                 healthQuestion(device, "heartbeat");
 
@@ -60,20 +60,20 @@ public class DeviceScheduledTasks {
         }
         boolean alive = healthCheckerMap.get(key).isAlive(device);
         if (alive){
-            device.setStatus(DeviceStatus.ONLINE);
-            if (device.getMonitorMode() == DeviceMonitorMode.PING) {
+            device.setStatus(DeviceStatusEnum.ONLINE);
+            if (device.getMonitorMode() == DeviceMonitorModeEnum.PING) {
                 device.setLastOnlineTime(LocalDateTime.now());
             }
             deviceRepository.save(device);
         } else {
-            if (device.getStatus() == DeviceStatus.PROBE){
+            if (device.getStatus() == DeviceStatusEnum.PROBE){
                 if (device.getResponseTimeout() > Duration.between(device.getProbeStartTime(), LocalDateTime.now()).getSeconds()) {
-                    device.setStatus(DeviceStatus.OFFLINE);
+                    device.setStatus(DeviceStatusEnum.OFFLINE);
                 } else {
                     log.info("Device {} has been PROBE", device.getDeviceId());
                 }
             } else {
-                device.setStatus(DeviceStatus.OFFLINE);
+                device.setStatus(DeviceStatusEnum.OFFLINE);
                 deviceRepository.save(device);
                 log.info("{} is dead, ID : {}", key, device.getDeviceId());
             }

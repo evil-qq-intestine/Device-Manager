@@ -2,8 +2,8 @@ package com.example.tool.device.service;
 
 
 import com.example.tool.device.entity.Device;
-import com.example.tool.device.entity.DeviceIpMode;
-import com.example.tool.device.entity.DeviceStatus;
+import com.example.tool.device.entity.DeviceIpModeEnum;
+import com.example.tool.device.entity.DeviceStatusEnum;
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.service.checker.DeviceIpChecker;
@@ -38,7 +38,7 @@ public class WolService {
             throw new BusinessException("device send magic packet failed");
         }
         device.setProbeStartTime(LocalDateTime.now());
-        device.setStatus(DeviceStatus.PROBE);
+        device.setStatus(DeviceStatusEnum.PROBE);
         deviceRepository.save(device);
     }
 
@@ -46,9 +46,9 @@ public class WolService {
         if (device.getIpMode() == null) {
             log.error("ip mode is null,id:{}", device.getDeviceId());
             throw new BusinessException("ip mode is null");
-        } else if (device.getIpMode() == DeviceIpMode.IPV4) {
+        } else if (device.getIpMode() == DeviceIpModeEnum.IPV4) {
             return ipSendChecker(device, payload, 4);
-        } else if (device.getIpMode() == DeviceIpMode.IPV6) {
+        } else if (device.getIpMode() == DeviceIpModeEnum.IPV6) {
             return ipSendChecker(device, payload, 6);
         } else {
             throw new BusinessException("ip mode is unknown");

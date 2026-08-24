@@ -1,6 +1,6 @@
 package com.example.tool.device.entity;
 
-public enum DeviceStatus {
+public enum DeviceStatusEnum {
     ONLINE,
     OFFLINE,
     PROBE,

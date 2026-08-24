@@ -1,7 +1,9 @@
 package com.example.tool.device.controller;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.device.entity.DeviceMonitor;
 import com.example.tool.device.service.DeviceService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -27,15 +29,22 @@ public class DeviceController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Device addDevice(@RequestBody Device device) {
+    public Device addDevice(@Valid @RequestBody Device device) {
         return deviceService.saveDevice(device);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{deviceId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Device updateDevice(@PathVariable Integer id, @RequestBody Device device) {
-        device.setDeviceId(id);
+    public Device updateDevice(@PathVariable Integer deviceId, @Valid @RequestBody Device device) {
+        device.setDeviceId(deviceId);
         return deviceService.updateDevice(device);
+    }
+
+    @PutMapping("/monitor/{deviceMonitorId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public DeviceMonitor monitorDevice(@PathVariable Integer deviceMonitorId, @Valid @RequestBody DeviceMonitor deviceMonitor) {
+        deviceMonitor.setMonitorId(deviceMonitorId);
+        return deviceService.updateDeviceMonitor(deviceMonitor);
     }
 
     @DeleteMapping("/{id}")

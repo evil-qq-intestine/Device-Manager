@@ -3,13 +3,20 @@ package com.example.tool.device.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
+import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "device")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true) // toBuilder = true 允许基于现有对象修改，更新好用
 public class Device {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // 自增ID
     @JsonIgnore
@@ -19,158 +26,117 @@ public class Device {
     private Integer userId;          // 先存用户ID，等User类建好后再改成对象关联
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "MAC地址不能为空")
+    @Pattern(regexp = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", message = "MAC地址格式无效")
     private String mac;
 
-    private String ip;
+    public static final String IP_REGEX =
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|" +
+                    "(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|([0-9a-fA-F]{1,4}:){1,6}:([0-9a-fA-F]{1,4})?|" +
+                    "([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|" +
+                    "([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|" +
+                    "[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|" +
+                    "fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|" +
+                    "::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|" +
+                    "([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$";
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ipmode", length = 10)
-    private DeviceIpMode ipMode;
+
+    @Pattern(regexp = IP_REGEX, message = "非法的 IPv4 或 IPv6 地址")
+    private String ip;
 
     private String deviceName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "monitormode")
-    private DeviceMonitorMode monitorMode;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private DeviceMonitor monitor;
 
-    @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
-    private Integer pingInterval;
-    @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
-    private Integer responseTimeout;
-    @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
-    private Integer pingTimeout;
-    @JsonIgnore
-    private LocalDateTime lastOnlineTime;
 
-    @JsonIgnore
-    private LocalDateTime probeStartTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private DeviceStatus status;
 
-    public Device() {}
 
-    public Device(Integer deviceId,
-                  Integer userId,
-                  String mac,
-                  String ip,
-                  DeviceIpMode ipMode,
-                  String deviceName,
-                  DeviceMonitorMode monitorMode,
-                  Integer pingInterval,
-                  Integer responseTimeout,
-                  Integer pingTimeout,
-                  LocalDateTime lastOnlineTime,
-                  LocalDateTime probeStartTime,
-                  DeviceStatus deviceStatus)
-                  {
-        this.deviceId = deviceId;
-        this.userId = userId;
-        this.mac = mac;
-        this.ip = ip;
-        this.ipMode = ipMode;
-        this.deviceName = deviceName;
-        this.monitorMode = monitorMode;
-        this.pingInterval = pingInterval;
-        this.responseTimeout = responseTimeout;
-        this.pingTimeout = pingTimeout;
-        this.lastOnlineTime = lastOnlineTime;
-        this.probeStartTime = probeStartTime;
-        this.status = deviceStatus;
-    }
 
-    // 所有 getter/setter
-    public Integer getDeviceId() {
-        return deviceId;
-    }
-    public void setDeviceId(Integer deviceId) {
-        this.deviceId = deviceId;
-    }
 
-    public Integer getUserId() {
-        return userId;
-    }
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
 
-    public String getMac() {
-        return mac;
-    }
-    public void setMac(String mac) {
-        this.mac = mac;
-    }
 
-    public String getIp() {
-        return ip;
-    }
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
 
-    public DeviceIpMode getIpMode() {
-        return ipMode;
-    }
-    public void setIpMode(DeviceIpMode ipMode) {
-        this.ipMode = ipMode;
-    }
 
-    public String getDeviceName() {
-        return deviceName;
-    }
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
 
-    public DeviceMonitorMode getMonitorMode() {
-        return monitorMode;
+
+
+
+
+    public DeviceMonitorModeEnum getMonitorMode() {
+        return monitor != null ? monitor.getMonitorMode() : DeviceMonitorModeEnum.PING;
     }
-    public void setMonitorMode(DeviceMonitorMode monitorMode) {
-        this.monitorMode = monitorMode;
+    public void setMonitorMode(DeviceMonitorModeEnum monitorMode) {
+        ensureMonitor();
+        this.monitor.setMonitorMode(monitorMode);
     }
 
     public Integer getPingInterval() {
-        return pingInterval;
+        return monitor != null ? monitor.getPingInterval() : 30;
     }
     public void setPingInterval(Integer pingInterval) {
-        this.pingInterval = pingInterval;
-    }
-
-    public Integer getResponseTimeout() {
-        return responseTimeout;
-    }
-
-    public void setResponseTimeout(Integer onlineTimeout) {
-        this.responseTimeout = onlineTimeout;
+        ensureMonitor();
+        this.monitor.setPingInterval(pingInterval);
     }
 
     public Integer getPingTimeout() {
-        return pingTimeout;
+        return monitor != null ? monitor.getPingTimeout() : 3;
     }
     public void setPingTimeout(Integer pingTimeout) {
-        this.pingTimeout = pingTimeout;
+        ensureMonitor();
+        this.monitor.setPingTimeout(pingTimeout);
     }
 
     public LocalDateTime getLastOnlineTime() {
-        return lastOnlineTime;
+        return monitor != null ? monitor.getLastOnlineTime() : null;
     }
     public void setLastOnlineTime(LocalDateTime lastOnlineTime) {
-        this.lastOnlineTime = lastOnlineTime;
+        ensureMonitor();
+        this.monitor.setLastOnlineTime(lastOnlineTime);
     }
 
-    public DeviceStatus getStatus() {
-        return status;
+    public Integer getResponseTimeout() {
+        return monitor != null ? monitor.getResponseTimeout() : 60;
     }
-    public void setStatus(DeviceStatus status) {
-        this.status = status;
+    public void setResponseTimeout(Integer responseTimeout) {
+        ensureMonitor();
+        this.monitor.setResponseTimeout(responseTimeout);
     }
 
-    public LocalDateTime getProbeStartTime() {
-        return probeStartTime;
+    public DeviceIpModeEnum getIpMode() {
+        return monitor != null ? monitor.getIpMode() : DeviceIpModeEnum.IPV4;
+    }
+    public void setIpMode(DeviceIpModeEnum ipMode) {
+        ensureMonitor();
+        this.monitor.setIpMode(ipMode);
+    }
+
+    public LocalDateTime getProbeStartTime(){
+        return monitor != null ? monitor.getProbeStartTime() : null;
     }
     public void setProbeStartTime(LocalDateTime probeStartTime) {
-        this.probeStartTime = probeStartTime;
+        ensureMonitor();
+        this.monitor.setProbeStartTime(probeStartTime);
     }
 
+    public DeviceStatusEnum getStatus() {
+        return monitor != null ? monitor.getStatus() : DeviceStatusEnum.UNKNOWN;
+    }
+    public void setStatus(DeviceStatusEnum deviceStatus) {
+        ensureMonitor();
+        this.monitor.setStatus(deviceStatus);
+    }
+
+    private void ensureMonitor() {
+        if (this.monitor == null) {
+            this.monitor = DeviceMonitor.builder()
+                    .status(DeviceStatusEnum.UNKNOWN)
+                    .monitorMode(DeviceMonitorModeEnum.PING)
+                    .pingInterval(30)
+                    .responseTimeout(60)
+                    .build();
+            monitor.setDevice(this);
+        }
+    }
 }
