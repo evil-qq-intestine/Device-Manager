@@ -13,19 +13,27 @@ spring:
     hibernate:
       ddl-auto: update            # 自动更新表结构（推荐开发环境使用）
     database-platform: org.hibernate.community.dialect.SQLiteDialect
-    show-sql: true                # 打印 SQL，方便调试
+    show-sql: true
+    properties:
+      hibernate:
+              enhance:
+                enableLazyInitialization: ture                # 打印 SQL，方便调试
 
   docker:
     compose:
       enabled: false
 
-  wol:
-    ipv6:
-      multicast-address: ff02::1
-      networkCard: wlp1s0
-    ipv4:
-      broadcast-address: "255.255.255.255"
-    port: 9
+jwt:
+  secret: your-256-bit-secret-key-here-at-least-32-characters #密钥
+  expiration: 86400000 # Token有效期24小时
 
-  ping:
-    task-time: 10
+wol:
+  ipv6:
+    multicast-address: ff02::1
+    networkCard: wlp1s0
+  ipv4:
+    broadcast-address: "255.255.255.255"
+  port: 9
+
+ping:
+  task-time: 10

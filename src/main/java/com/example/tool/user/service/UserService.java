@@ -1,5 +1,6 @@
 package com.example.tool.user.service;
 
+import com.example.tool.device.entity.Device;
 import com.example.tool.user.entity.Role;
 import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
@@ -29,5 +30,9 @@ public class UserService {
 //        }
 //        return users;
 //    }
+
+    public User findAll(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
+    }
 
 }

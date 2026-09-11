@@ -1,5 +1,6 @@
 package com.example.tool.device.entity;
 
+import com.example.tool.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -22,16 +23,13 @@ public class Device {
     @JsonIgnore
     private Integer deviceId;
 
-    @Column(name = "user_id")
-    private Integer userId;          // 先存用户ID，等User类建好后再改成对象关联
-
     @Column(nullable = false, unique = true)
     @NotBlank(message = "MAC地址不能为空")
     @Pattern(regexp = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", message = "MAC地址格式无效")
     private String mac;
 
     public static final String IP_REGEX =
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|" +
+                    "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|" +
                     "(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|([0-9a-fA-F]{1,4}:){1,6}:([0-9a-fA-F]{1,4})?|" +
                     "([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|" +
                     "([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|" +
@@ -40,29 +38,18 @@ public class Device {
                     "::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|" +
                     "([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$";
 
-
     @Pattern(regexp = IP_REGEX, message = "非法的 IPv4 或 IPv6 地址")
     private String ip;
 
     private String deviceName;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private DeviceMonitor monitor;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private User user;
 
     public DeviceMonitorModeEnum getMonitorMode() {
         return monitor != null ? monitor.getMonitorMode() : DeviceMonitorModeEnum.PING;

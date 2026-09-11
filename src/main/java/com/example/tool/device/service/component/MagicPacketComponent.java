@@ -13,7 +13,7 @@ import java.net.InetAddress;
 @Component
 public class MagicPacketComponent {
 
-    @Value("${spring.wol.port:9}")
+    @Value("${wol.port:9}")
     private int wolPort;
 
     public void sendMagicPacket(byte[] macBytes, InetAddress broadcast) {

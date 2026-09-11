@@ -11,10 +11,10 @@ import java.net.UnknownHostException;
 @Component("deviceIpv6Checker")
 public class DeviceIpv6Checker implements DeviceIpChecker {
 
-    @Value("${spring.wol.ipv6.multicast-address: ff02::1}")
+    @Value("${wol.ipv6.multicast-address: ff02::1}")
     private String multicastAddress;
 
-    @Value("${spring.wol.ipv6.networkCard:}")
+    @Value("${wol.ipv6.networkCard:}")
     private String networkCard;
 
     @Override

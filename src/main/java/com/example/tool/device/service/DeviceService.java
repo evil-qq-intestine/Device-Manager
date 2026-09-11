@@ -11,6 +11,9 @@ import com.example.tool.device.task.DeviceScheduledTasks;
 import com.example.tool.device.util.BeanCopyUtils;
 import com.example.tool.device.validator.DeviceMonitorValidator;
 import com.example.tool.device.validator.DeviceValidator;
+import com.example.tool.user.entity.User;
+import com.example.tool.user.reopsitory.UserRepository;
+import com.example.tool.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class DeviceService {
     }
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private DeviceValidator deviceValidator;
 
     @Autowired
@@ -43,16 +49,30 @@ public class DeviceService {
     public List<Device> findAll() {
         log.info("查询设备列表");
         List<Device> devices = deviceRepository.findAll();
+//        devices.forEach(device -> {
+//            if (device.getMonitor() != null) {
+//                device.getMonitor().getStatus(); // 触发加载
+//            }
+//        });
         log.info("共查询到{}条设备", devices);
         return devices;
     }
 
     @Transactional(readOnly = true)
-    public Device findById(Integer id) {
-        log.info("查询单个设备");
+    public Device findById(Integer id, Integer userId) {
+        log.info("用户{}查询单个设备", userId);
+        Device device = new Device();
+        
         return deviceRepository.findById(id).orElseThrow(() -> new IdNotDetectedException("未查询到设备"));
     }
 
+    @Transactional(readOnly = true)
+    public List<DeviceMonitor> findAllDeviceMonitor() {
+        log.info("查询所有设备状态信息");
+        return deviceMonitorRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public DeviceMonitor findMonitorById(Integer id) {
         log.info("查询设备信息");
         return deviceMonitorRepository.findById(id).orElseThrow(() -> new IdNotDetectedException("未查询到设备信息"));
@@ -65,6 +85,7 @@ public class DeviceService {
         if (device.getStatus() == null) {
             device.setStatus(DeviceStatusEnum.UNKNOWN);
         }
+
         Device savedDevice = deviceRepository.save(device);
 
         DeviceMonitor.DeviceMonitorBuilder builder = DeviceMonitor.builder()
@@ -77,6 +98,7 @@ public class DeviceService {
             builder.monitorMode(DeviceMonitorModeEnum.PING);
         }
         DeviceMonitor deviceMonitor = builder.build();
+        deviceMonitor.setDevice(savedDevice);
         deviceMonitorRepository.save(deviceMonitor);
         log.info("设备保存成功，ID：{}", savedDevice.getDeviceId());
         return savedDevice;
@@ -84,7 +106,7 @@ public class DeviceService {
 
     public Device updateDevice(Device device) {
         Device newDevice = deviceRepository.findById(device.getDeviceId()).orElseThrow(() -> new RuntimeException("该设备ID不存在：" + device.getDeviceId()));
-        deviceValidator.validateBeforeUpdate(device);
+        deviceValidator.validateBeforeUpdate(device, newDevice);
 
         BeanCopyUtils.copyNonNullProperties(device, newDevice);
         Device savedDevice = deviceRepository.save(newDevice);
@@ -100,7 +122,7 @@ public class DeviceService {
         DeviceMonitor savedDeviceMonitor = deviceMonitorRepository.save(newDeviceMonitor);
         log.info("设备状态信息更新成功：{}", savedDeviceMonitor);
 
-        return newDeviceMonitor;
+        return savedDeviceMonitor;
     }
 
     public void deleteDevice(Integer id) {

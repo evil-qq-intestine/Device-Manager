@@ -1,10 +1,19 @@
 package com.example.tool.user.entity;
 
+import com.example.tool.device.entity.Device;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -12,7 +21,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
 
-    private Integer deviceId;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Device> devices = new ArrayList<>();
+
     private String username;
     private String password;
 
@@ -20,48 +32,14 @@ public class User {
     @Column(name = "role")
     private Role role;
 
-    User(){}
-
-    User(Integer userId, Integer deviceId, String username, String password, Role role) {
-        this.userId = userId;
-        this.deviceId = deviceId;
-        this.username = username;
-        this.password = password;
-        this.role = role;
+    public void addDevice(Device device) {
+        devices.add(device);
+        device.setUser(this);
     }
 
-    public Integer getDeviceId() {
-        return deviceId;
-    }
-    public void setDeviceId(Integer deviceId) {
-        this.deviceId = deviceId;
+    public void removeDevice(Device device) {
+        devices.remove(device);
+        device.setUser(null);
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-    public void setRole(Role role) {
-        this.role = role;
-    }
 }

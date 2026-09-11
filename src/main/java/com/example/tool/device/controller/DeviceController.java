@@ -23,8 +23,18 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
-    public Device findById(@PathVariable Integer id) {
-        return deviceService.findById(id);
+    public Device findById(@PathVariable Integer deviceId, Integer userId) {
+        return deviceService.findById(deviceId, userId);
+    }
+
+    @GetMapping("/monitor")
+    public List<DeviceMonitor> findAllMonitor() {
+        return deviceService.findAllDeviceMonitor();
+    }
+
+    @GetMapping("/monitor/{deviceMonitorId}")
+    public DeviceMonitor findMonitorById(@PathVariable Integer deviceMonitorId) {
+        return deviceService.findMonitorById(deviceMonitorId);
     }
 
     @PostMapping

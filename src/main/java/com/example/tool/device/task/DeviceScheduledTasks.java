@@ -3,6 +3,7 @@ package com.example.tool.device.task;
 import com.example.tool.device.entity.Device;
 import com.example.tool.device.entity.DeviceMonitorModeEnum;
 import com.example.tool.device.entity.DeviceStatusEnum;
+import com.example.tool.device.repository.DeviceMonitorRepository;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.service.checker.DeviceHealthChecker;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class DeviceScheduledTasks {
 
     private static final Map<Integer, Long> lastPingMap = new ConcurrentHashMap<>();
 
-    @Scheduled(fixedDelayString = "${spring.ping.task-time:30}000")
+    @Scheduled(fixedDelayString = "${ping.task-time:30}000")
     public void healthCheck() {
         List<Device> devices = deviceRepository.findAll();
         for (Device device : devices) {

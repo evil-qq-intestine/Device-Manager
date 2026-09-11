@@ -2,8 +2,11 @@ package com.example.tool.device.repository;
 
 
 import com.example.tool.device.entity.Device;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,6 +24,11 @@ public interface DeviceRepository extends JpaRepository<Device, Integer> {
 //                .query(Device.class)
 //                .list();
 //    }
+
+    @Override
+    @Query("SELECT device FROM Device device JOIN FETCH device.monitor")
+    List<Device> findAll();
+
     boolean existsByMac(String mac);
     Optional<Device> findByMac(String mac);
 }

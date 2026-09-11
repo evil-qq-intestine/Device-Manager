@@ -36,7 +36,7 @@ public class DeviceMonitor {
 
     @Builder.Default
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
-    private Integer pingInterval = 30;
+    private Integer pingInterval = 30;//PING时间间隔
     @Builder.Default
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer responseTimeout = 60;//离线最大容忍
@@ -53,19 +53,4 @@ public class DeviceMonitor {
     @Column(name = "status")
     private DeviceStatusEnum status;
 
-//    public void changeStatus()
-//    {
-//        if (responseTimeout >){
-//
-//        }
-//    }
-//
-//    private void powerNO_State() {
-//        lastOnlineTime = LocalDateTime.now();
-//        status = DeviceStatusEnum.ONLINE;
-//    }
-//
-//    private void shutdownState() {
-//        status = DeviceStatusEnum.OFFLINE;
-//    }
 }
