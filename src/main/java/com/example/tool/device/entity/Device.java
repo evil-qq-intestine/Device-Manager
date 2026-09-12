@@ -115,12 +115,14 @@ public class Device {
         this.monitor.setStatus(deviceStatus);
     }
 
-    private void ensureMonitor() {
+    public void ensureMonitor() {
         if (this.monitor == null) {
             this.monitor = DeviceMonitor.builder()
                     .status(DeviceStatusEnum.UNKNOWN)
                     .monitorMode(DeviceMonitorModeEnum.PING)
-                    .pingInterval(30)
+                    .ipMode(DeviceIpModeEnum.getIpMode(ip))
+                    .pingInterval(120)
+                    .pingTimeout(3)
                     .responseTimeout(60)
                     .build();
             monitor.setDevice(this);

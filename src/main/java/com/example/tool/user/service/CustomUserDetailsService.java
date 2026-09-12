@@ -2,6 +2,7 @@ package com.example.tool.user.service;
 
 import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
+import com.example.tool.user.util.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,10 +20,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("用户不存在" + username));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles(String.valueOf(user.getRole()))
-                .build();
+        return new CustomUserDetails(user);
     }
 }

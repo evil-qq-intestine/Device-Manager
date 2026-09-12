@@ -62,7 +62,9 @@ public class JwtUtils {
     public String generateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
         // 可以在这里添加额外信息，比如用户角色
-        // claims.put("roles", userDetails.getAuthorities());
+        if(userDetails instanceof CustomUserDetails customUserDetails){
+            claims.put("userId", customUserDetails.getUserId());
+        }
         return createToken(claims, userDetails.getUsername());
     }
 

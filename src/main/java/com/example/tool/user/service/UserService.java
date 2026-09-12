@@ -16,23 +16,11 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-//    public List<User> findAll(User user){
-//        log.info("查询用户列表");
-//        List<User> users = List.of();
-//        if (user == null) {
-//            log.warn("未授权的访问");
-//        }
-//        else if (user.getRole() == Role.SUPER_ADMIN) {
-//            users = userRepository.findAll();
-//            log.info("管理员 {} 查询了用户列表，共 {} 条", user.getUsername(), users.size());
-//        } else {
-//            log.warn("未授权的访问{}", user.getUserId());
-//        }
-//        return users;
-//    }
-
-    public User findAll(Integer userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
+    public User findByid(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户" + userId + "不存在"));
+    }
 }

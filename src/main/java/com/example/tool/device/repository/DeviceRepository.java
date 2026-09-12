@@ -29,6 +29,12 @@ public interface DeviceRepository extends JpaRepository<Device, Integer> {
     @Query("SELECT device FROM Device device JOIN FETCH device.monitor")
     List<Device> findAll();
 
+    List<Device> findByUserId(Integer userId);
+
+    Optional<Device> findByDeviceIdAndUserId(Integer deviceId, Integer userId);
+
+
+
     boolean existsByMac(String mac);
-    Optional<Device> findByMac(String mac);
+    Optional<Device> findByMacAndUserId(String mac, Integer userId);
 }

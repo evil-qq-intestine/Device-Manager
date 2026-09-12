@@ -28,11 +28,11 @@ public class WolService {
     @Autowired
     private Map<String, DeviceIpChecker> ipCheckerMap;
 
-    public void wakeDevice(Integer deviceId) {
+    public void wakeDevice(Integer deviceId, Integer userId) {
         if (deviceId == null) {
             throw new BusinessException("deviceId is null");
         }
-        Device device = deviceRepository.findById(deviceId).orElseThrow(() -> new RuntimeException("device not found"));
+        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new RuntimeException("device not found"));
         boolean sendSuccess = ipStrategy(device, MacUtils.parse(device.getMac()));
         if (!sendSuccess) {
             throw new BusinessException("device send magic packet failed");
