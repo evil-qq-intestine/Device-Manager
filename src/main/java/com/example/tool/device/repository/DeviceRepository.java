@@ -26,7 +26,7 @@ public interface DeviceRepository extends JpaRepository<Device, Integer> {
 //    }
 
     @Override
-    @Query("SELECT device FROM Device device JOIN FETCH device.monitor")
+    @EntityGraph(attributePaths = "monitor")
     List<Device> findAll();
 
     List<Device> findByUserId(Integer userId);
