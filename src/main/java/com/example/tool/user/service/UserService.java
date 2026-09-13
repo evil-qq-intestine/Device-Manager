@@ -67,6 +67,7 @@ public class UserService {
     public UserResponse createUser(@Valid CreateUserRequest createUserRequest) {
         User user = new User();
         user.createUser(createUserRequest);
+        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
         userValidator.validateBeforeSave(user);
 
         User saved = userRepository.save(user);
@@ -78,7 +79,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException("User not found, id: " + userId));
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setTokenVersion(user.getTokenVersion() + 1);
+        user.setTokenVersion((user.getTokenVersion() == null ? 0 : user.getTokenVersion()) + 1);
         userRepository.save(user);
 
         return new UserResponse(user);
@@ -97,6 +98,25 @@ public class UserService {
         }
 
         // 用更新后的 user 重新构造 UserDetails，再生成新 Token
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        String newToken = jwtUtils.generateToken(userDetails);
+
+        return new AuthResponse(new UserResponse(user), newToken);
+    }
+
+    public AuthResponse changePassword(Integer userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found, id: " + userId));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new BusinessException("当前密码不正确");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setTokenVersion((user.getTokenVersion() == null ? 0 : user.getTokenVersion()) + 1);
+        userRepository.save(user);
+
+        // tokenVersion 已变化，签发新 Token 保持当前会话有效
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String newToken = jwtUtils.generateToken(userDetails);
 

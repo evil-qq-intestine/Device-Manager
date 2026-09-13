@@ -11,12 +11,12 @@ public class WebController {
 
     @GetMapping("/index")
     public ModelAndView index() {
-        return new ModelAndView("index");
+        return new ModelAndView("redirect:/index.html");
     }
 
     @GetMapping("/login")
     public ModelAndView login() {
-        return new ModelAndView("login");
+        return new ModelAndView("redirect:/index.html");
     }
 
 }

@@ -1,9 +1,12 @@
 package com.example.tool.device.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -12,6 +15,9 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "device_monitor")
 public class DeviceMonitor {
     @Id
@@ -43,6 +49,9 @@ public class DeviceMonitor {
     @Builder.Default
     @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
     private Integer pingTimeout = 3;//PING命令超时
+    @Builder.Default
+    @Column(columnDefinition = "INTEGER COMMENT '单位：秒'")
+    private Integer wakeTimeout = 120;//开机(唤醒)后等待上线的独立超时
     @JsonIgnore
     private LocalDateTime lastOnlineTime;//上次在线时间
 

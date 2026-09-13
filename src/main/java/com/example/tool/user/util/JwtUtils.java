@@ -69,6 +69,7 @@ public class JwtUtils {
         if(userDetails instanceof CustomUserDetails customUserDetails){
             claims.put("userId", customUserDetails.getUserId());
             claims.put("tokenVersion", customUserDetails.getTokenVersion());
+            claims.put("role", customUserDetails.getRole());
         }
         return createToken(claims, userDetails.getUsername());
     }

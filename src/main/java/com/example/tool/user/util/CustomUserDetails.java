@@ -21,7 +21,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Integer getTokenVersion() {
-        return user.getTokenVersion();
+        return user.getTokenVersion() != null ? user.getTokenVersion() : 0;
+    }
+
+    public String getRole() {
+        return user.getRole() != null ? user.getRole().name() : null;
     }
 
     @Override

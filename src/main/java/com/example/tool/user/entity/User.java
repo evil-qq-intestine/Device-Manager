@@ -23,12 +23,13 @@ public class User {
     private Integer id;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     @ToString.Exclude
     private List<Device> devices = new ArrayList<>();
 
     private String username;
     private String password;
-    private Integer tokenVersion;
+    private Integer tokenVersion = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)

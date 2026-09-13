@@ -36,3 +36,6 @@ build/
 *.db
 *.log
 *.aeg
+
+### secrets ###
+.master-key

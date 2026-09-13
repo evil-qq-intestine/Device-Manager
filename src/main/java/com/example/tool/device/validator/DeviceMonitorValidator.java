@@ -21,5 +21,9 @@ public class DeviceMonitorValidator {
                         + ") must be less than check interval (" + deviceMonitor.getPingInterval() + ")");
             }
         }
+
+        if (deviceMonitor.getWakeTimeout() != null && deviceMonitor.getWakeTimeout() <= 0) {
+            throw new BusinessException("Wake timeout must be a positive number of seconds");
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.tool.device.entity;
 
 import com.example.tool.user.entity.User;
+import com.example.tool.scripttask.entity.ScriptTask;
+import com.example.tool.scripttask.entity.ScriptType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -9,6 +11,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -52,8 +56,39 @@ public class Device {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     @ToString.Exclude
     private User user;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<ScriptTask> scriptTasks = new ArrayList<>();
+
+    // ---- 设备级 SSH 配置（用于独立关机等，不依赖脚本任务）----
+
+    private String sshHost;
+    private Integer sshPort;
+    private String sshUser;
+
+    @Enumerated(EnumType.STRING)
+    private ScriptType sshType = ScriptType.BASH;
+
+    @JsonIgnore
+    @Column(columnDefinition = "TEXT")
+    private String sshPrivateKeyEncrypted;
+
+    @JsonIgnore
+    @Column(columnDefinition = "TEXT")
+    private String sshKeyPassphraseEncrypted;
+
+    @JsonIgnore
+    @Column(columnDefinition = "TEXT")
+    private String sudoPasswordEncrypted;
+
+    public boolean getSshConfigured() {
+        return sshPrivateKeyEncrypted != null;
+    }
 
     public DeviceMonitorModeEnum getMonitorMode() {
         return monitor != null ? monitor.getMonitorMode() : DeviceMonitorModeEnum.PING;
@@ -88,11 +123,19 @@ public class Device {
     }
 
     public Integer getResponseTimeout() {
-        return monitor != null ? monitor.getResponseTimeout() : 60;
+        return (monitor != null && monitor.getResponseTimeout() != null) ? monitor.getResponseTimeout() : 60;
     }
     public void setResponseTimeout(Integer responseTimeout) {
         ensureMonitor();
         this.monitor.setResponseTimeout(responseTimeout);
+    }
+
+    public Integer getWakeTimeout() {
+        return (monitor != null && monitor.getWakeTimeout() != null) ? monitor.getWakeTimeout() : 120;
+    }
+    public void setWakeTimeout(Integer wakeTimeout) {
+        ensureMonitor();
+        this.monitor.setWakeTimeout(wakeTimeout);
     }
 
     public DeviceIpModeEnum getIpMode() {
@@ -128,6 +171,7 @@ public class Device {
                     .pingInterval(120)
                     .pingTimeout(3)
                     .responseTimeout(60)
+                    .wakeTimeout(120)
                     .build();
             monitor.setDevice(this);
         }

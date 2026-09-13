@@ -19,37 +19,48 @@ public class SystemPingUtil {
             log.warn("IP is empty, cannot ping");
             return false;
         }
-        if (timeoutSeconds < 0) {
+        if (timeoutSeconds <= 0) {
             log.warn("Invalid timeout");
             return false;
         }
-        String os =  System.getProperty("os.name");
+
+        boolean windows = System.getProperty("os.name", "").contains("Windows");
+        long timeoutMillis;
         String[] command;
-        if (os.contains("Windows")) {
-            timeoutSeconds = Math.max(timeoutSeconds * 1000, 1000);
-            command = new String[]{"ping", "-n", "1", "-w", String.valueOf(timeoutSeconds), ip};
+        if (windows) {
+            timeoutMillis = Math.max(timeoutSeconds * 1000L, 1000L);
+            command = new String[]{"ping", "-n", "1", "-w", String.valueOf(timeoutMillis), ip};
         } else {
+            timeoutMillis = timeoutSeconds * 1000L;
             command = new String[]{"ping", "-c", "1", "-w", String.valueOf(timeoutSeconds), ip};
         }
+
         Process process = null;
         try {
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.redirectErrorStream(true);
             process = builder.start();
-            StringBuilder output = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
-            }
-            boolean finished = process.waitFor(timeoutSeconds + 1, TimeUnit.SECONDS);
+
+            // 先带超时地等待进程结束，避免读取输出时被永久阻塞
+            boolean finished = process.waitFor(timeoutMillis + 2000, TimeUnit.MILLISECONDS);
             if (!finished) {
                 process.destroyForcibly();
+                process.waitFor(2, TimeUnit.SECONDS);
                 log.error("Ping process timed out, forcefully terminated, IP: {}", ip);
+                return false;
             }
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line);
+                }
+            }
+
             int exitCode = process.exitValue();
             boolean reachable = (exitCode == 0);
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Ping {} result: {}, exit code: {}, output: {}",
                         ip, reachable ? "reachable" : "unreachable", exitCode, output.toString().trim());
             }

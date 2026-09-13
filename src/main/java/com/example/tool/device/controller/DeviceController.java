@@ -28,7 +28,7 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
-    public Device findById(@PathVariable Integer deviceId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public Device findById(@PathVariable("id") Integer deviceId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return deviceService.findById(deviceId, userDetails.getUserId());
     }
 

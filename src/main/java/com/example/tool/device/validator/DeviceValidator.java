@@ -28,9 +28,8 @@ public class DeviceValidator {
         if(deviceRepository.existsByMac(device.getMac())) {
             throw new BusinessException("Device MAC address already exists: " + device.getMac());
         }
-        if(device.getDeviceToken() != null) {
-            device.setDeviceToken(generateDeviceToken());
-        }
+        // deviceToken is server-generated and never accepted from the client
+        device.setDeviceToken(generateDeviceToken());
     }
 
     private String generateDeviceToken() {

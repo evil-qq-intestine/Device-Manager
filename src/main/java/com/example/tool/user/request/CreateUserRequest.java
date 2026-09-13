@@ -2,6 +2,7 @@ package com.example.tool.user.request;
 
 import com.example.tool.user.entity.Role;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,6 @@ public class CreateUserRequest {
     @Size(min = 6, max = 32, message = "密码长度6-32")
     private String password;
 
-    @NotBlank(message = "权限不能为空")
+    @NotNull(message = "权限不能为空")
     private Role role;
 }

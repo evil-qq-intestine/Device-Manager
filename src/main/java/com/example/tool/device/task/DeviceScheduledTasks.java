@@ -7,8 +7,10 @@ import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceMonitorRepository;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.service.checker.DeviceHealthChecker;
+import com.example.tool.scripttask.service.DeviceOnlineEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,9 @@ public class DeviceScheduledTasks {
 
     @Autowired
     private Map<String, DeviceHealthChecker> healthCheckerMap;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private static final Map<Integer, Long> lastPingMap = new ConcurrentHashMap<>();
 
@@ -63,17 +68,30 @@ public class DeviceScheduledTasks {
         }
         boolean alive = healthCheckerMap.get(key).isAlive(device);
         if (alive){
+            DeviceStatusEnum previous = device.getStatus();
             device.setStatus(DeviceStatusEnum.ONLINE);
             if (device.getMonitorMode() == DeviceMonitorModeEnum.PING) {
                 device.setLastOnlineTime(LocalDateTime.now());
             }
             deviceRepository.save(device);
+            if (previous != DeviceStatusEnum.ONLINE) {
+                eventPublisher.publishEvent(new DeviceOnlineEvent(device.getDeviceId()));
+            }
         } else {
-            if (device.getStatus() == DeviceStatusEnum.PROBE){
-                if (device.getResponseTimeout() > Duration.between(device.getProbeStartTime(), LocalDateTime.now()).getSeconds()) {
+            if (device.getStatus() == DeviceStatusEnum.PROBE) {
+                // 唤醒后处于 PROBE：在 wakeTimeout 内等待上线，超时则判为 OFFLINE
+                LocalDateTime probeStart = device.getProbeStartTime();
+                long elapsed = probeStart == null
+                        ? Long.MAX_VALUE
+                        : Duration.between(probeStart, LocalDateTime.now()).getSeconds();
+                if (elapsed >= device.getWakeTimeout()) {
                     device.setStatus(DeviceStatusEnum.OFFLINE);
+                    deviceRepository.save(device);
+                    log.info("Device {} wake timed out after {}s (wakeTimeout {}s), marked OFFLINE",
+                            device.getDeviceId(), elapsed, device.getWakeTimeout());
                 } else {
-                    log.info("Device {} has been PROBE", device.getDeviceId());
+                    log.info("Device {} is still PROBE ({}s / {}s)",
+                            device.getDeviceId(), elapsed, device.getWakeTimeout());
                 }
             } else {
                 device.setStatus(DeviceStatusEnum.OFFLINE);

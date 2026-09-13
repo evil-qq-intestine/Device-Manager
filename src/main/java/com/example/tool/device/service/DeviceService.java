@@ -10,6 +10,7 @@ import com.example.tool.device.task.DeviceScheduledTasks;
 import com.example.tool.device.util.BeanCopyUtils;
 import com.example.tool.device.validator.DeviceMonitorValidator;
 import com.example.tool.device.validator.DeviceValidator;
+import com.example.tool.scripttask.service.ScriptTaskService;
 import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
 import com.example.tool.user.service.UserService;
@@ -31,17 +32,20 @@ public class DeviceService {
     private final DeviceMonitorValidator deviceMonitorValidator;
     private final DeviceValidator deviceValidator;
     private final UserRepository userRepository;
+    private final ScriptTaskService scriptTaskService;
 
     public DeviceService(DeviceRepository deviceRepository,
                          DeviceMonitorRepository deviceMonitorRepository,
                          DeviceMonitorValidator deviceMonitorValidator,
                          DeviceValidator deviceValidator,
-                         UserRepository userRepository) {
+                         UserRepository userRepository,
+                         ScriptTaskService scriptTaskService) {
         this.deviceRepository = deviceRepository;
         this.deviceMonitorRepository = deviceMonitorRepository;
-        this.deviceValidator = deviceValidator;
         this.deviceMonitorValidator = deviceMonitorValidator;
+        this.deviceValidator = deviceValidator;
         this.userRepository = userRepository;
+        this.scriptTaskService = scriptTaskService;
     }
 
     @Value("${app.server-url}")
@@ -92,7 +96,20 @@ public class DeviceService {
         Device newDevice = deviceRepository.findByDeviceIdAndUserId(device.getDeviceId(), userId).orElseThrow(() -> new IdNotDetectedException("Device not found, id: " + device.getDeviceId()));
         deviceValidator.validateBeforeUpdate(device, newDevice);
 
-        BeanCopyUtils.copyNonNullProperties(device, newDevice);
+        // 只更新基础字段，避免 Device 上委托 monitor 的计算型 getter 把监控配置覆盖成默认值
+        if (device.getMac() != null) {
+            newDevice.setMac(device.getMac());
+        }
+        if (device.getIp() != null) {
+            newDevice.setIp(device.getIp());
+        }
+        if (device.getDeviceName() != null) {
+            newDevice.setDeviceName(device.getDeviceName());
+        }
+
+        // IP 变化时，监控的 IP 协议始终以新 IP 为准
+        newDevice.ensureMonitor();
+        newDevice.getMonitor().setIpMode(DeviceIpModeEnum.getIpMode(newDevice.getIp()));
         Device savedDevice = deviceRepository.save(newDevice);
         log.info("Device basic info updated: {}", savedDevice);
         return savedDevice;
@@ -103,6 +120,10 @@ public class DeviceService {
         deviceMonitorValidator.validateBeforeUpdate(deviceMonitor);
 
         BeanCopyUtils.copyNonNullProperties(deviceMonitor, newDeviceMonitor);
+        // IP 协议由设备地址自动决定，忽略客户端传入值
+        if (newDeviceMonitor.getDevice() != null) {
+            newDeviceMonitor.setIpMode(DeviceIpModeEnum.getIpMode(newDeviceMonitor.getDevice().getIp()));
+        }
         DeviceMonitor savedDeviceMonitor = deviceMonitorRepository.save(newDeviceMonitor);
         log.info("Device status info updated: {}", savedDeviceMonitor);
 
@@ -113,6 +134,7 @@ public class DeviceService {
         log.info("Delete device, deviceId: {}", deviceId);
         Device existingDevice = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device to delete not found, id: " + deviceId));
         DeviceScheduledTasks.removeLastPingMap(List.of(existingDevice));
+        scriptTaskService.deleteAllByDevice(deviceId);
         deviceRepository.delete(existingDevice);
         log.info("Device deleted, deviceId: {}, userId: {}", deviceId, userId);
     }

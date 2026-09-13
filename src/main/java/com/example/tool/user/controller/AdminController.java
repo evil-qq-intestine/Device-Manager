@@ -14,54 +14,47 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     @Autowired
     private UserService userService;
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{idOrName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyRole ADMIN")
-    public void deleteUser(@PathVariable Integer id) {
-        userService.deleteById(id);
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{name}")
-    @PreAuthorize("hasAnyRole ADMIN")
-    public void deleteUser(@PathVariable String name) {
-        userService.deleteByUsername(name);
+    public void deleteUser(@PathVariable String idOrName) {
+        if (isNumeric(idOrName)) {
+            userService.deleteById(Integer.valueOf(idOrName));
+        } else {
+            userService.deleteByUsername(idOrName);
+        }
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole ADMIN")
     public List<UserResponse> findAllUser() {
         return userService.findAll();
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole ADMIN")
-    public UserResponse findUserById(@PathVariable Integer id) {
-        return userService.getUserResponseById(id);
-    }
-
-    @GetMapping("/{username}")
-    @PreAuthorize("hasAnyRole ADMIN")
-    public UserResponse findByUsername(@PathVariable String username) {
-        return userService.getUserResponseByName(username);
+    @GetMapping("/{idOrName}")
+    public UserResponse findUser(@PathVariable String idOrName) {
+        if (isNumeric(idOrName)) {
+            return userService.getUserResponseById(Integer.valueOf(idOrName));
+        }
+        return userService.getUserResponseByName(idOrName);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse addUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         return userService.createUser(createUserRequest);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole ADMIN")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public UserResponse updatePassword(@PathVariable Integer userid, @Valid @RequestBody User user) {
-        user.setId(userid);
-        return userService.updatePassword(userid, user.getPassword());
+    public void updatePassword(@PathVariable Integer id, @Valid @RequestBody User user) {
+        userService.updatePassword(id, user.getPassword());
+    }
+
+    private boolean isNumeric(String value) {
+        return value != null && value.matches("\\d+");
     }
 }
