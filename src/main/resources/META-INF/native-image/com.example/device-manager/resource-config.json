@@ -1,0 +1,1649 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "META-INF/build-info.properties"
+      },
+      {
+        "pattern": "META-INF/jpa-named-queries.properties"
+      },
+      {
+        "pattern": "META-INF/maven/org.xerial/sqlite-jdbc/pom.properties"
+      },
+      {
+        "pattern": "META-INF/orm.xml"
+      },
+      {
+        "pattern": "META-INF/persistence.xml"
+      },
+      {
+        "pattern": "META-INF/resources/index.html"
+      },
+      {
+        "pattern": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
+      },
+      {
+        "pattern": "META-INF/services/com.fasterxml.jackson.databind.Module"
+      },
+      {
+        "pattern": "META-INF/services/io.jsonwebtoken.io.Deserializer"
+      },
+      {
+        "pattern": "META-INF/services/io.jsonwebtoken.io.Serializer"
+      },
+      {
+        "pattern": "META-INF/services/jakarta.el.ExpressionFactory"
+      },
+      {
+        "pattern": "META-INF/services/jakarta.persistence.spi.PersistenceProvider"
+      },
+      {
+        "pattern": "META-INF/services/jakarta.validation.ConstraintValidator"
+      },
+      {
+        "pattern": "META-INF/services/jakarta.validation.spi.ValidationProvider"
+      },
+      {
+        "pattern": "META-INF/services/jakarta.validation.valueextraction.ValueExtractor"
+      },
+      {
+        "pattern": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
+      },
+      {
+        "pattern": "META-INF/services/java.nio.channels.spi.AsynchronousChannelProvider"
+      },
+      {
+        "pattern": "META-INF/services/java.nio.channels.spi.SelectorProvider"
+      },
+      {
+        "pattern": "META-INF/services/java.sql.Driver"
+      },
+      {
+        "pattern": "META-INF/services/java.time.zone.ZoneRulesProvider"
+      },
+      {
+        "pattern": "META-INF/services/java.util.spi.ResourceBundleControlProvider"
+      },
+      {
+        "pattern": "META-INF/services/javax.xml.stream.XMLEventFactory"
+      },
+      {
+        "pattern": "META-INF/services/javax.xml.transform.TransformerFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.apache.commons.logging.LogFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.apache.juli.logging.Log"
+      },
+      {
+        "pattern": "META-INF/services/org.apache.sshd.common.io.IoServiceFactoryFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.model.FunctionContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.model.TypeContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.registry.selector.StrategyRegistrationProvider"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.registry.selector.spi.DialectSelector"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.registry.selector.spi.NamedStrategyContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.AdditionalMappingContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.MetadataBuilderContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.MetadataBuilderFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.MetadataBuilderInitializer"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.MetadataSourcesContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.boot.spi.SessionFactoryBuilderFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.engine.extension.spi.ExtensionIntegration"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.engine.jdbc.batch.spi.BatchBuilder"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.engine.jdbc.dialect.spi.DialectResolver"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.engine.jdbc.mutation.spi.MutationExecutorService"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.engine.transaction.jta.platform.spi.JtaPlatformProvider"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.event.monitor.spi.EventMonitor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.event.spi.EventEngineContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.integrator.spi.Integrator"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.models.spi.ModelsContextProvider"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.query.criteria.spi.CriteriaBuilderExtension"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.service.spi.ServiceContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.service.spi.SessionFactoryServiceContributor"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.stat.spi.StatisticsFactory"
+      },
+      {
+        "pattern": "META-INF/services/org.hibernate.tool.schema.spi.SchemaManagementTool"
+      },
+      {
+        "pattern": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+      },
+      {
+        "pattern": "META-INF/services/tools.jackson.databind.JacksonModule"
+      },
+      {
+        "pattern": "META-INF/spring-autoconfigure-metadata.properties"
+      },
+      {
+        "pattern": "META-INF/spring.components"
+      },
+      {
+        "pattern": "META-INF/spring.factories"
+      },
+      {
+        "pattern": "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
+      },
+      {
+        "pattern": "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.replacements"
+      },
+      {
+        "pattern": "META-INF/validation.xml"
+      },
+      {
+        "pattern": "application-default.properties"
+      },
+      {
+        "pattern": "application-default.xml"
+      },
+      {
+        "pattern": "application-default.yaml"
+      },
+      {
+        "pattern": "application-default.yml"
+      },
+      {
+        "pattern": "application.properties"
+      },
+      {
+        "pattern": "application.xml"
+      },
+      {
+        "pattern": "application.yaml"
+      },
+      {
+        "pattern": "application.yml"
+      },
+      {
+        "pattern": "banner.txt"
+      },
+      {
+        "pattern": "ch/qos/logback/classic/logback-classic-version.properties"
+      },
+      {
+        "pattern": "ch/qos/logback/core/logback-core-version.properties"
+      },
+      {
+        "pattern": "com/example/tool"
+      },
+      {
+        "pattern": "com/example/tool/config/AsyncConfig.class"
+      },
+      {
+        "pattern": "com/example/tool/config/GlobalExceptionHandler.class"
+      },
+      {
+        "pattern": "com/example/tool/config/WebSecurityConfig.class"
+      },
+      {
+        "pattern": "com/example/tool/device/controller/DeviceController.class"
+      },
+      {
+        "pattern": "com/example/tool/device/controller/HeartbeatController.class"
+      },
+      {
+        "pattern": "com/example/tool/device/controller/WolController.class"
+      },
+      {
+        "pattern": "com/example/tool/device/entity/Device.class"
+      },
+      {
+        "pattern": "com/example/tool/device/entity/DeviceMonitor.class"
+      },
+      {
+        "pattern": "com/example/tool/device/exception/BusinessException.class"
+      },
+      {
+        "pattern": "com/example/tool/device/repository/DeviceMonitorRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/device/repository/DeviceRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/device/script/ScriptForClient.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/DeviceService.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/HeartbeatService.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/WolService.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/DeviceHealthChecker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/DeviceIpChecker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/DeviceIpv4Checker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/DeviceIpv6Checker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/HeartbeatHealthChecker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/checker/PingHealthChecker.class"
+      },
+      {
+        "pattern": "com/example/tool/device/service/component/MagicPacketComponent.class"
+      },
+      {
+        "pattern": "com/example/tool/device/task/DeviceScheduledTasks.class"
+      },
+      {
+        "pattern": "com/example/tool/device/validator/DeviceMonitorValidator.class"
+      },
+      {
+        "pattern": "com/example/tool/device/validator/DeviceValidator.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/controller/DeviceShutdownController.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/controller/ScriptTaskController.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/controller/ScriptTaskLogController.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/entity/ScriptTask.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/entity/ScriptTaskLog.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/entity/SshHostKey.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/repository/ScriptTaskLogRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/repository/ScriptTaskRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/repository/SshHostKeyRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/DeviceOnlineListener.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/DeviceShutdownService.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ScriptTaskExecutor.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ScriptTaskScheduler.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ScriptTaskService.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/component/CryptoService.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ssh/MinaSshExecutor.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ssh/SshExecutor.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/service/ssh/SshHostKeyService.class"
+      },
+      {
+        "pattern": "com/example/tool/scripttask/validator/ScriptTaskValidator.class"
+      },
+      {
+        "pattern": "com/example/tool/user/controller/AdminController.class"
+      },
+      {
+        "pattern": "com/example/tool/user/controller/AuthController.class"
+      },
+      {
+        "pattern": "com/example/tool/user/controller/UserController.class"
+      },
+      {
+        "pattern": "com/example/tool/user/entity/User.class"
+      },
+      {
+        "pattern": "com/example/tool/user/init/AdminInitializer.class"
+      },
+      {
+        "pattern": "com/example/tool/user/reopsitory/UserRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/user/service/CustomUserDetailsService.class"
+      },
+      {
+        "pattern": "com/example/tool/user/service/UserService.class"
+      },
+      {
+        "pattern": "com/example/tool/user/service/component/JwtAuthenticationFilter.class"
+      },
+      {
+        "pattern": "com/example/tool/user/util/JwtUtils.class"
+      },
+      {
+        "pattern": "com/example/tool/user/validator/UserValidator.class"
+      },
+      {
+        "pattern": "com/example/tool/versionController/VersionController.class"
+      },
+      {
+        "pattern": "com/example/tool/webController/WebController.class"
+      },
+      {
+        "pattern": "commons-logging.properties"
+      },
+      {
+        "pattern": "config/application-default.properties"
+      },
+      {
+        "pattern": "config/application-default.xml"
+      },
+      {
+        "pattern": "config/application-default.yaml"
+      },
+      {
+        "pattern": "config/application-default.yml"
+      },
+      {
+        "pattern": "config/application.properties"
+      },
+      {
+        "pattern": "config/application.xml"
+      },
+      {
+        "pattern": "config/application.yaml"
+      },
+      {
+        "pattern": "config/application.yml"
+      },
+      {
+        "pattern": "data-all.sql"
+      },
+      {
+        "pattern": "data.sql"
+      },
+      {
+        "pattern": "git.properties"
+      },
+      {
+        "pattern": "hibernate.properties"
+      },
+      {
+        "pattern": "jakarta/servlet/Filter.class"
+      },
+      {
+        "pattern": "jakarta/servlet/LocalStrings.properties"
+      },
+      {
+        "pattern": "jakarta/servlet/LocalStrings_en.properties"
+      },
+      {
+        "pattern": "jakarta/servlet/http/LocalStrings.properties"
+      },
+      {
+        "pattern": "jakarta/servlet/http/LocalStrings_en.properties"
+      },
+      {
+        "pattern": "jndi.properties"
+      },
+      {
+        "pattern": "logback-spring.groovy"
+      },
+      {
+        "pattern": "logback-spring.xml"
+      },
+      {
+        "pattern": "logback-test-spring.groovy"
+      },
+      {
+        "pattern": "logback-test-spring.xml"
+      },
+      {
+        "pattern": "logback-test.groovy"
+      },
+      {
+        "pattern": "logback-test.xml"
+      },
+      {
+        "pattern": "logback.groovy"
+      },
+      {
+        "pattern": "logback.xml"
+      },
+      {
+        "pattern": "messages.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/authenticator/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/authenticator/jaspic/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/connector/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/core/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/core/RestrictedFilters.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/core/RestrictedListeners.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/core/RestrictedServlets.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/deploy/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/loader/JdbcLeakPrevention.class"
+      },
+      {
+        "pattern": "org/apache/catalina/loader/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/mapper/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/mbeans/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/realm/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/session/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/startup/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/util/CharsetMapperDefault.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/util/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/util/ServerInfo.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/valves/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/catalina/webresources/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/coyote/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/coyote/http11/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/coyote/http11/filters/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/naming/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/naming/LocalStrings_en.properties"
+      },
+      {
+        "pattern": "org/apache/sshd/client/keyverifier/ServerKeyVerifier.class"
+      },
+      {
+        "pattern": "org/apache/tomcat/jni/AprStatus.class"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/buf/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/compat/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/descriptor/web/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/http/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/http/parser/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/modeler/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/net/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/scan/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/util/threads/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/websocket/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/apache/tomcat/websocket/server/LocalStrings.properties"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$AreFieldsDirty.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$AreFieldsDirtyWithoutCollections.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$ClearDirtyAttributes.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$ClearDirtyAttributesWithoutCollections.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$ClearOwner.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$GetCollectionTrackerWithoutCollections.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$GetDirtyAttributes.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$GetDirtyAttributesWithoutCollections.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$InitializeLazyAttributeLoadingInterceptor.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$SetOwner.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$SetPersistenceInfo.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$SuspendDirtyTracking.class"
+      },
+      {
+        "pattern": "org/hibernate/bytecode/enhance/internal/bytebuddy/CodeTemplates$TrackChange.class"
+      },
+      {
+        "pattern": "org/hibernate/hibernate-configuration-3.0.dtd"
+      },
+      {
+        "pattern": "org/hibernate/hibernate-mapping-3.0.dtd"
+      },
+      {
+        "pattern": "org/springframework/aop/aspectj/annotation/AnnotationAwareAspectJAutoProxyCreator.class"
+      },
+      {
+        "pattern": "org/springframework/aop/framework/AopInfrastructureBean.class"
+      },
+      {
+        "pattern": "org/springframework/aot/hint/annotation/Reflective.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/Aware.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/BeanClassLoaderAware.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/BeanFactoryAware.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/BeanNameAware.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/DisposableBean.class"
+      },
+      {
+        "pattern": "org/springframework/beans/factory/InitializingBean.class"
+      },
+      {
+        "pattern": "org/springframework/boot/CommandLineRunner.class"
+      },
+      {
+        "pattern": "org/springframework/boot/Runner.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/AutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/AutoConfigureAfter.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/AutoConfigureBefore.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/AutoConfigureOrder.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/admin/SpringApplicationAdminJmxAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/aop/AopAutoConfiguration$AspectJAutoProxyingConfiguration$CglibAutoProxyConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/aop/AopAutoConfiguration$AspectJAutoProxyingConfiguration$JdkDynamicAutoProxyConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/aop/AopAutoConfiguration$AspectJAutoProxyingConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/aop/AopAutoConfiguration$ClassProxyingConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/aop/AopAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/availability/ApplicationAvailabilityAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnBean.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnBooleanProperty.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnClass.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnMissingBean.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnMissingFilterBean.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnNotWarDeployment.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnProperty.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnResource.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnSingleCandidate.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/condition/ConditionalOnWebApplication.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/context/ConfigurationPropertiesAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/context/LifecycleAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/context/MessageSourceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/context/PropertyPlaceholderAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/data/AbstractRepositoryConfigurationSourceSupport.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/info/ProjectInfoAutoConfiguration$GitResourceAvailableCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/info/ProjectInfoAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/jmx/JmxAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/ssl/SslAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/DefaultTaskSchedulerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutionAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$AsyncConfigurerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$AsyncConfigurerWrapperConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$BootstrapExecutorConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$OnExecutorCondition$ExecutorBeanCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$OnExecutorCondition$ModelCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$OnExecutorCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$SimpleAsyncTaskExecutorBuilderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$TaskExecutorConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$TaskExecutorContextPropagationConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$ThreadPoolTaskExecutorBuilderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskSchedulingAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskSchedulingConfigurations$SimpleAsyncTaskSchedulerBuilderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskSchedulingConfigurations$TaskSchedulerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/autoconfigure/task/TaskSchedulingConfigurations$ThreadPoolTaskSchedulerBuilderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/context/properties/EnableConfigurationProperties.class"
+      },
+      {
+        "pattern": "org/springframework/boot/context/properties/EnableConfigurationPropertiesRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/boot/data/autoconfigure/web/DataWebAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/data/jpa/autoconfigure/DataJpaRepositoriesAutoConfiguration$JpaRepositoriesImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/boot/data/jpa/autoconfigure/DataJpaRepositoriesAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/data/jpa/autoconfigure/DataJpaRepositoriesRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/boot/gson/autoconfigure$GsonAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/gson/autoconfigure/GsonAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/hibernate/autoconfigure/HibernateJpaAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration$HibernateRuntimeHints.class"
+      },
+      {
+        "pattern": "org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration$NamingStrategiesHibernatePropertiesCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/GsonHttpMessageConvertersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/HttpMessageConvertersAutoConfiguration$NotReactiveWebApplicationCondition$ReactiveWebApplication.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/HttpMessageConvertersAutoConfiguration$NotReactiveWebApplicationCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/HttpMessageConvertersAutoConfiguration$StringHttpMessageConverterConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/HttpMessageConvertersAutoConfiguration$StringHttpMessageConvertersCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/HttpMessageConvertersAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$Jackson2JsonMessageConvertersCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$Jackson2XmlMessageConvertersCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$MappingJackson2HttpMessageConverterConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$MappingJackson2XmlHttpMessageConverterConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$PreferJackson2OrJacksonUnavailableCondition$Jackson2Preferred.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$PreferJackson2OrJacksonUnavailableCondition$JacksonUnavailable.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration$PreferJackson2OrJacksonUnavailableCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/Jackson2HttpMessageConvertersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConvertersCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonXmlHttpMessageConverterConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonXmlHttpMessageConvertersCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/JsonbHttpMessageConvertersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/http/converter/autoconfigure/KotlinSerializationHttpMessageConvertersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$AbstractFactoryBuilderCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$AbstractMapperBuilderCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$CborConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonAutoConfigurationRuntimeHints.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonFactoryBuilderCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JsonProblemDetailsConfiguration$ProblemDetailJsonMapperBuilderCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JsonProblemDetailsConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$XmlConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson2/autoconfigure$Jackson2AutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jackson2/autoconfigure/Jackson2AutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$EmbeddedDatabaseCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$EmbeddedDatabaseConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$PooledDataSourceAvailableCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$PooledDataSourceCondition$ExplicitType.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$PooledDataSourceCondition$PooledDataSourceAvailable.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$PooledDataSourceCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration$PooledDataSourceConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceCheckpointRestoreConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceConfiguration$Dbcp2.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceConfiguration$Generic.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceConfiguration$Hikari.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceConfiguration$OracleUcp.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceConfiguration$Tomcat.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceInitializationAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceJmxConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration$CommonsDbcp2PoolDataSourceMetadataProviderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration$HikariDataSourcePoolMetadataRuntimeHints.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration$OracleUcpPoolDataSourceMetadataProviderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration$TomcatDataSourcePoolMetadataProviderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourcePoolMetadataProvidersConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceTransactionManagerAutoConfiguration$JdbcTransactionManagerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/DataSourceTransactionManagerAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/JdbcClientAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/JdbcTemplateAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/JdbcTemplateConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/JndiDataSourceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/LazyConnectionDataSourceConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/NamedParameterJdbcTemplateConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jdbc/autoconfigure/XADataSourceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jpa/autoconfigure/JpaBaseConfiguration$JpaWebConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jpa/autoconfigure/JpaBaseConfiguration$PersistenceManagedTypesConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jpa/autoconfigure/JpaBaseConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jsonb/autoconfigure$JsonbAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/jsonb/autoconfigure/JsonbAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/kotlinx/serialization/json/autoconfigure$KotlinxSerializationJsonAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/kotlinx/serialization/json/autoconfigure/KotlinxSerializationJsonAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/persistence/autoconfigure/PersistenceExceptionTranslationAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/rsocket/autoconfigure$RSocketMessagingAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/rsocket/autoconfigure/RSocketMessagingAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured$MissingAlternative.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured$NameConfigured.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured$PasswordConfigured.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/ReactiveUserDetailsServiceAutoConfiguration$RSocketEnabledOrReactiveWebApplication$RSocketSecurityEnabledCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/ReactiveUserDetailsServiceAutoConfiguration$RSocketEnabledOrReactiveWebApplication$ReactiveWebApplicationCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/ReactiveUserDetailsServiceAutoConfiguration$RSocketEnabledOrReactiveWebApplication.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/ReactiveUserDetailsServiceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/SecurityAutoConfiguration$SecurityDataConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/SecurityAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/UserDetailsServiceAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/ConditionalOnDefaultWebSecurity.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/DefaultWebSecurityCondition$Beans.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/DefaultWebSecurityCondition$Classes.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/DefaultWebSecurityCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/SecurityFilterAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/ServletWebSecurityAutoConfiguration$EnableWebSecurityConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/ServletWebSecurityAutoConfiguration$PathPatternRequestMatcherBuilderConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/ServletWebSecurityAutoConfiguration$SecurityFilterChainConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/security/autoconfigure/web/servlet/ServletWebSecurityAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/servlet/autoconfigure/HttpEncodingAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/servlet/autoconfigure/MultipartAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/sql/autoconfigure/init/ConditionalOnSqlInitialization.class"
+      },
+      {
+        "pattern": "org/springframework/boot/sql/init/dependency/DatabaseInitializationDependencyConfigurer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/tomcat/autoconfigure/TomcatWebServerConfiguration$TomcatWebSocketConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/tomcat/autoconfigure/TomcatWebServerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/tomcat/autoconfigure/servlet/TomcatServletWebServerAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration$AspectJTransactionManagementConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration$EnableTransactionManagementConfiguration$CglibAutoProxyConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration$EnableTransactionManagementConfiguration$JdkDynamicAutoProxyConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration$EnableTransactionManagementConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration$TransactionTemplateConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/autoconfigure/TransactionManagerCustomizationAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/jta/autoconfigure/JndiJtaConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/transaction/jta/autoconfigure/JtaAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/validation/autoconfigure/PrimaryDefaultValidatorPostProcessor.class"
+      },
+      {
+        "pattern": "org/springframework/boot/validation/autoconfigure/ValidationAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/web/server/autoconfigure/servlet/ServletWebServerConfiguration$BeanPostProcessorsRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/boot/web/server/autoconfigure/servlet/ServletWebServerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/DispatcherServletAutoConfiguration$DefaultDispatcherServletCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/DispatcherServletAutoConfiguration$DispatcherServletConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/DispatcherServletAutoConfiguration$DispatcherServletRegistrationCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/DispatcherServletAutoConfiguration$DispatcherServletRegistrationConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/DispatcherServletAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$MvcValidatorRuntimeHints.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$ProblemDetailsErrorHandlingConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$ResourceChainCustomizerConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$ResourceChainResourceHandlerRegistrationCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$ResourceHandlerRegistrationCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$WelcomePageHandlerMappingFactory.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$DefaultErrorViewResolverConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$ErrorPageCustomizer.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$ErrorTemplateMissingCondition.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$PreserveErrorControllerTargetClassPostProcessor.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$StaticView.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration$WhitelabelErrorViewConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/autoconfigure/error/ErrorMvcAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/test/autoconfigure$MockMvcAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/boot/webmvc/test/autoconfigure/MockMvcAutoConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/context/ApplicationContextAware.class"
+      },
+      {
+        "pattern": "org/springframework/context/EmbeddedValueResolverAware.class"
+      },
+      {
+        "pattern": "org/springframework/context/EnvironmentAware.class"
+      },
+      {
+        "pattern": "org/springframework/context/ResourceLoaderAware.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/AdviceModeImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/AspectJAutoProxyRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/AutoProxyRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/Conditional.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/Configuration.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/EnableAspectJAutoProxy.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/Import.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/ImportAware.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/ImportBeanDefinitionRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/ImportRuntimeHints.class"
+      },
+      {
+        "pattern": "org/springframework/context/annotation/Role.class"
+      },
+      {
+        "pattern": "org/springframework/core/Ordered.class"
+      },
+      {
+        "pattern": "org/springframework/core/annotation/Order.class"
+      },
+      {
+        "pattern": "org/springframework/core/env/EnvironmentCapable.class"
+      },
+      {
+        "pattern": "org/springframework/data/jpa/repository/JpaRepository.class"
+      },
+      {
+        "pattern": "org/springframework/data/jpa/repository/support/JpaRepositoryFactoryBean.class"
+      },
+      {
+        "pattern": "org/springframework/data/jpa/util/JpaMetamodelCacheCleanup.class"
+      },
+      {
+        "pattern": "org/springframework/data/repository/CrudRepository.class"
+      },
+      {
+        "pattern": "org/springframework/data/repository/ListCrudRepository.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/EnableSpringDataWebSupport$QuerydslActivator.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/EnableSpringDataWebSupport$SpringDataWebConfigurationImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/EnableSpringDataWebSupport$SpringDataWebSettingsRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/EnableSpringDataWebSupport.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/ProjectingArgumentResolverRegistrar$ProjectingArgumentResolverBeanPostProcessor.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/ProjectingArgumentResolverRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/SpringDataJackson3Configuration.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/SpringDataJackson3Modules.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/SpringDataJacksonConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/SpringDataJacksonModules.class"
+      },
+      {
+        "pattern": "org/springframework/data/web/config/SpringDataWebConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/scheduling/annotation/AbstractAsyncConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/scheduling/annotation/AsyncConfigurationSelector.class"
+      },
+      {
+        "pattern": "org/springframework/scheduling/annotation/EnableAsync.class"
+      },
+      {
+        "pattern": "org/springframework/scheduling/annotation/ProxyAsyncConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/access/prepost/PreAuthorize.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/AuthenticationConfiguration$AuthenticationManagerDelegator.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/AuthenticationConfiguration$DefaultPasswordEncoderAuthenticationManagerBuilder.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/AuthenticationConfiguration$EnableGlobalAuthenticationAutowiredConfigurer.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/AuthenticationConfiguration$LazyPasswordEncoder.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/AuthenticationConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/authentication/configuration/EnableGlobalAuthentication.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/configuration/ObjectPostProcessorConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/AuthorizationProxyConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/AuthorizationProxyWebConfiguration$AccessDeniedExceptionResolver.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/AuthorizationProxyWebConfiguration$WebTargetVisitor.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/AuthorizationProxyWebConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/EnableMethodSecurity.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/MethodObservationConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/MethodSecurityAdvisorRegistrar.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/MethodSecuritySelector.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/method/configuration/PrePostMethodSecurityConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/EnableWebSecurity.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/HttpSecurityConfiguration$DefaultPasswordEncoderAuthenticationManagerBuilder.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/HttpSecurityConfiguration$LazyPasswordEncoder.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/HttpSecurityConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/OAuth2ImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/ObservationConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/ObservationImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/SpringWebMvcImportSelector.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/WebMvcSecurityConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/WebSecurityConfiguration$AnnotationAwareOrderComparator.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/WebSecurityConfiguration$CompositeFilterChainProxy.class"
+      },
+      {
+        "pattern": "org/springframework/security/config/annotation/web/configuration/WebSecurityConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/security/core/userdetails/UserDetails.class"
+      },
+      {
+        "pattern": "org/springframework/security/core/userdetails/UserDetailsService.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/annotation/AbstractTransactionManagementConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/annotation/EnableTransactionManagement.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/annotation/ProxyTransactionManagementConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/annotation/TransactionManagementConfigurationSelector.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/annotation/Transactional.class"
+      },
+      {
+        "pattern": "org/springframework/transaction/support/TransactionSynchronization.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/ControllerAdvice.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/Mapping.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/RequestMapping.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/ResponseBody.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/RestController.class"
+      },
+      {
+        "pattern": "org/springframework/web/bind/annotation/RestControllerAdvice.class"
+      },
+      {
+        "pattern": "org/springframework/web/context/ServletContextAware.class"
+      },
+      {
+        "pattern": "org/springframework/web/filter/GenericFilterBean$FilterConfigPropertyValues.class"
+      },
+      {
+        "pattern": "org/springframework/web/filter/GenericFilterBean.class"
+      },
+      {
+        "pattern": "org/springframework/web/filter/OncePerRequestFilter.class"
+      },
+      {
+        "pattern": "org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration.class"
+      },
+      {
+        "pattern": "org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport$NoOpValidator.class"
+      },
+      {
+        "pattern": "org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport.class"
+      },
+      {
+        "pattern": "org/springframework/web/servlet/config/annotation/WebMvcConfigurer.class"
+      },
+      {
+        "pattern": "org/sqlite/native/Linux/x86_64/libsqlitejdbc.so"
+      },
+      {
+        "pattern": "resources/index.html"
+      },
+      {
+        "pattern": "schema-all.sql"
+      },
+      {
+        "pattern": "schema.sql"
+      },
+      {
+        "pattern": "spring.properties"
+      },
+      {
+        "pattern": "sqlite-jdbc.properties"
+      },
+      {
+        "pattern": "static/index.html"
+      },
+      {
+        "pattern": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
+      }
+    ]
+  },
+  "bundles": [
+    {
+      "name": "jakarta.servlet.LocalStrings"
+    },
+    {
+      "name": "jakarta.servlet.http.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.authenticator.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.authenticator.jaspic.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.connector.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.core.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.deploy.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.loader.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.mapper.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.mbeans.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.realm.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.session.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.startup.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.util.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.valves.LocalStrings"
+    },
+    {
+      "name": "org.apache.catalina.webresources.LocalStrings"
+    },
+    {
+      "name": "org.apache.coyote.LocalStrings"
+    },
+    {
+      "name": "org.apache.coyote.http11.LocalStrings"
+    },
+    {
+      "name": "org.apache.coyote.http11.filters.LocalStrings"
+    },
+    {
+      "name": "org.apache.naming.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.buf.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.compat.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.descriptor.web.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.http.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.http.parser.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.modeler.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.net.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.scan.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.util.threads.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.websocket.LocalStrings"
+    },
+    {
+      "name": "org.apache.tomcat.websocket.server.LocalStrings"
+    }
+  ]
+}

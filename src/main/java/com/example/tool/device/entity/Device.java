@@ -48,10 +48,10 @@ public class Device {
     @JsonIgnore
     private String deviceToken;
 
-    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
     private DeviceMonitor monitor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude

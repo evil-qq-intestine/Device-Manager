@@ -24,7 +24,7 @@ public class DeviceMonitor {
     @Column(columnDefinition = "INT", name = "monitor_id")
     private Integer monitorId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "device_id")
     @JsonIgnore
