@@ -192,8 +192,9 @@ jobs:
         working-directory: /tmp/digests
         run: |
           set -euo pipefail
-          AMD="$IMAGE@sha256:$(cat amd64.digest)"
-          ARM="$IMAGE@sha256:$(cat arm64.digest)"
+          # steps.build.outputs.digest 已包含 "sha256:" 前缀
+          AMD="$IMAGE@$(cat amd64.digest)"
+          ARM="$IMAGE@$(cat arm64.digest)"
           # 多架构 manifest：docker pull 会自动选架构
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
