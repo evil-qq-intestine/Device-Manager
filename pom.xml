@@ -144,8 +144,8 @@
 					</metadataRepository>
 					<buildArgs>
 						<buildArg>-H:+ReportExceptionStackTraces</buildArg>
-						<!-- MINA SSHD 的 RootedFileSystemProvider 会被放进 image heap，需标记为构建期初始化 -->
-						<buildArg>--initialize-at-build-time=org.apache.sshd.common.file.root.RootedFileSystemProvider</buildArg>
+						<!-- 让 FileSystemProvider 在运行时初始化：避免 MINA 的 RootedFileSystemProvider 被放进镜像堆（连带 logback Logger） -->
+						<buildArg>--future-defaults=run-time-initialize-file-system-providers</buildArg>
 						<!-- xerial sqlite-jdbc 的原生库需打进镜像 -->
 						<buildArg>-H:IncludeResources=org/sqlite/native/.*</buildArg>
 					</buildArgs>
