@@ -20,10 +20,10 @@ public final class ShutdownCommands {
     }
 
     /** 按任务配置（IMMEDIATE / DELAYED）生成关机命令。 */
-    public static String forTask(ScriptTask task, boolean withPassword) {
+    public static String forTask(ScriptTask task, ScriptType type, boolean withPassword) {
         boolean immediate = task.getShutdownMode() == ShutdownMode.IMMEDIATE;
         int delay = task.getShutdownDelaySeconds() == null ? 0 : task.getShutdownDelaySeconds();
-        return command(task.getScriptType(), immediate, delay, withPassword);
+        return command(type, immediate, delay, withPassword);
     }
 
     /** 立即关机（忽略任务配置）。 */

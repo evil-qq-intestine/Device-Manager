@@ -1,7 +1,6 @@
 package com.example.tool.device.entity;
 
 import com.example.tool.user.entity.User;
-import com.example.tool.scripttask.entity.ScriptTask;
 import com.example.tool.scripttask.entity.ScriptType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -11,8 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Setter
 @Getter
@@ -60,12 +57,7 @@ public class Device {
     @ToString.Exclude
     private User user;
 
-    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    @ToString.Exclude
-    private List<ScriptTask> scriptTasks = new ArrayList<>();
-
-    // ---- 设备级 SSH 配置（用于独立关机等，不依赖脚本任务）----
+    // ---- 设备级 SSH 配置（用于独立关机与脚本任务执行）----
 
     private String sshHost;
     private Integer sshPort;

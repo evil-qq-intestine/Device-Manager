@@ -26,18 +26,16 @@ public class ScriptTaskController {
         this.scriptTaskService = scriptTaskService;
     }
 
-    @PostMapping("/device/{deviceId}/script-task")
+    @PostMapping("/script-task")
     @ResponseStatus(HttpStatus.CREATED)
-    public ScriptTaskResponse create(@PathVariable Integer deviceId,
-                                     @Valid @RequestBody ScriptTaskRequest request,
+    public ScriptTaskResponse create(@Valid @RequestBody ScriptTaskRequest request,
                                      @AuthenticationPrincipal CustomUserDetails user) {
-        return scriptTaskService.create(deviceId, user.getUserId(), request);
+        return scriptTaskService.create(user.getUserId(), request);
     }
 
-    @GetMapping("/device/{deviceId}/script-task")
-    public List<ScriptTaskResponse> list(@PathVariable Integer deviceId,
-                                         @AuthenticationPrincipal CustomUserDetails user) {
-        return scriptTaskService.listByDevice(deviceId, user.getUserId());
+    @GetMapping("/script-task")
+    public List<ScriptTaskResponse> list(@AuthenticationPrincipal CustomUserDetails user) {
+        return scriptTaskService.list(user.getUserId());
     }
 
     @GetMapping("/script-task/{taskId}")
@@ -69,16 +67,15 @@ public class ScriptTaskController {
     @PostMapping("/script-task/{taskId}/execute")
     public Map<String, Object> execute(@PathVariable Long taskId,
                                        @AuthenticationPrincipal CustomUserDetails user) {
-        // 手动执行前先做所有权校验
         scriptTaskService.get(taskId, user.getUserId());
-        Long logId = scriptTaskService.submit(taskId, TriggeredBy.MANUAL);
-        return Map.of("logId", logId);
+        List<Long> logIds = scriptTaskService.submit(taskId, TriggeredBy.MANUAL);
+        return Map.of("logIds", logIds);
     }
 
     @PostMapping("/script-task/{taskId}/shutdown")
     public Map<String, Object> shutdown(@PathVariable Long taskId,
                                         @AuthenticationPrincipal CustomUserDetails user) {
-        return scriptTaskService.shutdownNow(taskId, user.getUserId());
+        return Map.of("results", scriptTaskService.shutdownNow(taskId, user.getUserId()));
     }
 
     @GetMapping("/script-task/{taskId}/logs")

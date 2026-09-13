@@ -11,13 +11,13 @@ import java.util.Optional;
 @Repository
 public interface ScriptTaskRepository extends JpaRepository<ScriptTask, Long> {
 
-    List<ScriptTask> findByDevice_DeviceIdAndDevice_UserId(Integer deviceId, Integer userId);
+    List<ScriptTask> findByOwner_Id(Integer userId);
 
-    Optional<ScriptTask> findByIdAndDevice_UserId(Long id, Integer userId);
+    Optional<ScriptTask> findByIdAndOwner_Id(Long id, Integer userId);
 
     List<ScriptTask> findByTriggerTypeAndEnabledTrue(TriggerType triggerType);
 
-    List<ScriptTask> findByDevice_DeviceIdAndTriggerTypeAndEnabledTrue(Integer deviceId, TriggerType triggerType);
+    List<ScriptTask> findByTriggerTypeAndEnabledTrueAndTargets_DeviceId(TriggerType triggerType, Integer deviceId);
 
-    List<ScriptTask> findByDevice_DeviceId(Integer deviceId);
+    List<ScriptTask> findByTargets_DeviceId(Integer deviceId);
 }

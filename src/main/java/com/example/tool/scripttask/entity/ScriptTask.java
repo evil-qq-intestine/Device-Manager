@@ -1,15 +1,18 @@
 package com.example.tool.scripttask.entity;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * 通过 SSH 在目标设备上远程执行的脚本任务。
- * 私钥与口令以密文存储，永不通过接口返回。
+ * 用户级脚本任务：一个脚本可挂到多台目标设备，触发方式与关机配置为脚本级共享。
+ * 目标设备的 SSH 连接信息复用各自设备的「设备 SSH 配置」，脚本本身不存密钥。
  */
 @Getter
 @Setter
@@ -25,10 +28,19 @@ public class ScriptTask {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     @JsonIgnore
     @ToString.Exclude
-    private Device device;
+    private User owner;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "script_task_target",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "device_id"))
+    @JsonIgnore
+    @ToString.Exclude
+    private Set<Device> targets = new HashSet<>();
 
     private String name;
 
@@ -40,10 +52,6 @@ public class ScriptTask {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ScriptType scriptType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TriggerType triggerType;
 
     /** ONCE：精确执行时间 */
@@ -51,19 +59,6 @@ public class ScriptTask {
 
     /** CRON：cron 表达式 */
     private String cronExpression;
-
-    private String sshHost;
-    private Integer sshPort;
-    private String sshUser;
-
-    @Column(columnDefinition = "TEXT")
-    private String sshPrivateKeyEncrypted;
-
-    @Column(columnDefinition = "TEXT")
-    private String sshKeyPassphraseEncrypted;
-
-    @Column(columnDefinition = "TEXT")
-    private String sudoPasswordEncrypted;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

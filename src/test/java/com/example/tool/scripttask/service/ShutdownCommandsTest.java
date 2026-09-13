@@ -11,9 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ShutdownCommandsTest {
 
-    private ScriptTask task(ScriptType type, ShutdownMode mode, Integer delay) {
+    private ScriptTask task(ShutdownMode mode, Integer delay) {
         return ScriptTask.builder()
-                .scriptType(type)
                 .shutdownMode(mode)
                 .shutdownDelaySeconds(delay)
                 .build();
@@ -23,18 +22,17 @@ class ShutdownCommandsTest {
     void bashImmediateNoPasswordUsesSudoN() {
         assertEquals("sudo -n shutdown -h now", ShutdownCommands.command(ScriptType.BASH, true, 0, false));
         assertEquals("sudo -n shutdown -h now",
-                ShutdownCommands.forTask(task(ScriptType.BASH, ShutdownMode.IMMEDIATE, null), false));
+                ShutdownCommands.forTask(task(ShutdownMode.IMMEDIATE, null), ScriptType.BASH, false));
     }
 
     @Test
     void bashImmediateWithPasswordUsesSudoS() {
-        String command = ShutdownCommands.command(ScriptType.BASH, true, 0, true);
-        assertEquals("sudo -S -p '' shutdown -h now", command);
+        assertEquals("sudo -S -p '' shutdown -h now", ShutdownCommands.command(ScriptType.BASH, true, 0, true));
     }
 
     @Test
     void bashDelayedNoPasswordUsesSeconds() {
-        String command = ShutdownCommands.forTask(task(ScriptType.BASH, ShutdownMode.DELAYED, 30), false);
+        String command = ShutdownCommands.forTask(task(ShutdownMode.DELAYED, 30), ScriptType.BASH, false);
         assertTrue(command.contains("sleep 30"));
         assertTrue(command.contains("sudo -n shutdown -h now"));
     }
@@ -44,7 +42,6 @@ class ShutdownCommandsTest {
         String command = ShutdownCommands.command(ScriptType.BASH, false, 30, true);
         assertTrue(command.contains("sleep 30"));
         assertTrue(command.contains("sudo -S"));
-        // 密码通过 stdin 传入，不能出现在命令里
         assertFalse(command.contains("secret"));
     }
 
@@ -52,6 +49,6 @@ class ShutdownCommandsTest {
     void powershellCommands() {
         assertEquals("Stop-Computer -Force", ShutdownCommands.immediate(ScriptType.POWERSHELL, false));
         assertEquals("shutdown /s /t 15 /f",
-                ShutdownCommands.forTask(task(ScriptType.POWERSHELL, ShutdownMode.DELAYED, 15), false));
+                ShutdownCommands.forTask(task(ShutdownMode.DELAYED, 15), ScriptType.POWERSHELL, false));
     }
 }

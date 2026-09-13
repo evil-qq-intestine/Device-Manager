@@ -134,7 +134,7 @@ public class DeviceService {
         log.info("Delete device, deviceId: {}", deviceId);
         Device existingDevice = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device to delete not found, id: " + deviceId));
         DeviceScheduledTasks.removeLastPingMap(List.of(existingDevice));
-        scriptTaskService.deleteAllByDevice(deviceId);
+        scriptTaskService.detachDevice(deviceId);
         deviceRepository.delete(existingDevice);
         log.info("Device deleted, deviceId: {}, userId: {}", deviceId, userId);
     }

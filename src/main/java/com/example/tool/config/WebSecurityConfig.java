@@ -33,7 +33,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//不生成JSESSIONID，自己靠JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/login.html",
-                                "/app.js", "/styles.css", "/favicon.svg",
+                                "/app.js", "/script-task.js", "/styles.css", "/favicon.svg",
                                 "/vendor/**").permitAll()
                         .requestMatchers("/api/auth/**", "/api/heartbeat/**", "/api/version").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

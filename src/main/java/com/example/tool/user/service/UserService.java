@@ -26,15 +26,18 @@ public class UserService {
     private final UserValidator userValidator;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final com.example.tool.scripttask.service.ScriptTaskService scriptTaskService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        UserValidator userValidator,
-                       JwtUtils jwtUtils) {
+                       JwtUtils jwtUtils,
+                       com.example.tool.scripttask.service.ScriptTaskService scriptTaskService) {
         this.userRepository = userRepository;
         this.userValidator = userValidator;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.scriptTaskService = scriptTaskService;
     }
 
     @Transactional(readOnly = true)
@@ -55,13 +58,21 @@ public class UserService {
     public void deleteById(Integer deleteUserId) {
         User deleteUser = userRepository.findById(deleteUserId).orElseThrow(() -> new BusinessException("User to delete not found, id: " + deleteUserId));
         DeviceScheduledTasks.removeLastPingMap(deleteUser.getDevices());
+        detachDevices(deleteUser);
         userRepository.delete(deleteUser);
     }
 
     public void deleteByUsername(String deleteUsername) {
         User deleteUser = userRepository.findByUsername(deleteUsername).orElseThrow(() -> new BusinessException("User to delete not found, username: " + deleteUsername));
         DeviceScheduledTasks.removeLastPingMap(deleteUser.getDevices());
+        detachDevices(deleteUser);
         userRepository.delete(deleteUser);
+    }
+
+    private void detachDevices(User user) {
+        for (var device : user.getDevices()) {
+            scriptTaskService.detachDevice(device.getDeviceId());
+        }
     }
 
     public UserResponse createUser(@Valid CreateUserRequest createUserRequest) {

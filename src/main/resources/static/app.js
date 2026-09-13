@@ -18,17 +18,19 @@
                 hint: "首次启动时管理员账号与随机密码会打印在服务端日志中。",
                 welcome: "欢迎回来，{name}"
             },
-            nav: { dashboard: "控制台", admin: "用户管理" },
+            nav: { dashboard: "控制台", script: "脚本任务", admin: "用户管理" },
             dashboard: { title: "设备总览" },
             stats: { total: "设备总数", online: "在线", offline: "离线", probing: "探测中" },
             panel: { status: "状态分布", rate: "在线率", onlineRate: "在线率" },
             toolbar: { search: "搜索名称 / MAC / IP", add: "添加设备", live: "实时" },
             device: {
                 empty: "还没有设备，点击「添加设备」开始吧",
-                wake: "唤醒", script: "脚本", edit: "编辑", monitor: "监控设置", delete: "删除",
+                wake: "唤醒", script: "下载心跳脚本", edit: "编辑", monitor: "监控设置", delete: "删除", shutdown: "关机",
                 status: "状态", mode: "模式", lastOnline: "最后在线", never: "从未",
                 wakeSent: "魔术包已发送至 {name}", confirmDelete: "确定删除设备 {name} 吗？",
-                deleteTitle: "删除设备"
+                deleteTitle: "删除设备",
+                confirmShutdown: "确定立即关闭设备「{name}」吗？", shutdownTitle: "设备关机",
+                shutdownSent: "关机命令已发送", shutdownFail: "关机失败"
             },
             status: { online: "在线", offline: "离线", probe: "探测中", unknown: "未知" },
             form: {
@@ -47,6 +49,44 @@
                 hint: "PING 超时必须小于检测间隔；心跳模式只需设置心跳超时。"
             },
             script: { title: "心跳脚本", download: "下载", loading: "加载中…" },
+            scriptTask: {
+                title: "脚本任务", add: "新建任务", edit: "编辑任务", empty: "还没有脚本任务",
+                devices: "设备列表", pickDevice: "请选择左侧设备", allDevices: "全部设备",
+                targets: "目标设备", targetPlaceholder: "选择目标设备（可多选）",
+                targetsHint: "SSH 连接信息取各设备的「设备 SSH 配置」；未配置 SSH 的设备执行时会失败",
+                device: "设备",
+                executeSubmitted: "已提交到 {n} 台设备", executeFailCount: "有 {n} 台执行失败",
+                name: "任务名称", description: "描述", scriptContent: "脚本内容", scriptType: "脚本类型",
+                triggerType: "触发方式", triggerOnce: "定时一次", triggerCron: "Cron 周期", triggerOnBoot: "开机上线",
+                executeAt: "执行时间", cronExpression: "Cron 表达式",
+                sshHost: "SSH 主机", sshPort: "端口", sshUser: "SSH 用户",
+                privateKey: "SSH 私钥", privateKeyHint: "仅支持密钥认证。编辑时留空表示不修改原私钥。",
+                passphrase: "私钥口令", passphraseHint: "私钥没有口令可留空。",
+                sudoPassword: "sudo 密码", sudoHintTitle: "目标机免密 sudo 示例",
+                sudoHint: "留空则使用 sudo -n，要求目标机为该 SSH 用户配置 NOPASSWD（或 SSH 用户为 root）。示例：",
+                shutdownMode: "关机行为", shutdownNone: "不关机", shutdownImmediate: "立即关机", shutdownDelayed: "延迟关机",
+                shutdownDelay: "延迟秒数", enabled: "启用",
+                execute: "执行", shutdown: "关机", logs: "日志", delete: "删除",
+                lastResult: "上次结果", never: "从未", success: "成功", failed: "失败", running: "执行中",
+                triggeredBy: "触发来源", exitCode: "退出码", startedAt: "开始时间", finishedAt: "结束时间",
+                triggerSchedule: "定时", triggerHeartbeat: "上线", triggerManual: "手动",
+                sshTest: "测试连接", sshTestOk: "连接成功，主机指纹：{fp}",
+                sshRequired: "请先填写主机、端口、用户和私钥",
+                executed: "已提交执行，正在后台运行…",
+                executeOk: "执行成功（退出码 0）", executeFail: "执行失败（退出码 {code}）{msg}",
+                confirmDelete: "确定删除任务「{name}」吗？", deleteTitle: "删除任务",
+                confirmExecute: "确定立即执行任务「{name}」吗？",
+                confirmShutdown: "确定立即关闭「{name}」的所有目标设备吗？",
+                stdout: "标准输出", stderr: "错误输出", detail: "执行详情"
+            },
+            deviceSsh: {
+                title: "设备 SSH 配置", button: "设备 SSH", hint: "用于设备级关机，与脚本任务相互独立。",
+                host: "SSH 主机", port: "端口", user: "SSH 用户", type: "目标系统",
+                privateKey: "SSH 私钥", privateKeyHint: "首次必须填写；之后留空表示不修改。",
+                passphrase: "私钥口令", sudoPassword: "sudo 密码",
+                save: "保存", test: "测试连接", testOk: "连接成功，主机指纹：{fp}",
+                notConfigured: "未配置", saved: "已保存", required: "请填写主机、端口和用户"
+            },
             profile: { title: "修改用户名", username: "用户名", password: "修改密码" },
             password: {
                 title: "修改密码", old: "当前密码", new: "新密码",
@@ -78,17 +118,19 @@
                 hint: "On first boot the admin account and a random password are printed to the server log.",
                 welcome: "Welcome back, {name}"
             },
-            nav: { dashboard: "Dashboard", admin: "Users" },
+            nav: { dashboard: "Dashboard", script: "Scripts", admin: "Users" },
             dashboard: { title: "Device overview" },
             stats: { total: "Total devices", online: "Online", offline: "Offline", probing: "Probing" },
             panel: { status: "Status distribution", rate: "Uptime", onlineRate: "Online rate" },
             toolbar: { search: "Search name / MAC / IP", add: "Add device", live: "Live" },
             device: {
                 empty: "No devices yet — click “Add device” to begin",
-                wake: "Wake", script: "Script", edit: "Edit", monitor: "Monitor", delete: "Delete",
+                wake: "Wake", script: "Download heartbeat script", edit: "Edit", monitor: "Monitor", delete: "Delete", shutdown: "Shut down",
                 status: "Status", mode: "Mode", lastOnline: "Last online", never: "Never",
                 wakeSent: "Magic packet sent to {name}", confirmDelete: "Delete device {name}?",
-                deleteTitle: "Delete device"
+                deleteTitle: "Delete device",
+                confirmShutdown: "Shut down device “{name}” now?", shutdownTitle: "Device shutdown",
+                shutdownSent: "Shutdown command sent", shutdownFail: "Shutdown failed"
             },
             status: { online: "Online", offline: "Offline", probe: "Probing", unknown: "Unknown" },
             form: {
@@ -107,6 +149,44 @@
                 hint: "Ping timeout must be smaller than the check interval; heartbeat mode only needs a heartbeat timeout."
             },
             script: { title: "Heartbeat script", download: "Download", loading: "Loading…" },
+            scriptTask: {
+                title: "Script tasks", add: "New task", edit: "Edit task", empty: "No script tasks yet",
+                devices: "Devices", pickDevice: "Select a device on the left", allDevices: "All devices",
+                targets: "Targets", targetPlaceholder: "Select target devices (multiple)",
+                targetsHint: "SSH credentials come from each device's Device SSH config; unconfigured devices will fail at run time",
+                device: "Device",
+                executeSubmitted: "Submitted to {n} device(s)", executeFailCount: "{n} device(s) failed",
+                name: "Task name", description: "Description", scriptContent: "Script content", scriptType: "Script type",
+                triggerType: "Trigger", triggerOnce: "Once", triggerCron: "Cron", triggerOnBoot: "On boot",
+                executeAt: "Execute at", cronExpression: "Cron expression",
+                sshHost: "SSH host", sshPort: "Port", sshUser: "SSH user",
+                privateKey: "SSH private key", privateKeyHint: "Key authentication only. Leave empty on edit to keep the existing key.",
+                passphrase: "Key passphrase", passphraseHint: "Leave empty if the key has no passphrase.",
+                sudoPassword: "sudo password", sudoHintTitle: "Passwordless sudo example",
+                sudoHint: "Leave empty to use sudo -n, which requires a NOPASSWD entry for the SSH user (or the user is root). Example:",
+                shutdownMode: "Shutdown", shutdownNone: "Never", shutdownImmediate: "Immediate", shutdownDelayed: "Delayed",
+                shutdownDelay: "Delay (seconds)", enabled: "Enabled",
+                execute: "Run", shutdown: "Shut down", logs: "Logs", delete: "Delete",
+                lastResult: "Last result", never: "Never", success: "OK", failed: "Failed", running: "Running",
+                triggeredBy: "Trigger", exitCode: "Exit", startedAt: "Started", finishedAt: "Finished",
+                triggerSchedule: "Schedule", triggerHeartbeat: "Boot", triggerManual: "Manual",
+                sshTest: "Test connection", sshTestOk: "Connected, host fingerprint: {fp}",
+                sshRequired: "Fill in host, port, user and private key first",
+                executed: "Submitted, running in background…",
+                executeOk: "Succeeded (exit code 0)", executeFail: "Failed (exit code {code}) {msg}",
+                confirmDelete: "Delete task “{name}”?", deleteTitle: "Delete task",
+                confirmExecute: "Run task “{name}” now?",
+                confirmShutdown: "Shut down all targets of “{name}” now?",
+                stdout: "stdout", stderr: "stderr", detail: "Execution detail"
+            },
+            deviceSsh: {
+                title: "Device SSH", button: "Device SSH", hint: "Used for device-level shutdown, independent of script tasks.",
+                host: "SSH host", port: "Port", user: "SSH user", type: "Target OS",
+                privateKey: "SSH private key", privateKeyHint: "Required on first setup; leave empty to keep it.",
+                passphrase: "Key passphrase", sudoPassword: "sudo password",
+                save: "Save", test: "Test connection", testOk: "Connected, host fingerprint: {fp}",
+                notConfigured: "Not configured", saved: "Saved", required: "Fill in host, port and user"
+            },
             profile: { title: "Change username", username: "Username", password: "Change password" },
             password: {
                 title: "Change password", old: "Current password", new: "New password",
@@ -162,7 +242,12 @@
             responseTimeout: raw.responseTimeout != null ? raw.responseTimeout : (m.responseTimeout != null ? m.responseTimeout : 60),
             wakeTimeout: raw.wakeTimeout != null ? raw.wakeTimeout : (m.wakeTimeout != null ? m.wakeTimeout : 120),
             status: raw.status || m.status || "UNKNOWN",
-            lastOnlineTime: raw.lastOnlineTime || null
+            lastOnlineTime: raw.lastOnlineTime || null,
+            sshConfigured: !!raw.sshConfigured,
+            sshHost: raw.sshHost || "",
+            sshPort: raw.sshPort || null,
+            sshUser: raw.sshUser || "",
+            sshType: raw.sshType || "BASH"
         };
     }
 
@@ -221,6 +306,9 @@
     <nav class="topbar__nav">
       <div class="nav-pill" :class="{active: view==='dashboard'}" @click="view='dashboard'">
         <el-icon><Odometer/></el-icon><span>{{ t('nav.dashboard') }}</span>
+      </div>
+      <div class="nav-pill" :class="{active: view==='script'}" @click="openScriptView">
+        <el-icon><Tickets/></el-icon><span>{{ t('nav.script') }}</span>
       </div>
       <div v-if="isAdmin" class="nav-pill" :class="{active: view==='admin'}" @click="view='admin'">
         <el-icon><UserFilled/></el-icon><span>{{ t('nav.admin') }}</span>
@@ -334,18 +422,55 @@
 
           <div class="device-card__actions">
             <el-button type="primary" @click="wake(d)"><el-icon><Promotion/></el-icon>&nbsp;{{ t('device.wake') }}</el-button>
-            <el-button @click="openScript(d)"><el-icon><Download/></el-icon>&nbsp;{{ t('device.script') }}</el-button>
-            <el-button @click="openEdit(d)"><el-icon><Edit/></el-icon></el-button>
+            <el-button type="warning" plain @click="shutdownDevice(d)"><el-icon><SwitchButton/></el-icon>&nbsp;{{ t('device.shutdown') }}</el-button>
             <el-dropdown trigger="click" @command="cmd => onDeviceCommand(cmd, d)">
               <el-button><el-icon><MoreFilled/></el-icon></el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="monitor"><el-icon><Setting/></el-icon>{{ t('device.monitor') }}</el-dropdown-item>
+                  <el-dropdown-item command="downloadScript"><el-icon><Download/></el-icon>{{ t('device.script') }}</el-dropdown-item>
+                  <el-dropdown-item command="edit"><el-icon><Edit/></el-icon>{{ t('device.edit') }}</el-dropdown-item>
+                  <el-dropdown-item command="monitor" divided><el-icon><Setting/></el-icon>{{ t('device.monitor') }}</el-dropdown-item>
                   <el-dropdown-item command="delete" divided><el-icon><Delete/></el-icon>{{ t('device.delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </div>
+        </div>
+      </div>
+    </template>
+
+    <template v-else-if="view==='script'">
+      <div class="section-title"><span class="spark"></span><h2>{{ t('nav.script') }}</h2></div>
+      <div class="script-layout">
+        <div class="script-side glass">
+          <div class="script-side__title">{{ t('scriptTask.devices') }}</div>
+          <div class="script-device" :class="{ active: !scriptSelected }" @click="selectScriptDevice(null)">
+            <span class="script-device__name">{{ t('scriptTask.allDevices') }}</span>
+          </div>
+          <div v-for="d in devices" :key="d.id" class="script-device"
+               :class="{ active: scriptSelected && scriptSelected.id === d.id }" @click="selectScriptDevice(d)">
+            <span class="script-device__dot" :class="statusBadgeClass(d.status)"></span>
+            <span class="script-device__name">{{ d.name || d.mac }}</span>
+            <span v-if="d.sshConfigured" class="chip">SSH</span>
+          </div>
+          <el-empty v-if="!devices.length" :description="t('device.empty')" :image-size="60" />
+        </div>
+
+        <div class="script-main">
+          <div class="glass script-ssh" v-if="scriptSelected">
+            <div class="script-ssh__head">
+              <h3>{{ t('deviceSsh.title') }}</h3>
+              <el-button size="small" @click="openDeviceSsh(scriptSelected)"><el-icon><Edit/></el-icon>&nbsp;{{ t('device.edit') }}</el-button>
+            </div>
+            <div class="script-ssh__body">
+              <template v-if="scriptSelected.sshConfigured">
+                <span class="mono">{{ scriptSelected.sshUser }}@{{ scriptSelected.sshHost }}:{{ scriptSelected.sshPort }}</span>
+                <span class="chip">{{ scriptSelected.sshType }}</span>
+              </template>
+              <span v-else class="stp__muted">{{ t('deviceSsh.notConfigured') }}</span>
+            </div>
+          </div>
+          <script-task-panel :key="scriptSelected ? scriptSelected.id : 'all'" :device="scriptSelected" :devices="devices" />
         </div>
       </div>
     </template>
@@ -512,8 +637,65 @@
       <el-button type="primary" :loading="saving" @click="changePassword">{{ t('common.save') }}</el-button>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="deviceSshDialog.visible" :title="t('deviceSsh.title')" width="540px">
+    <el-form label-position="top">
+      <div class="field-hint" style="margin-bottom:12px">{{ t('deviceSsh.hint') }}</div>
+      <el-row :gutter="12">
+        <el-col :span="14">
+          <el-form-item :label="t('deviceSsh.host')"><el-input v-model="deviceSshDialog.form.sshHost" /></el-form-item>
+        </el-col>
+        <el-col :span="10">
+          <el-form-item :label="t('deviceSsh.port')">
+            <el-input-number v-model="deviceSshDialog.form.sshPort" :min="1" :max="65535" style="width:100%" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-form-item :label="t('deviceSsh.user')"><el-input v-model="deviceSshDialog.form.sshUser" /></el-form-item>
+      <el-form-item :label="t('deviceSsh.type')">
+        <el-select v-model="deviceSshDialog.form.sshType" style="width:100%">
+          <el-option label="Linux (Bash)" value="BASH" />
+          <el-option label="Windows (PowerShell)" value="POWERSHELL" />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <template #label><span>{{ t('deviceSsh.privateKey') }}<hint-icon :text="t('deviceSsh.privateKeyHint')" /></span></template>
+        <el-input v-model="deviceSshDialog.form.sshPrivateKey" type="textarea" :rows="4" class="mono" />
+      </el-form-item>
+      <el-form-item :label="t('deviceSsh.passphrase')">
+        <el-input v-model="deviceSshDialog.form.sshKeyPassphrase" show-password />
+      </el-form-item>
+      <el-form-item>
+        <template #label><span>{{ t('deviceSsh.sudoPassword') }}<hint-icon><sudo-hint /></hint-icon></span></template>
+        <el-input v-model="deviceSshDialog.form.sudoPassword" show-password />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="deviceSshDialog.visible=false">{{ t('common.cancel') }}</el-button>
+      <el-button @click="testDeviceSsh">{{ t('deviceSsh.test') }}</el-button>
+      <el-button type="primary" :loading="saving" @click="saveDeviceSsh">{{ t('common.save') }}</el-button>
+    </template>
+  </el-dialog>
 </div>
 `;
+
+    const HintIcon = {
+        name: "HintIcon",
+        props: { text: { type: String, default: "" } },
+        template: `<el-tooltip placement="top" effect="dark" :show-after="120" popper-class="hint-popper">
+            <el-icon class="hint-icon"><QuestionFilled/></el-icon>
+            <template #content><slot>{{ text }}</slot></template>
+          </el-tooltip>`
+    };
+
+    const SudoHint = {
+        name: "SudoHint",
+        inject: ["nd"],
+        template: `<div>
+            <div>{{ nd.t('scriptTask.sudoHint') }}</div>
+            <pre class="hint-pre">&lt;ssh-user&gt; ALL=(root) NOPASSWD: /sbin/shutdown, /usr/sbin/shutdown, /sbin/poweroff, /usr/sbin/poweroff, /sbin/halt, /usr/sbin/halt</pre>
+          </div>`
+    };
 
     const app = createApp({
         template,
@@ -543,7 +725,18 @@
                 profileDialog: { visible: false, username: "" },
                 selfPwdDialog: { visible: false, oldPassword: "", newPassword: "" },
                 adminCreate: { visible: false, form: { username: "", password: "", role: "USER" } },
-                adminPwd: { visible: false, id: null, password: "" }
+                adminPwd: { visible: false, id: null, password: "" },
+                scriptSelectedId: null,
+                deviceSshDialog: { visible: false, deviceId: null, form: { sshHost: "", sshPort: 22, sshUser: "", sshType: "BASH", sshPrivateKey: "", sshKeyPassphrase: "", sudoPassword: "" } }
+            };
+        },
+        provide() {
+            const self = this;
+            return {
+                nd: {
+                    t: (key, params) => self.t(key, params),
+                    api: (path, options) => self.api(path, options)
+                }
             };
         },
         computed: {
@@ -569,6 +762,10 @@
                     (d.name || "").toLowerCase().includes(kw) ||
                     (d.mac || "").toLowerCase().includes(kw) ||
                     (d.ip || "").toLowerCase().includes(kw));
+            },
+            scriptSelected() {
+                if (this.scriptSelectedId == null) return null;
+                return this.devices.find((d) => d.id === this.scriptSelectedId) || null;
             },
             filteredUsers() {
                 const kw = this.adminKeyword.trim().toLowerCase();
@@ -724,6 +921,7 @@
                 this.devices = [];
                 this.users = [];
                 this.view = "dashboard";
+                this.scriptSelectedId = null;
                 this.loginForm = { username: "", password: "" };
             },
             onUserCommand(cmd) {
@@ -862,6 +1060,85 @@
             onDeviceCommand(cmd, d) {
                 if (cmd === "monitor") this.openMonitor(d);
                 else if (cmd === "delete") this.removeDevice(d);
+                else if (cmd === "downloadScript") this.openScript(d);
+                else if (cmd === "edit") this.openEdit(d);
+            },
+            openScriptView() {
+                this.view = "script";
+            },
+            selectScriptDevice(d) {
+                this.scriptSelectedId = d ? d.id : null;
+            },
+            async openDeviceSsh(d) {
+                this.deviceSshDialog.deviceId = d.id;
+                this.deviceSshDialog.form = {
+                    sshHost: "", sshPort: 22, sshUser: "", sshType: "BASH",
+                    sshPrivateKey: "", sshKeyPassphrase: "", sudoPassword: ""
+                };
+                try {
+                    const cfg = await this.api("/api/device/" + d.id + "/ssh");
+                    if (cfg) {
+                        this.deviceSshDialog.form.sshHost = cfg.sshHost || "";
+                        this.deviceSshDialog.form.sshPort = cfg.sshPort || 22;
+                        this.deviceSshDialog.form.sshUser = cfg.sshUser || "";
+                        this.deviceSshDialog.form.sshType = cfg.sshType || "BASH";
+                    }
+                } catch (e) {
+                    ElMessage.error(e.message);
+                }
+                this.deviceSshDialog.visible = true;
+            },
+            async saveDeviceSsh() {
+                const f = this.deviceSshDialog.form;
+                if (!f.sshHost || !f.sshUser || !f.sshPort) {
+                    ElMessage.warning(this.t("deviceSsh.required"));
+                    return;
+                }
+                this.saving = true;
+                try {
+                    await this.api("/api/device/" + this.deviceSshDialog.deviceId + "/ssh", { method: "PUT", body: f });
+                    ElMessage.success(this.t("deviceSsh.saved"));
+                    this.deviceSshDialog.visible = false;
+                } catch (e) {
+                    ElMessage.error(e.message);
+                } finally {
+                    this.saving = false;
+                }
+            },
+            async testDeviceSsh() {
+                const f = this.deviceSshDialog.form;
+                if (!f.sshHost || !f.sshUser || !f.sshPort || !f.sshPrivateKey) {
+                    ElMessage.warning(this.t("scriptTask.sshRequired"));
+                    return;
+                }
+                try {
+                    const res = await this.api("/api/script-task/test-ssh", {
+                        method: "POST",
+                        body: {
+                            sshHost: f.sshHost, sshPort: f.sshPort, sshUser: f.sshUser,
+                            sshPrivateKey: f.sshPrivateKey, sshKeyPassphrase: f.sshKeyPassphrase
+                        }
+                    });
+                    ElMessage.success(this.t("deviceSsh.testOk", { fp: res.fingerprint }));
+                } catch (e) {
+                    ElMessage.error(e.message);
+                }
+            },
+            shutdownDevice(d) {
+                const name = d.name || d.mac;
+                ElMessageBox.confirm(this.t("device.confirmShutdown", { name }), this.t("device.shutdownTitle"), {
+                    type: "warning",
+                    confirmButtonText: this.t("common.confirm"),
+                    cancelButtonText: this.t("common.cancel")
+                }).then(async () => {
+                    try {
+                        const res = await this.api("/api/device/" + d.id + "/shutdown", { method: "POST" });
+                        if (res && res.shutdownTriggered) ElMessage.success(this.t("device.shutdownSent"));
+                        else ElMessage.error((res && res.errorMessage) || this.t("device.shutdownFail"));
+                    } catch (e) {
+                        ElMessage.error(e.message);
+                    }
+                }).catch(() => {});
             },
             openMonitor(d) {
                 this.monitorDialog.id = d.id;
@@ -1177,6 +1454,11 @@
     });
 
     app.use(ElementPlus);
+    app.component("HintIcon", HintIcon);
+    app.component("SudoHint", SudoHint);
+    if (window.ScriptTaskPanel) {
+        app.component("ScriptTaskPanel", window.ScriptTaskPanel);
+    }
     for (const [name, comp] of Object.entries(ElementPlusIconsVue)) {
         app.component(name, comp);
     }

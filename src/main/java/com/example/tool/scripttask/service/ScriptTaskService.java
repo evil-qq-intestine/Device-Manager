@@ -5,6 +5,7 @@ import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.scripttask.entity.ScriptTask;
 import com.example.tool.scripttask.entity.ScriptTaskLog;
+import com.example.tool.scripttask.entity.ScriptType;
 import com.example.tool.scripttask.entity.TriggerType;
 import com.example.tool.scripttask.entity.TriggeredBy;
 import com.example.tool.scripttask.repository.ScriptTaskLogRepository;
@@ -20,6 +21,8 @@ import com.example.tool.scripttask.service.ssh.SshConfig;
 import com.example.tool.scripttask.service.ssh.SshExecutor;
 import com.example.tool.scripttask.service.ssh.SshResult;
 import com.example.tool.scripttask.validator.ScriptTaskValidator;
+import com.example.tool.user.entity.User;
+import com.example.tool.user.reopsitory.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -32,9 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -43,6 +44,7 @@ public class ScriptTaskService {
     private final ScriptTaskRepository taskRepository;
     private final ScriptTaskLogRepository logRepository;
     private final DeviceRepository deviceRepository;
+    private final UserRepository userRepository;
     private final CryptoService cryptoService;
     private final ScriptTaskValidator validator;
     private final ScriptTaskExecutor scriptTaskExecutor;
@@ -57,6 +59,7 @@ public class ScriptTaskService {
     public ScriptTaskService(ScriptTaskRepository taskRepository,
                              ScriptTaskLogRepository logRepository,
                              DeviceRepository deviceRepository,
+                             UserRepository userRepository,
                              CryptoService cryptoService,
                              ScriptTaskValidator validator,
                              ScriptTaskExecutor scriptTaskExecutor,
@@ -64,6 +67,7 @@ public class ScriptTaskService {
         this.taskRepository = taskRepository;
         this.logRepository = logRepository;
         this.deviceRepository = deviceRepository;
+        this.userRepository = userRepository;
         this.cryptoService = cryptoService;
         this.validator = validator;
         this.scriptTaskExecutor = scriptTaskExecutor;
@@ -73,20 +77,38 @@ public class ScriptTaskService {
     /* ---------------- 查询 ---------------- */
 
     @Transactional(readOnly = true)
-    public List<ScriptTaskResponse> listByDevice(Integer deviceId, Integer userId) {
-        requireOwnedDevice(deviceId, userId);
-        return taskRepository.findByDevice_DeviceIdAndDevice_UserId(deviceId, userId)
-                .stream().map(ScriptTaskResponse::from).toList();
+    public List<ScriptTaskResponse> list(Integer userId) {
+        List<ScriptTask> tasks = taskRepository.findByOwner_Id(userId);
+        Map<Long, Map<Integer, ScriptTaskLog>> latest = loadLatestByDevice(tasks);
+        return tasks.stream()
+                .map(t -> ScriptTaskResponse.from(t, latest.getOrDefault(t.getId(), Map.of())))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public ScriptTaskResponse get(Long taskId, Integer userId) {
-        return ScriptTaskResponse.from(requireOwnedTask(taskId, userId));
+        ScriptTask task = requireOwned(taskId, userId);
+        Map<Integer, ScriptTaskLog> latest = loadLatestByDevice(List.of(task)).getOrDefault(taskId, Map.of());
+        return ScriptTaskResponse.from(task, latest);
+    }
+
+    /** 每个 (任务, 设备) 的最近一次执行结果。 */
+    private Map<Long, Map<Integer, ScriptTaskLog>> loadLatestByDevice(List<ScriptTask> tasks) {
+        if (tasks.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> ids = tasks.stream().map(ScriptTask::getId).toList();
+        Map<Long, Map<Integer, ScriptTaskLog>> result = new HashMap<>();
+        for (ScriptTaskLog logEntry : logRepository.findLatestPerDeviceByTaskIds(ids)) {
+            result.computeIfAbsent(logEntry.getTaskId(), k -> new HashMap<>())
+                    .put(logEntry.getDeviceId(), logEntry);
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)
     public PageResponse<ScriptTaskLogResponse> logs(Long taskId, Integer userId, int page, int size) {
-        requireOwnedTask(taskId, userId);
+        requireOwned(taskId, userId);
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100));
         Page<ScriptTaskLog> result = logRepository.findByTaskIdOrderByStartedAtDesc(taskId, pageable);
         return PageResponse.of(result, ScriptTaskLogResponse::from);
@@ -94,34 +116,29 @@ public class ScriptTaskService {
 
     @Transactional(readOnly = true)
     public ScriptTaskLogDetailResponse logDetail(Long logId, Integer userId) {
-        ScriptTaskLog log = logRepository.findById(logId)
+        ScriptTaskLog logEntry = logRepository.findById(logId)
                 .orElseThrow(() -> new AccessDeniedException("Log not found or access denied"));
-        requireOwnedTask(log.getTaskId(), userId);
-        return ScriptTaskLogDetailResponse.from(log);
+        requireOwned(logEntry.getTaskId(), userId);
+        return ScriptTaskLogDetailResponse.from(logEntry);
     }
 
     /* ---------------- 变更 ---------------- */
 
     @Transactional
-    public ScriptTaskResponse create(Integer deviceId, Integer userId, ScriptTaskRequest request) {
-        Device device = requireOwnedDevice(deviceId, userId);
+    public ScriptTaskResponse create(Integer userId, ScriptTaskRequest request) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found, id: " + userId));
         validator.validate(request, true);
 
         ScriptTask task = ScriptTask.builder()
-                .device(device)
+                .owner(owner)
+                .targets(resolveTargets(userId, request.getTargetDeviceIds()))
                 .name(request.getName())
                 .description(request.getDescription())
                 .scriptContent(request.getScriptContent())
-                .scriptType(request.getScriptType())
                 .triggerType(request.getTriggerType())
                 .executeAt(request.getTriggerType() == TriggerType.ONCE ? request.getExecuteAt() : null)
                 .cronExpression(request.getTriggerType() == TriggerType.CRON ? request.getCronExpression() : null)
-                .sshHost(request.getSshHost())
-                .sshPort(request.getSshPort())
-                .sshUser(request.getSshUser())
-                .sshPrivateKeyEncrypted(cryptoService.encrypt(request.getSshPrivateKey()))
-                .sshKeyPassphraseEncrypted(cryptoService.encrypt(blankToNull(request.getSshKeyPassphrase())))
-                .sudoPasswordEncrypted(cryptoService.encrypt(blankToNull(request.getSudoPassword())))
                 .shutdownMode(request.getShutdownMode())
                 .shutdownDelaySeconds(request.getShutdownDelaySeconds())
                 .enabled(request.getEnabled() == null || request.getEnabled())
@@ -132,47 +149,34 @@ public class ScriptTaskService {
 
     @Transactional
     public ScriptTaskResponse update(Long taskId, Integer userId, ScriptTaskRequest request) {
-        ScriptTask task = requireOwnedTask(taskId, userId);
+        ScriptTask task = requireOwned(taskId, userId);
         validator.validate(request, false);
 
+        task.setTargets(resolveTargets(userId, request.getTargetDeviceIds()));
         task.setName(request.getName());
         task.setDescription(request.getDescription());
         task.setScriptContent(request.getScriptContent());
-        task.setScriptType(request.getScriptType());
         task.setTriggerType(request.getTriggerType());
         task.setExecuteAt(request.getTriggerType() == TriggerType.ONCE ? request.getExecuteAt() : null);
         task.setCronExpression(request.getTriggerType() == TriggerType.CRON ? request.getCronExpression() : null);
-        task.setSshHost(request.getSshHost());
-        task.setSshPort(request.getSshPort());
-        task.setSshUser(request.getSshUser());
         task.setShutdownMode(request.getShutdownMode());
         task.setShutdownDelaySeconds(request.getShutdownDelaySeconds());
         if (request.getEnabled() != null) {
             task.setEnabled(request.getEnabled());
         }
-        if (!isBlank(request.getSshPrivateKey())) {
-            task.setSshPrivateKeyEncrypted(cryptoService.encrypt(request.getSshPrivateKey()));
-        }
-        if (request.getSshKeyPassphrase() != null) {
-            task.setSshKeyPassphraseEncrypted(cryptoService.encrypt(blankToNull(request.getSshKeyPassphrase())));
-        }
-        if (request.getSudoPassword() != null) {
-            task.setSudoPasswordEncrypted(cryptoService.encrypt(blankToNull(request.getSudoPassword())));
-        }
-
         return ScriptTaskResponse.from(taskRepository.save(task));
     }
 
     @Transactional
     public ScriptTaskResponse toggle(Long taskId, Integer userId) {
-        ScriptTask task = requireOwnedTask(taskId, userId);
+        ScriptTask task = requireOwned(taskId, userId);
         task.setEnabled(!Boolean.TRUE.equals(task.getEnabled()));
         return ScriptTaskResponse.from(taskRepository.save(task));
     }
 
     @Transactional
     public void delete(Long taskId, Integer userId) {
-        ScriptTask task = requireOwnedTask(taskId, userId);
+        ScriptTask task = requireOwned(taskId, userId);
         logRepository.deleteByTaskId(taskId);
         taskRepository.delete(task);
     }
@@ -189,62 +193,95 @@ public class ScriptTaskService {
     /* ---------------- 执行 ---------------- */
 
     /**
-     * 同步创建日志并返回 logId，异步执行；事务提交后再触发，避免异步任务读不到日志。
+     * 在所有目标设备上执行：每个目标同步创建日志并返回 logId，事务提交后异步执行。
      */
     @Transactional
-    public Long submit(Long taskId, TriggeredBy triggeredBy) {
+    public List<Long> submit(Long taskId, TriggeredBy triggeredBy) {
         ScriptTask task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new BusinessException("Task not found, id: " + taskId));
+        List<Long> logIds = new ArrayList<>();
+        for (Device device : task.getTargets()) {
+            logIds.add(schedule(task, device, triggeredBy));
+        }
+        return logIds;
+    }
 
-        ScriptTaskLog log = ScriptTaskLog.builder()
+    /**
+     * 仅在指定设备上执行（用于 ON_BOOT）。
+     */
+    @Transactional
+    public Long submitForDevice(Long taskId, Integer deviceId, TriggeredBy triggeredBy) {
+        ScriptTask task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new BusinessException("Task not found, id: " + taskId));
+        Device device = task.getTargets().stream()
+                .filter(d -> d.getDeviceId().equals(deviceId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException("Device " + deviceId + " is not a target of task " + taskId));
+        return schedule(task, device, triggeredBy);
+    }
+
+    private Long schedule(ScriptTask task, Device device, TriggeredBy triggeredBy) {
+        ScriptTaskLog logEntry = ScriptTaskLog.builder()
                 .taskId(task.getId())
-                .deviceId(task.getDevice().getDeviceId())
+                .deviceId(device.getDeviceId())
                 .triggeredBy(triggeredBy)
                 .startedAt(LocalDateTime.now())
                 .shutdownTriggered(false)
                 .build();
-        Long logId = logRepository.save(log).getId();
-        Long finalTaskId = task.getId();
-
+        Long logId = logRepository.save(logEntry).getId();
+        Long taskId = task.getId();
+        Integer deviceId = device.getDeviceId();
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    scriptTaskExecutor.run(finalTaskId, logId, triggeredBy);
+                    scriptTaskExecutor.run(taskId, logId, deviceId, triggeredBy);
                 }
             });
         } else {
-            scriptTaskExecutor.run(finalTaskId, logId, triggeredBy);
+            scriptTaskExecutor.run(taskId, logId, deviceId, triggeredBy);
         }
         return logId;
     }
 
     /**
-     * 手动关机：忽略任务配置，立即关机。同步执行并记录一条日志。
+     * 手动关机：忽略任务配置，立即关闭所有目标设备。
      */
     @Transactional
-    public Map<String, Object> shutdownNow(Long taskId, Integer userId) {
-        ScriptTask task = requireOwnedTask(taskId, userId);
-        LocalDateTime startedAt = LocalDateTime.now();
+    public List<Map<String, Object>> shutdownNow(Long taskId, Integer userId) {
+        ScriptTask task = requireOwned(taskId, userId);
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (Device device : task.getTargets()) {
+            results.add(shutdownDevice(task, device));
+        }
+        return results;
+    }
 
-        boolean withPassword = task.getSudoPasswordEncrypted() != null;
+    private Map<String, Object> shutdownDevice(ScriptTask task, Device device) {
+        LocalDateTime startedAt = LocalDateTime.now();
         SshResult result;
-        try {
-            SshConfig config = new SshConfig(
-                    task.getSshHost(), task.getSshPort(), task.getSshUser(),
-                    cryptoService.decrypt(task.getSshPrivateKeyEncrypted()),
-                    cryptoService.decrypt(task.getSshKeyPassphraseEncrypted()));
-            String command = ShutdownCommands.immediate(task.getScriptType(), withPassword);
-            String stdin = withPassword ? cryptoService.decrypt(task.getSudoPasswordEncrypted()) + "\n" : null;
-            result = sshExecutor.executeCommand(config, command, stdin, commandTimeoutMs);
-        } catch (Exception e) {
-            result = SshResult.error(e.getMessage());
+        if (device.getSshPrivateKeyEncrypted() == null) {
+            result = SshResult.error("目标设备未配置 SSH");
+        } else {
+            try {
+                boolean withPassword = device.getSudoPasswordEncrypted() != null;
+                ScriptType type = device.getSshType() != null ? device.getSshType() : ScriptType.BASH;
+                SshConfig config = new SshConfig(
+                        device.getSshHost(), device.getSshPort(), device.getSshUser(),
+                        cryptoService.decrypt(device.getSshPrivateKeyEncrypted()),
+                        cryptoService.decrypt(device.getSshKeyPassphraseEncrypted()));
+                String command = ShutdownCommands.immediate(type, withPassword);
+                String stdin = withPassword ? cryptoService.decrypt(device.getSudoPasswordEncrypted()) + "\n" : null;
+                result = sshExecutor.executeCommand(config, command, stdin, commandTimeoutMs);
+            } catch (Exception e) {
+                result = SshResult.error(e.getMessage());
+            }
         }
 
         String error = result.success() ? null : ShutdownCommands.describeFailure(result);
         logRepository.save(ScriptTaskLog.builder()
                 .taskId(task.getId())
-                .deviceId(task.getDevice().getDeviceId())
+                .deviceId(device.getDeviceId())
                 .triggeredBy(TriggeredBy.MANUAL)
                 .startedAt(startedAt)
                 .finishedAt(LocalDateTime.now())
@@ -256,36 +293,43 @@ public class ScriptTaskService {
                 .build());
 
         Map<String, Object> response = new LinkedHashMap<>();
+        response.put("deviceId", device.getDeviceId());
+        response.put("name", device.getDeviceName());
         response.put("shutdownTriggered", result.success());
         response.put("exitCode", result.exitCode());
         response.put("errorMessage", error);
         return response;
     }
 
-    /** 设备删除时清理其任务与日志。 */
+    /** 设备删除时：从所有任务的 targets 中移除，并清理该设备的日志。 */
     @Transactional
-    public void deleteAllByDevice(Integer deviceId) {
+    public void detachDevice(Integer deviceId) {
+        for (ScriptTask task : taskRepository.findByTargets_DeviceId(deviceId)) {
+            task.getTargets().removeIf(d -> d.getDeviceId().equals(deviceId));
+            taskRepository.save(task);
+        }
         logRepository.deleteByDeviceId(deviceId);
-        taskRepository.deleteAll(taskRepository.findByDevice_DeviceId(deviceId));
     }
 
     /* ---------------- 权限 ---------------- */
 
-    private Device requireOwnedDevice(Integer deviceId, Integer userId) {
-        return deviceRepository.findByDeviceIdAndUserId(deviceId, userId)
-                .orElseThrow(() -> new AccessDeniedException("Device not found or access denied"));
+    private ScriptTask requireOwned(Long taskId, Integer userId) {
+        return taskRepository.findByIdAndOwner_Id(taskId, userId)
+                .orElseThrow(() -> new AccessDeniedException("Task not found or access denied"));
     }
 
-    private ScriptTask requireOwnedTask(Long taskId, Integer userId) {
-        return taskRepository.findByIdAndDevice_UserId(taskId, userId)
-                .orElseThrow(() -> new AccessDeniedException("Task not found or access denied"));
+    private Set<Device> resolveTargets(Integer userId, List<Integer> deviceIds) {
+        Set<Integer> requested = new HashSet<>(deviceIds);
+        Set<Integer> owned = deviceRepository.findByUserId(userId).stream()
+                .map(Device::getDeviceId)
+                .collect(java.util.stream.Collectors.toSet());
+        if (!owned.containsAll(requested)) {
+            throw new AccessDeniedException("Contains devices you do not own");
+        }
+        return new HashSet<>(deviceRepository.findAllById(requested));
     }
 
     private String blankToNull(String s) {
         return (s == null || s.isBlank()) ? null : s;
-    }
-
-    private boolean isBlank(String s) {
-        return s == null || s.isBlank();
     }
 }

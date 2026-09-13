@@ -34,10 +34,6 @@ public class ScriptTaskValidator {
                 throw new BusinessException("延迟关机必须设置大于 0 的延迟秒数");
             }
         }
-
-        if (isCreate && isBlank(request.getSshPrivateKey())) {
-            throw new BusinessException("必须上传 SSH 私钥");
-        }
     }
 
     private boolean isBlank(String s) {
