@@ -1,5 +1,7 @@
 # 构建上下文瘦身：不要把产物、IDE、数据与密钥送进镜像
-target/
+# 注意：排除 target 下的内容，但保留 Dockerfile.native 需要的 native 可执行文件
+target/*
+!target/device-manager
 .git/
 .gitignore
 .gitattributes
