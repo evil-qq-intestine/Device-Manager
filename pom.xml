@@ -118,6 +118,21 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- JDK 23+ 默认不再自动运行 classpath 上的注解处理器，显式开启并指定 Lombok -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<proc>full</proc>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 			<!-- 声明后由父 POM 的 native profile 装配；用 -Pnative 激活 -->
 			<plugin>
 				<groupId>org.graalvm.buildtools</groupId>
