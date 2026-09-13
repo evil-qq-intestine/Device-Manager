@@ -90,7 +90,8 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          # Spring Boot 4.1 的 native 构建要求 GraalVM 25（编译产物仍按 java.version=21）
+          java-version: '25'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
