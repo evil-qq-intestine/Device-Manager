@@ -1,2 +1,18 @@
-/mvnw text eol=lf
+# 统一以 LF 存入仓库，避免 Windows/Linux 来回切换产生大量“假改动”
+* text=auto eol=lf
+
+# Windows 批处理必须是 CRLF
 *.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Maven wrapper
+/mvnw text eol=lf
+
+# 二进制文件不做行尾转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.db binary

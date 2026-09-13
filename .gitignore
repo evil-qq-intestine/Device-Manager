@@ -1,41 +1,52 @@
-HELP.md
+# ================= 构建产物 =================
 target/
-.mvn/wrapper/maven-wrapper.jar
+build/
+out/
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# ================= Maven Wrapper =================
+.mvn/wrapper/maven-wrapper.jar
+
+# ================= IDE =================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+# Eclipse / STS
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
 
-### db ###
-*.db
-*.log
-*.aeg
+# ================= 操作系统 =================
+.DS_Store
+Thumbs.db
+desktop.ini
 
-### secrets ###
+# ================= 运行时数据 / 密钥 =================
+*.db
+*.db-shm
+*.db-wal
+*.aeg
 .master-key
+
+# ================= 日志 =================
+*.log
+logs/
+
+# ================= 其他 =================
+HELP.md
