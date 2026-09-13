@@ -7,7 +7,6 @@ import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.repository.DeviceMonitorRepository;
 import com.example.tool.device.script.ScriptForClient;
 import com.example.tool.device.task.DeviceScheduledTasks;
-import com.example.tool.device.util.BeanCopyUtils;
 import com.example.tool.device.validator.DeviceMonitorValidator;
 import com.example.tool.device.validator.DeviceValidator;
 import com.example.tool.scripttask.service.ScriptTaskService;
@@ -119,7 +118,22 @@ public class DeviceService {
         DeviceMonitor newDeviceMonitor = deviceMonitorRepository.findByMonitorIdAndDeviceUserId(deviceMonitor.getMonitorId(), userId).orElseThrow(() -> new IdNotDetectedException("Device monitor config not found, id: " + deviceMonitor.getMonitorId()));
         deviceMonitorValidator.validateBeforeUpdate(deviceMonitor);
 
-        BeanCopyUtils.copyNonNullProperties(deviceMonitor, newDeviceMonitor);
+        // 只更新可配置字段，避免客户端篡改 status/lastOnlineTime/probeStartTime 等运行时字段
+        if (deviceMonitor.getMonitorMode() != null) {
+            newDeviceMonitor.setMonitorMode(deviceMonitor.getMonitorMode());
+        }
+        if (deviceMonitor.getPingInterval() != null) {
+            newDeviceMonitor.setPingInterval(deviceMonitor.getPingInterval());
+        }
+        if (deviceMonitor.getPingTimeout() != null) {
+            newDeviceMonitor.setPingTimeout(deviceMonitor.getPingTimeout());
+        }
+        if (deviceMonitor.getResponseTimeout() != null) {
+            newDeviceMonitor.setResponseTimeout(deviceMonitor.getResponseTimeout());
+        }
+        if (deviceMonitor.getWakeTimeout() != null) {
+            newDeviceMonitor.setWakeTimeout(deviceMonitor.getWakeTimeout());
+        }
         // IP 协议由设备地址自动决定，忽略客户端传入值
         if (newDeviceMonitor.getDevice() != null) {
             newDeviceMonitor.setIpMode(DeviceIpModeEnum.getIpMode(newDeviceMonitor.getDevice().getIp()));

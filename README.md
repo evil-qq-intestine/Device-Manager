@@ -123,6 +123,27 @@ docker run -d --name device-manager \
   ghcr.io/evil-qq-intestine/device-manager:latest
 ```
 
+#### native 运行期排错（可选，遇到再处理）
+
+GraalVM native 是封闭世界分析，第三方库用到的反射必须提前登记。本项目已处理
+`FileSystemProvider`、安全 Provider 与 sqlite 的元数据；如果实际使用时（尤其是 SSH 脚本任务）
+报 `MissingReflectionRegistrationError`，用 tracing agent **精确**生成配置，而不是手写猜：
+
+```bash
+# 需要 GraalVM（自带 native-image-agent）
+# 1) 以 agent 方式启动 JVM 应用
+java -agentlib:native-image-agent=config-merge-dir=target/native-config \
+     -jar target/device-manager-*.jar
+# 2) 在界面上把相关功能点一遍：登录 → 新建并执行脚本任务 → 测试 SSH → 设备关机
+# 3) Ctrl-C 停止，配置会写到 target/native-config/
+# 4) 拷进源码，重新构建 native
+mkdir -p src/main/resources/META-INF/native-image/com.example/device-manager
+cp target/native-config/*.json src/main/resources/META-INF/native-image/com.example/device-manager/
+./mvnw -Pnative -DskipTests native:compile
+```
+
+生成的文件会随源码提交，之后 native 构建会自动读取。没遇到问题就不需要加。
+
 ### 远程关机与 sudo
 
 Linux 目标机推荐配置免密 sudo（服务端无需保存密码）：
@@ -292,6 +313,29 @@ docker run -d --name device-manager \
   --network host \
   ghcr.io/evil-qq-intestine/device-manager:latest
 ```
+
+#### Troubleshooting native at runtime (optional)
+
+GraalVM native is a closed-world analysis, so reflection used by third-party libraries must be
+registered ahead of time. This project already handles `FileSystemProvider`, security providers
+and the sqlite metadata. If you hit `MissingReflectionRegistrationError` at runtime (especially
+with SSH script tasks), generate the config **precisely** with the tracing agent instead of guessing:
+
+```bash
+# requires GraalVM (ships native-image-agent)
+# 1) start the JVM app with the agent
+java -agentlib:native-image-agent=config-merge-dir=target/native-config \
+     -jar target/device-manager-*.jar
+# 2) exercise the relevant features: log in -> create & run a script task -> test SSH -> shut down
+# 3) Ctrl-C; configs are written to target/native-config/
+# 4) copy them into the sources and rebuild native
+mkdir -p src/main/resources/META-INF/native-image/com.example/device-manager
+cp target/native-config/*.json src/main/resources/META-INF/native-image/com.example/device-manager/
+./mvnw -Pnative -DskipTests native:compile
+```
+
+The generated files are committed with the source and picked up automatically. You do not need
+them unless you actually hit a problem.
 
 ### Remote shutdown & sudo
 
