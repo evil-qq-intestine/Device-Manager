@@ -144,8 +144,8 @@
 					</metadataRepository>
 					<buildArgs>
 						<buildArg>-H:+ReportExceptionStackTraces</buildArg>
-						<!-- 让 FileSystemProvider 在运行时初始化：避免 MINA 的 RootedFileSystemProvider 被放进镜像堆（连带 logback Logger） -->
-						<buildArg>--future-defaults=run-time-initialize-file-system-providers</buildArg>
+						<!-- 让 FileSystemProvider / 安全 Provider 在运行时初始化，避免第三方类进镜像堆 -->
+						<buildArg>--future-defaults=run-time-initialize-file-system-providers,run-time-initialize-security-providers</buildArg>
 						<!-- xerial sqlite-jdbc 的原生库需打进镜像 -->
 						<buildArg>-H:IncludeResources=org/sqlite/native/.*</buildArg>
 					</buildArgs>

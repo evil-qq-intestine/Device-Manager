@@ -75,6 +75,54 @@ docker run -d --name device-manager \
 
 > ⚠️ **主密钥务必妥善备份**：它用于加解密存储的私钥 / 口令，丢失后已保存的密钥将无法解密。
 
+### 启动与运行参数
+
+**JVM 镜像内存参数**（`JAVA_OPTS`，Dockerfile 已有默认值，可用 `-e JAVA_OPTS=...` 覆盖）：
+
+```
+-Xms48m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k \
+-XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError
+```
+
+资源更紧张的设备可把 `-Xmx` 调到 `192m` 甚至 `128m`。
+
+**native 镜像内存参数**：native 可执行文件用 `-XX:` 前缀传运行时参数：
+
+```bash
+docker run -d ... device-manager-native -XX:MaxHeapSize=192m
+```
+
+native 默认最大堆约为物理内存的 80%，小内存设备建议显式限制。
+
+**关键环境变量**：
+
+| 变量 | 说明 | 默认 |
+| --- | --- | --- |
+| `SPRING_PROFILES_ACTIVE` | 设为 `docker` 启用小内存优化（关 SQL 日志、Tomcat 线程 8、优雅停机） | 空 |
+| `SPRING_DATASOURCE_URL` | SQLite 路径 | `jdbc:sqlite:./data.db` |
+| `APP_SCRIPT_MASTER_KEY_FILE` | 主密钥文件路径 | `./.master-key` |
+| `APP_MASTER_KEY` | 主密钥（Base64，32 字节），优先于密钥文件 | 空 |
+| `APP_SERVER_URL` | 下发心跳脚本时使用的服务端地址 | `http://10.34.70.66:8080` |
+| `JAVA_OPTS` | JVM 启动参数（仅 JVM 镜像） | 见上 |
+| `TZ` | 时区，如 `Asia/Shanghai` | 容器默认 UTC |
+
+**Docker 运行要点**：
+
+- 数据持久化：`-v device-manager-data:/app/data`（SQLite 与主密钥都在里面，别丢）
+- 端口：`-p 8080:8080`
+- ICMP ping：Docker 默认能力集已包含 `NET_RAW`，通常无需额外参数；若你显式 `--cap-drop=ALL` 或启用 `no-new-privileges`，需加 `--cap-add=NET_RAW`（镜像内 `/bin/ping` 已通过 `setcap` 授权）
+- WOL 广播 / 组播：建议 `--network host`，否则魔术包出不了宿主机网段
+- 完整示例：
+
+```bash
+docker run -d --name device-manager \
+  -p 8080:8080 \
+  -v device-manager-data:/app/data \
+  -e TZ=Asia/Shanghai \
+  --network host \
+  ghcr.io/evil-qq-intestine/device-manager:latest
+```
+
 ### 远程关机与 sudo
 
 Linux 目标机推荐配置免密 sudo（服务端无需保存密码）：
@@ -196,6 +244,54 @@ Settings live in `src/main/resources/application.yaml` and can be overridden wit
 | `SPRING_PROFILES_ACTIVE` | Set to `docker` for low-memory tuning (no SQL logs, Tomcat threads = 8, graceful shutdown, …) |
 
 > ⚠️ **Back up the master key.** It encrypts the stored private keys / passphrases; lose it and they cannot be decrypted.
+
+### Startup & runtime parameters
+
+**JVM image memory flags** (`JAVA_OPTS`, defaults set in the Dockerfile, override with `-e JAVA_OPTS=...`):
+
+```
+-Xms48m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k \
+-XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError
+```
+
+On tighter devices lower `-Xmx` to `192m` or even `128m`.
+
+**native image memory flag**: pass runtime options with the `-XX:` prefix:
+
+```bash
+docker run -d ... device-manager-native -XX:MaxHeapSize=192m
+```
+
+A native image defaults to ~80% of physical RAM as max heap; cap it explicitly on small devices.
+
+**Key environment variables**:
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `SPRING_PROFILES_ACTIVE` | Set to `docker` for low-memory tuning (no SQL logs, Tomcat threads = 8, graceful shutdown) | empty |
+| `SPRING_DATASOURCE_URL` | SQLite path | `jdbc:sqlite:./data.db` |
+| `APP_SCRIPT_MASTER_KEY_FILE` | Master key file path | `./.master-key` |
+| `APP_MASTER_KEY` | Master key (Base64, 32 bytes), takes precedence over the file | empty |
+| `APP_SERVER_URL` | Server URL baked into device heartbeat scripts | `http://10.34.70.66:8080` |
+| `JAVA_OPTS` | JVM flags (JVM image only) | see above |
+| `TZ` | Time zone, e.g. `Asia/Shanghai` | container default UTC |
+
+**Docker run notes**:
+
+- Persist data: `-v device-manager-data:/app/data` (SQLite and the master key live there — do not lose it)
+- Port: `-p 8080:8080`
+- ICMP ping: `NET_RAW` is in Docker's default capability set, usually nothing extra is needed; if you `--cap-drop=ALL` or enable `no-new-privileges`, add `--cap-add=NET_RAW` (`/bin/ping` is `setcap`-enabled inside the image)
+- Wake-on-LAN broadcast / multicast: prefer `--network host`, otherwise magic packets cannot leave the host's subnet
+- Full example:
+
+```bash
+docker run -d --name device-manager \
+  -p 8080:8080 \
+  -v device-manager-data:/app/data \
+  -e TZ=Asia/Shanghai \
+  --network host \
+  ghcr.io/evil-qq-intestine/device-manager:latest
+```
 
 ### Remote shutdown & sudo
 

@@ -7,8 +7,12 @@ FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# 非 root 运行；数据目录持久化 SQLite 与主密钥
-RUN useradd -r -u 10001 app \
+# 非 root 运行；装 iputils 提供 ping（PING 监控模式需要），并授予 CAP_NET_RAW
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends iputils-ping libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && setcap cap_net_raw+ep /bin/ping \
+    && useradd -r -u 10001 app \
     && mkdir -p /app/data \
     && chown -R app:app /app
 

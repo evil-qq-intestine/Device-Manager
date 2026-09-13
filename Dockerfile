@@ -17,8 +17,10 @@ RUN mvn -B -q -DskipTests package
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# 非 root 运行；数据目录用于持久化 SQLite 与主密钥
-RUN addgroup -S app && adduser -S -G app app \
+# 非 root 运行；装 iputils 提供 ping（PING 监控模式需要），并授予 CAP_NET_RAW
+RUN apk add --no-cache iputils libcap \
+    && setcap cap_net_raw+ep /bin/ping \
+    && addgroup -S app && adduser -S -G app app \
     && mkdir -p /app/data \
     && chown -R app:app /app
 COPY --from=build --chown=app:app /build/target/*.jar /app/app.jar
