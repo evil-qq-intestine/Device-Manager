@@ -1,6 +1,6 @@
 spring:
   application:
-    name: tool
+    name: device-manager
 
   datasource:
     url: jdbc:sqlite:./data.db

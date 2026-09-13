@@ -1,5 +1,5 @@
 /* ============================================================
-   NeonDeck · Vue 3 + Element Plus SPA
+   Device Manager（设备管家）· Vue 3 + Element Plus SPA
    设备在线监控 / Wake-on-LAN 控制台
    ============================================================ */
 (function () {
@@ -12,7 +12,7 @@
     /* -------------------- i18n -------------------- */
     const MESSAGES = {
         zh: {
-            app: { name: "NeonDeck", tagline: "设备在线监控 · 网络唤醒控制台" },
+            app: { name: "设备管家", tagline: "设备在线监控 · 网络唤醒控制台" },
             login: {
                 username: "用户名", password: "密码", submit: "接 入",
                 hint: "首次启动时管理员账号与随机密码会打印在服务端日志中。",
@@ -112,7 +112,7 @@
             }
         },
         en: {
-            app: { name: "NeonDeck", tagline: "Device monitor · Wake-on-LAN console" },
+            app: { name: "Device Manager", tagline: "Device monitor · Wake-on-LAN console" },
             login: {
                 username: "Username", password: "Password", submit: "CONNECT",
                 hint: "On first boot the admin account and a random password are printed to the server log.",
@@ -288,7 +288,7 @@
     </el-form>
     <div class="login__hint">{{ t('login.hint') }}</div>
   </div>
-  <div class="login__version mono">NeonDeck · v{{ version }}</div>
+  <div class="login__version mono">{{ t('app.name') }} · v{{ version }}</div>
 </div>
 
 <div v-else class="app">
@@ -702,11 +702,11 @@
         data() {
             return {
                 authed: false,
-                token: localStorage.getItem("neondeck.token") || "",
+                token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
                 version: "1.0.0",
-                lang: localStorage.getItem("neondeck.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
-                theme: localStorage.getItem("neondeck.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+                lang: localStorage.getItem("devicemanager.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
+                theme: localStorage.getItem("devicemanager.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
                 view: "dashboard",
                 loggingIn: false,
                 saving: false,
@@ -784,7 +784,7 @@
                 nextTick(() => this.updateCharts());
             },
             lang() {
-                localStorage.setItem("neondeck.lang", this.lang);
+                localStorage.setItem("devicemanager.lang", this.lang);
                 nextTick(() => this.updateCharts());
             },
             theme() {
@@ -826,7 +826,7 @@
             },
             applyTheme() {
                 document.documentElement.classList.toggle("dark", this.theme === "dark");
-                localStorage.setItem("neondeck.theme", this.theme);
+                localStorage.setItem("devicemanager.theme", this.theme);
                 nextTick(() => this.updateCharts());
             },
             toggleTheme() {
@@ -874,7 +874,7 @@
             },
             setToken(token) {
                 this.token = token;
-                localStorage.setItem("neondeck.token", token);
+                localStorage.setItem("devicemanager.token", token);
                 const payload = decodeJwt(token);
                 if (payload) {
                     this.user = { username: payload.sub, role: payload.role || "USER", userId: payload.userId };
@@ -882,7 +882,7 @@
             },
             clearToken() {
                 this.token = "";
-                localStorage.removeItem("neondeck.token");
+                localStorage.removeItem("devicemanager.token");
                 this.user = { username: "", role: "", userId: null };
             },
             handleUnauthorized() {

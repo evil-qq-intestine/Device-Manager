@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # GraalVM native 可执行文件 → 极简运行镜像
 # 需先在 CI/本地执行：./mvnw -Pnative -DskipTests native:compile
-# 产物：target/tool（Spring Boot native 可执行文件）
+# 产物：target/device-manager（Spring Boot native 可执行文件）
 
 FROM debian:bookworm-slim
 
@@ -12,7 +12,7 @@ RUN useradd -r -u 10001 app \
     && mkdir -p /app/data \
     && chown -R app:app /app
 
-COPY --chown=app:app target/tool /app/app
+COPY --chown=app:app target/device-manager /app/app
 
 ENV SPRING_PROFILES_ACTIVE=docker \
     SPRING_DATASOURCE_URL="jdbc:sqlite:/app/data/data.db" \
