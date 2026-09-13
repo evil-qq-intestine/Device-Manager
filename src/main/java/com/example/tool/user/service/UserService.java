@@ -43,11 +43,6 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserById(Integer userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户ID:" + userId + "不存在"));
-    }
-
-    @Transactional(readOnly = true)
     public UserResponse getUserResponseById(Integer userId) {
         return new UserResponse(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户ID:" + userId + "不存在")));
     }

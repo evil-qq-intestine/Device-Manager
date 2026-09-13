@@ -11,19 +11,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Integer> {
-//    普通不继承接口的写法：
-//    private static final Logger log = LoggerFactory.getLogger(DeviceRepository.class);
-//
-//    private final JdbcClient jdbcClient;
-//    public DeviceRepository(JdbcClient jdbcClient) {
-//        this.jdbcClient = jdbcClient;
-//    }
-//
-//    public List<Device> findAll() {
-//        return jdbcClient.sql("~~~")
-//                .query(Device.class)
-//                .list();
-//    }
 
     @Override
     @EntityGraph(attributePaths = "monitor")
@@ -33,8 +20,7 @@ public interface DeviceRepository extends JpaRepository<Device, Integer> {
 
     Optional<Device> findByDeviceIdAndUserId(Integer deviceId, Integer userId);
 
-
-
     boolean existsByMac(String mac);
-    Optional<Device> findByMacAndUserId(String mac, Integer userId);
+
+    Optional<Device> findByMacAndDeviceToken(String mac, String deviceToken);
 }

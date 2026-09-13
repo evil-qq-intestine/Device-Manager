@@ -1,17 +1,21 @@
 package com.example.tool.device.service;
 
 import com.example.tool.device.entity.*;
+import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.exception.IdNotDetectedException;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.repository.DeviceMonitorRepository;
+import com.example.tool.device.script.ScriptForClient;
 import com.example.tool.device.task.DeviceScheduledTasks;
 import com.example.tool.device.util.BeanCopyUtils;
 import com.example.tool.device.validator.DeviceMonitorValidator;
 import com.example.tool.device.validator.DeviceValidator;
 import com.example.tool.user.entity.User;
+import com.example.tool.user.reopsitory.UserRepository;
 import com.example.tool.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,20 +30,24 @@ public class DeviceService {
 
     private final DeviceRepository deviceRepository;
     private final DeviceMonitorRepository deviceMonitorRepository;
+    private final DeviceMonitorValidator deviceMonitorValidator;
+    private final DeviceValidator deviceValidator;
+    private final UserRepository userRepository;
 
-    public DeviceService(DeviceRepository deviceRepository, DeviceMonitorRepository deviceMonitorRepository) {
+    public DeviceService(DeviceRepository deviceRepository,
+                         DeviceMonitorRepository deviceMonitorRepository,
+                         DeviceMonitorValidator deviceMonitorValidator,
+                         DeviceValidator deviceValidator,
+                         UserRepository userRepository) {
         this.deviceRepository = deviceRepository;
         this.deviceMonitorRepository = deviceMonitorRepository;
+        this.deviceValidator = deviceValidator;
+        this.deviceMonitorValidator = deviceMonitorValidator;
+        this.userRepository = userRepository;
     }
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private DeviceValidator deviceValidator;
-
-    @Autowired
-    private DeviceMonitorValidator deviceMonitorValidator;
+    @Value("${app.server-url}")
+    private String serverAddress;
 
     @Transactional(readOnly = true)
     public List<Device> findDevicesByUserId(Integer userId) {
@@ -69,7 +77,7 @@ public class DeviceService {
     }
 
     public Device saveDevice(Device device, Integer userId) {
-        User user = userService.getUserById(userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户ID:" + userId + "不存在"));
         device.setUser(user);
 
         deviceValidator.validateBeforeSave(device);
@@ -84,7 +92,7 @@ public class DeviceService {
 
     public Device updateDevice(Device device, Integer userId) {
         Device newDevice = deviceRepository.findByDeviceIdAndUserId(device.getDeviceId(), userId).orElseThrow(() -> new RuntimeException("该设备ID不存在：" + device.getDeviceId()));
-        deviceValidator.validateBeforeSave(device, newDevice);
+        deviceValidator.validateBeforeUpdate(device, newDevice);
 
         BeanCopyUtils.copyNonNullProperties(device, newDevice);
         Device savedDevice = deviceRepository.save(newDevice);
@@ -110,5 +118,13 @@ public class DeviceService {
         // 直接删 Device，Monitor 会被级联删掉（因为 cascade = ALL）
         deviceRepository.delete(existingDevice);
         log.info("删除设备成功,deviceId : {},userId : {}", deviceId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public String generateHeartbeatScript(Integer deviceId, Integer userId, String os) {
+        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new BusinessException("设备不存在或无权访问"));
+
+        ScriptForClient client = ScriptForClient.fromString(os);
+        return client.render(serverAddress, device.getMac(), device.getDeviceId(), device.getDeviceToken());
     }
 }

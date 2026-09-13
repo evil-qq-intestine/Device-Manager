@@ -6,7 +6,10 @@ import com.example.tool.device.service.DeviceService;
 import com.example.tool.user.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,5 +66,20 @@ public class DeviceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDevice(@PathVariable Integer id, @AuthenticationPrincipal CustomUserDetails userDetails) {
         deviceService.deleteDevice(id, userDetails.getUserId());
+    }
+
+    @GetMapping("/{deviceId}/heartbeat-script")
+    public ResponseEntity<String> deviceHeartbeatScript(
+            @PathVariable Integer deviceId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "linux") String os) {
+
+        String script = deviceService.generateHeartbeatScript(deviceId, userDetails.getUserId(), os);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"heartbeat-" + deviceId + ".sh\"")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(script);
     }
 }

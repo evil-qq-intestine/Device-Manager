@@ -14,8 +14,7 @@ public class HeartbeatController {
     private HeartbeatService heartbeatService;
 
     @PostMapping
-    public Device heartbeat(@RequestParam String mac, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return heartbeatService.updateHeartbeat(mac, userDetails.getUserId());
+    public Device heartbeat(@RequestParam String mac, @RequestHeader("X-Device-Token") String deviceToken) {
+        return heartbeatService.updateHeartbeat(mac, deviceToken);
     }
-
 }

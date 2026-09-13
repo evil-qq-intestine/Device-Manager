@@ -22,38 +22,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
-//    @Bean
-//    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .securityMatcher("/api/**")
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/heartbeat", "").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .httpBasic(Customizer.withDefaults());
-//        return http.build();
-//    }
-//
-//    @Bean
-//    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .securityMatcher("/**")
-//                .csrf(csrf -> csrf
-//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//                )
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(form  -> form
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/dashboard")
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout.permitAll());
-//        return http.build();
-//    }
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -64,7 +32,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//不生成JSESSIONID，自己靠JWT
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/heartbeat/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

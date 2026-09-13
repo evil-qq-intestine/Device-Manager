@@ -43,6 +43,10 @@ public class Device {
 
     private String deviceName;
 
+    @Column(unique = true, nullable = false)
+    @JsonIgnore
+    private String deviceToken;
+
     @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private DeviceMonitor monitor;
 

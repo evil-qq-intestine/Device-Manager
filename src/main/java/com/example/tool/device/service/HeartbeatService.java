@@ -17,10 +17,10 @@ public class HeartbeatService {
     private DeviceRepository deviceRepository;
 
     @Transactional
-    public Device updateHeartbeat(String mac, Integer userId) {
+    public Device updateHeartbeat(String mac, String deviceToken) {
         MacUtils.checkMac(mac);
 
-        Device device = deviceRepository.findByMacAndUserId(mac, userId)
+        Device device = deviceRepository.findByMacAndDeviceToken(mac, deviceToken)
                 .orElseThrow(() -> new BusinessException("设备未找到，MAC: " + mac));
 
         device.setLastOnlineTime(LocalDateTime.now());

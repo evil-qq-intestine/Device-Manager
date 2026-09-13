@@ -20,45 +20,45 @@ public class AdminController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     public void deleteUser(@PathVariable Integer id) {
         userService.deleteById(id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{name}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     public void deleteUser(@PathVariable String name) {
         userService.deleteByUsername(name);
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     public List<UserResponse> findAllUser() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     public UserResponse findUserById(@PathVariable Integer id) {
         return userService.getUserResponseById(id);
     }
 
     @GetMapping("/{username}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     public UserResponse findByUsername(@PathVariable String username) {
         return userService.getUserResponseByName(username);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse addUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         return userService.createUser(createUserRequest);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole ADMIN")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public UserResponse updatePassword(@PathVariable Integer userid, @Valid @RequestBody User user) {
         user.setId(userid);

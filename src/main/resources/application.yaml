@@ -17,7 +17,7 @@ spring:
     properties:
       hibernate:
               enhance:
-                enableLazyInitialization: ture                # 打印 SQL，方便调试
+                enableLazyInitialization: true                # 打印 SQL，方便调试
 
   docker:
     compose:
@@ -37,3 +37,6 @@ wol:
 
 ping:
   task-time: 10
+
+app:
+  server-url: http://10.34.70.66:8080

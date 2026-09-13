@@ -31,7 +31,7 @@ public class User {
     private Integer tokenVersion;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role;
 
     public void addDevice(Device device) {
