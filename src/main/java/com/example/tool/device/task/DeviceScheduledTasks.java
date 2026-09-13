@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,7 +82,9 @@ public class DeviceScheduledTasks {
         }
     }
 
-    public static void removeLastPingMap(Integer id) {
-        lastPingMap.remove(id);
+    public static void removeLastPingMap(Collection<Device> devices) {
+        for (Device key : devices){
+            lastPingMap.remove(key.getDeviceId());
+        }
     }
 }

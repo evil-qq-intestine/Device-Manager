@@ -1,6 +1,7 @@
 package com.example.tool.user.entity;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.user.request.CreateUserRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class User {
     @Id
     @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Integer id;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -27,6 +28,7 @@ public class User {
 
     private String username;
     private String password;
+    private Integer tokenVersion;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
@@ -42,4 +44,9 @@ public class User {
         device.setUser(null);
     }
 
+    public void createUser(CreateUserRequest createUserRequest) {
+        this.setUsername(createUserRequest.getUsername());
+        this.setPassword(createUserRequest.getPassword());
+        this.setRole(createUserRequest.getRole());
+    }
 }

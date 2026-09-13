@@ -38,6 +38,10 @@ public class JwtUtils {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public Integer extractTokenVersion(String token){
+        return extractClaim(token, claims -> claims.get("tokenVersion", Integer.class));
+    }
+
     // 从Token中提取过期时间
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);
@@ -64,6 +68,7 @@ public class JwtUtils {
         // 可以在这里添加额外信息，比如用户角色
         if(userDetails instanceof CustomUserDetails customUserDetails){
             claims.put("userId", customUserDetails.getUserId());
+            claims.put("tokenVersion", customUserDetails.getTokenVersion());
         }
         return createToken(claims, userDetails.getUsername());
     }

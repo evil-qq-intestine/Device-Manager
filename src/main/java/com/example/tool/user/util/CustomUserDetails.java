@@ -17,7 +17,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Integer getUserId() {
-        return user.getUserId();
+        return user.getId();
+    }
+
+    public Integer getTokenVersion() {
+        return user.getTokenVersion();
     }
 
     @Override

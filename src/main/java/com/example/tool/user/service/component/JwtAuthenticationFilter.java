@@ -1,5 +1,6 @@
 package com.example.tool.user.service.component;
 
+import com.example.tool.user.util.CustomUserDetails;
 import com.example.tool.user.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,11 +36,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String username = null;
         String jwt = null;
+        Integer tokenVersion = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
                 //验签
                 username = jwtUtils.extractUsername(jwt);
+                tokenVersion = jwtUtils.extractTokenVersion(jwt);
             } catch (Exception e) {
                 log.warn("无法解析JWT Token: " + e.getMessage());
             }
@@ -49,6 +52,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtUtils.validateToken(jwt, userDetails)) {
+
+                if (userDetails instanceof CustomUserDetails customUserDetails) {
+                    if (tokenVersion == null || !tokenVersion.equals(customUserDetails.getTokenVersion())) {
+                        log.warn("Token版本号已失效，用户：{}", username);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

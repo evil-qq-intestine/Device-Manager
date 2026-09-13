@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/device")
+@RequestMapping("/api/device")
 public class DeviceController {
 
     @Autowired
@@ -21,7 +21,7 @@ public class DeviceController {
 
     @GetMapping("")
     public List<Device> findAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return deviceService.getDevicesByUserId(userDetails.getUserId());
+        return deviceService.findDevicesByUserId(userDetails.getUserId());
     }
 
     @GetMapping("/{id}")

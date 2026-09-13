@@ -42,7 +42,7 @@ public class DeviceService {
     private DeviceMonitorValidator deviceMonitorValidator;
 
     @Transactional(readOnly = true)
-    public List<Device> getDevicesByUserId(Integer userId) {
+    public List<Device> findDevicesByUserId(Integer userId) {
         log.info("查询设备列表");
         List<Device> devices = deviceRepository.findByUserId(userId);
         log.info("共查询到{}条设备", devices.size());
@@ -69,7 +69,7 @@ public class DeviceService {
     }
 
     public Device saveDevice(Device device, Integer userId) {
-        User user = userService.findByid(userId);
+        User user = userService.getUserById(userId);
         device.setUser(user);
 
         deviceValidator.validateBeforeSave(device);
@@ -106,7 +106,7 @@ public class DeviceService {
     public void deleteDevice(Integer deviceId, Integer userId) {
         log.info("删除设备,deviceId=：{}", deviceId);
         Device existingDevice = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("要删除的设备不存在，ID：" + deviceId));
-        DeviceScheduledTasks.removeLastPingMap(existingDevice.getDeviceId());
+        DeviceScheduledTasks.removeLastPingMap(List.of(existingDevice));
         // 直接删 Device，Monitor 会被级联删掉（因为 cascade = ALL）
         deviceRepository.delete(existingDevice);
         log.info("删除设备成功,deviceId : {},userId : {}", deviceId, userId);
