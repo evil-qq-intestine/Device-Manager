@@ -26,8 +26,6 @@ import java.util.List;
 @Transactional
 public class DeviceService {
 
-    //private static final Logger log = LoggerFactory.getLogger(DeviceService.class);
-
     private final DeviceRepository deviceRepository;
     private final DeviceMonitorRepository deviceMonitorRepository;
     private final DeviceMonitorValidator deviceMonitorValidator;
@@ -51,33 +49,33 @@ public class DeviceService {
 
     @Transactional(readOnly = true)
     public List<Device> findDevicesByUserId(Integer userId) {
-        log.info("查询设备列表");
+        log.info("Query device list");
         List<Device> devices = deviceRepository.findByUserId(userId);
-        log.info("共查询到{}条设备", devices.size());
+        log.info("Found {} device(s)", devices.size());
         return devices;
     }
 
     @Transactional(readOnly = true)
     public Device findById(Integer deviceId, Integer userId) {
-        log.info("用户{}查询单个设备", userId);
+        log.info("User {} queries a single device", userId);
 
-        return deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("未查询到设备"));
+        return deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device not found"));
     }
 
     @Transactional(readOnly = true)
     public List<DeviceMonitor> findAllDeviceMonitor(Integer userId) {
-        log.info("查询所有设备状态信息");
+        log.info("Query all device status info");
         return deviceMonitorRepository.findByDeviceUserId(userId);
     }
 
     @Transactional(readOnly = true)
     public DeviceMonitor findMonitorById(Integer deviceId, Integer userId) {
-        log.info("查询设备信息");
-        return deviceMonitorRepository.findByMonitorIdAndDeviceUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("未查询到设备信息"));
+        log.info("Query device info");
+        return deviceMonitorRepository.findByMonitorIdAndDeviceUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device monitor info not found"));
     }
 
     public Device saveDevice(Device device, Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户ID:" + userId + "不存在"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException("User not found, id: " + userId));
         device.setUser(user);
 
         deviceValidator.validateBeforeSave(device);
@@ -86,43 +84,42 @@ public class DeviceService {
 
         Device savedDevice = deviceRepository.save(device);
 
-        log.info("设备保存成功，ID：{}", savedDevice.getDeviceId());
+        log.info("Device saved, id: {}", savedDevice.getDeviceId());
         return savedDevice;
     }
 
     public Device updateDevice(Device device, Integer userId) {
-        Device newDevice = deviceRepository.findByDeviceIdAndUserId(device.getDeviceId(), userId).orElseThrow(() -> new RuntimeException("该设备ID不存在：" + device.getDeviceId()));
+        Device newDevice = deviceRepository.findByDeviceIdAndUserId(device.getDeviceId(), userId).orElseThrow(() -> new IdNotDetectedException("Device not found, id: " + device.getDeviceId()));
         deviceValidator.validateBeforeUpdate(device, newDevice);
 
         BeanCopyUtils.copyNonNullProperties(device, newDevice);
         Device savedDevice = deviceRepository.save(newDevice);
-        log.info("设备基础信息更新成功：{}", savedDevice);
+        log.info("Device basic info updated: {}", savedDevice);
         return savedDevice;
     }
 
     public DeviceMonitor updateDeviceMonitor(DeviceMonitor deviceMonitor, Integer userId) {
-        DeviceMonitor newDeviceMonitor = deviceMonitorRepository.findByMonitorIdAndDeviceUserId(deviceMonitor.getMonitorId(), userId).orElseThrow(() -> new RuntimeException("监控配置不存在：" + deviceMonitor.getMonitorId()));
+        DeviceMonitor newDeviceMonitor = deviceMonitorRepository.findByMonitorIdAndDeviceUserId(deviceMonitor.getMonitorId(), userId).orElseThrow(() -> new IdNotDetectedException("Device monitor config not found, id: " + deviceMonitor.getMonitorId()));
         deviceMonitorValidator.validateBeforeUpdate(deviceMonitor);
 
         BeanCopyUtils.copyNonNullProperties(deviceMonitor, newDeviceMonitor);
         DeviceMonitor savedDeviceMonitor = deviceMonitorRepository.save(newDeviceMonitor);
-        log.info("设备状态信息更新成功：{}", savedDeviceMonitor);
+        log.info("Device status info updated: {}", savedDeviceMonitor);
 
         return savedDeviceMonitor;
     }
 
     public void deleteDevice(Integer deviceId, Integer userId) {
-        log.info("删除设备,deviceId=：{}", deviceId);
-        Device existingDevice = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("要删除的设备不存在，ID：" + deviceId));
+        log.info("Delete device, deviceId: {}", deviceId);
+        Device existingDevice = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device to delete not found, id: " + deviceId));
         DeviceScheduledTasks.removeLastPingMap(List.of(existingDevice));
-        // 直接删 Device，Monitor 会被级联删掉（因为 cascade = ALL）
         deviceRepository.delete(existingDevice);
-        log.info("删除设备成功,deviceId : {},userId : {}", deviceId, userId);
+        log.info("Device deleted, deviceId: {}, userId: {}", deviceId, userId);
     }
 
     @Transactional(readOnly = true)
     public String generateHeartbeatScript(Integer deviceId, Integer userId, String os) {
-        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new BusinessException("设备不存在或无权访问"));
+        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device not found or no access"));
 
         ScriptForClient client = ScriptForClient.fromString(os);
         return client.render(serverAddress, device.getMac(), device.getDeviceId(), device.getDeviceToken());

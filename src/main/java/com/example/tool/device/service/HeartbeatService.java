@@ -21,7 +21,7 @@ public class HeartbeatService {
         MacUtils.checkMac(mac);
 
         Device device = deviceRepository.findByMacAndDeviceToken(mac, deviceToken)
-                .orElseThrow(() -> new BusinessException("设备未找到，MAC: " + mac));
+                .orElseThrow(() -> new BusinessException("Device not found, MAC: " + mac));
 
         device.setLastOnlineTime(LocalDateTime.now());
         device.setStatus(DeviceStatusEnum.ONLINE);

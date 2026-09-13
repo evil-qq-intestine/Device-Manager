@@ -3,6 +3,7 @@ package com.example.tool.device.task;
 import com.example.tool.device.entity.Device;
 import com.example.tool.device.entity.DeviceMonitorModeEnum;
 import com.example.tool.device.entity.DeviceStatusEnum;
+import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceMonitorRepository;
 import com.example.tool.device.repository.DeviceRepository;
 import com.example.tool.device.service.checker.DeviceHealthChecker;
@@ -49,7 +50,7 @@ public class DeviceScheduledTasks {
                 healthQuestion(device, "heartbeat");
 
             } else {
-                throw new RuntimeException("unknown device monitor mode");
+                throw new BusinessException("Unknown device monitor mode");
             }
         }
     }

@@ -11,7 +11,7 @@ public class PingHealthChecker implements DeviceHealthChecker {
     @Override
     public boolean isAlive(Device device){
         if (device == null) {
-            log.warn("没有设备信息，无法 Ping");
+            log.warn("No device info, cannot ping");
             return false;
         }
         int timeoutSeconds = 3;

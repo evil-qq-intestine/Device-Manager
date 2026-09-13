@@ -1,5 +1,6 @@
 package com.example.tool.device.service.component;
 
+import com.example.tool.device.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,11 +32,11 @@ public class MagicPacketComponent {
             DatagramPacket packet = new DatagramPacket(payload, payload.length, broadcast, wolPort);
             try (DatagramSocket socket = new DatagramSocket()) {
                 socket.send(packet);
-                log.info("WOL 魔术包已发送（102 字节），目标 MAC: {}", bytesToHex(macBytes));
+                log.info("WOL magic packet sent (102 bytes), target MAC: {}", bytesToHex(macBytes));
             }
         } catch (IOException e) {
-            log.error("发送 WOL 包失败", e);
-            throw new RuntimeException("WOL send failed", e);
+            log.error("Failed to send WOL packet", e);
+            throw new BusinessException("WOL send failed", e);
         }
     }
 

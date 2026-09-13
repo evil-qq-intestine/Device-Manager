@@ -32,7 +32,7 @@ public class WolService {
         if (deviceId == null) {
             throw new BusinessException("deviceId is null");
         }
-        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new RuntimeException("device not found"));
+        Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new BusinessException("Device not found, id: " + deviceId));
         boolean sendSuccess = ipStrategy(device, MacUtils.parse(device.getMac()));
         if (!sendSuccess) {
             throw new BusinessException("device send magic packet failed");

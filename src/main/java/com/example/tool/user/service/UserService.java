@@ -44,22 +44,22 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponse getUserResponseById(Integer userId) {
-        return new UserResponse(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户ID:" + userId + "不存在")));
+        return new UserResponse(userRepository.findById(userId).orElseThrow(() -> new BusinessException("User not found, id: " + userId)));
     }
 
     @Transactional(readOnly = true)
     public UserResponse getUserResponseByName(String username) {
-        return new UserResponse(userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("用户ID:" + username + "不存在")));
+        return new UserResponse(userRepository.findByUsername(username).orElseThrow(() -> new BusinessException("User not found, username: " + username)));
     }
 
     public void deleteById(Integer deleteUserId) {
-        User deleteUser = userRepository.findById(deleteUserId).orElseThrow(() -> new RuntimeException("要删除的用户ID:" + deleteUserId + "不存在"));
+        User deleteUser = userRepository.findById(deleteUserId).orElseThrow(() -> new BusinessException("User to delete not found, id: " + deleteUserId));
         DeviceScheduledTasks.removeLastPingMap(deleteUser.getDevices());
         userRepository.delete(deleteUser);
     }
 
     public void deleteByUsername(String deleteUsername) {
-        User deleteUser = userRepository.findByUsername(deleteUsername).orElseThrow(() -> new RuntimeException("要删除的用户" + deleteUsername + "不存在"));
+        User deleteUser = userRepository.findByUsername(deleteUsername).orElseThrow(() -> new BusinessException("User to delete not found, username: " + deleteUsername));
         DeviceScheduledTasks.removeLastPingMap(deleteUser.getDevices());
         userRepository.delete(deleteUser);
     }
@@ -75,7 +75,7 @@ public class UserService {
     }
 
     public UserResponse updatePassword(Integer userId, String newPassword) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException("User not found, id: " + userId));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setTokenVersion(user.getTokenVersion() + 1);
@@ -86,11 +86,11 @@ public class UserService {
 
     public AuthResponse updateUsername(Integer userId, String newUsername) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
+                .orElseThrow(() -> new BusinessException("User not found, id: " + userId));
 
         if (!user.getUsername().equals(newUsername)) {
             if (userRepository.existsByUsername(newUsername)) {
-                throw new BusinessException("用户名已存在");
+                throw new BusinessException("Username already exists: " + newUsername);
             }
             user.setUsername(newUsername);
             userRepository.save(user);

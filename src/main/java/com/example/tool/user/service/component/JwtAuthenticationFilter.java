@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 username = jwtUtils.extractUsername(jwt);
                 tokenVersion = jwtUtils.extractTokenVersion(jwt);
             } catch (Exception e) {
-                log.warn("无法解析JWT Token: " + e.getMessage());
+                log.warn("Failed to parse JWT token: " + e.getMessage());
             }
         }
 
@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (userDetails instanceof CustomUserDetails customUserDetails) {
                     if (tokenVersion == null || !tokenVersion.equals(customUserDetails.getTokenVersion())) {
-                        log.warn("Token版本号已失效，用户：{}", username);
+                        log.warn("Token version is invalid, user: {}", username);
                         filterChain.doFilter(request, response);
                         return;
                     }

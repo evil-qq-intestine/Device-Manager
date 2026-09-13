@@ -21,25 +21,25 @@ public enum ScriptForClient {
 
                     function Show-Menu {
                         Write-Host "=========================================="
-                        Write-Host "  设备心跳脚本管理"
-                        Write-Host "  设备ID: $DeviceId"
+                        Write-Host "  Device Heartbeat Script Management"
+                        Write-Host "  Device ID: $DeviceId"
                         Write-Host "  MAC   : $Mac"
                         Write-Host "=========================================="
-                        Write-Host "  1. 安装开机自启动"
-                        Write-Host "  2. 卸载开机自启动"
-                        Write-Host "  3. 退出"
+                        Write-Host "  1. Set up to start automatically on boot"
+                        Write-Host "  2. Uninstall startup program"
+                        Write-Host "  3. Exit"
                         Write-Host "=========================================="
                     }
 
                     function Invoke-Heartbeat {
-                        Write-Host "[心跳] 开始上报，间隔 $Interval 秒"
+                        Write-Host "[Heartbeat] Reporting started, interval $Interval seconds"
                         while ($true) {
                             try {
                                 Invoke-RestMethod -Uri "$Server/api/heartbeat?mac=$Mac" `
                                     -Method Post `
                                     -Headers @{ "X-Device-Token" = $DeviceToken } | Out-Null
                             } catch {
-                                Write-Host "[警告] 上报失败: $($_.Exception.Message)"
+                                Write-Host "[Warning] Report failed: $($_.Exception.Message)"
                             }
                             Start-Sleep -Seconds $Interval
                         }
@@ -80,16 +80,16 @@ public enum ScriptForClient {
 
                         Start-ScheduledTask -TaskName $TaskName
 
-                        Write-Host "[成功] 已安装并启动: $TaskName"
-                        Write-Host "[查看] Get-ScheduledTask -TaskName $TaskName"
-                        Write-Host "[停止] Stop-ScheduledTask -TaskName $TaskName"
+                        Write-Host "[Success] Installed and started: $TaskName"
+                        Write-Host "[View] Get-ScheduledTask -TaskName $TaskName"
+                        Write-Host "[Stop] Stop-ScheduledTask -TaskName $TaskName"
                     }
 
                     function Uninstall-Service {
                         Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
                         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
                         Remove-Item -Path $InstallPath -Force -ErrorAction SilentlyContinue
-                        Write-Host "[成功] 已卸载: $TaskName"
+                        Write-Host "[Success] Uninstalled: $TaskName"
                     }
 
                     if ($args.Count -gt 0 -and $args[0] -eq "run") {
@@ -99,12 +99,12 @@ public enum ScriptForClient {
 
                     while ($true) {
                         Show-Menu
-                        $choice = Read-Host "请选择 [1-3]"
+                        $choice = Read-Host "Please select [1-3]"
                         switch ($choice) {
                             "1" { Install-Service }
                             "2" { Uninstall-Service }
-                            "3" { Write-Host "再见"; exit 0 }
-                            default { Write-Host "[错误] 无效选择" }
+                            "3" { Write-Host "exit"; exit 0 }
+                            default { Write-Host "[Error] Invalid selection" }
                         }
                     }
                     """.formatted(server, mac, deviceId, deviceToken);
@@ -129,25 +129,25 @@ public enum ScriptForClient {
 
                     print_menu() {
                         echo "=========================================="
-                        echo "  设备心跳脚本管理"
-                        echo "  设备ID: ${DEVICE_ID}"
+                        echo "  Device Heartbeat Script Management"
+                        echo "  Device ID: ${DEVICE_ID}"
                         echo "  MAC   : ${MAC}"
                         echo "=========================================="
-                        echo "  1. 安装开机自启动"
-                        echo "  2. 卸载开机自启动"
-                        echo "  3. 退出"
+                        echo "  1. Set up to start automatically on boot"
+                        echo "  2. Uninstall startup program"
+                        echo "  3. Exit"
                         echo "=========================================="
                     }
 
                     check_root() {
                         if [ "$EUID" -ne 0 ]; then
-                            echo "[错误] 请使用 sudo 运行本脚本"
+                            echo "[Error] Please run this script using sudo"
                             exit 1
                         fi
                     }
 
                     do_heartbeat() {
-                        echo "[心跳] 开始向 ${SERVER} 上报，间隔 ${INTERVAL} 秒"
+                        echo "[Heartbeat] Start toward ${SERVER} Report，interval ${INTERVAL} second"
                         while true; do
                             curl -s -X POST "${SERVER}/api/heartbeat?mac=${MAC}" \\
                                  -H "X-Device-Token: ${DEVICE_TOKEN}" > /dev/null 2>&1
@@ -181,7 +181,7 @@ public enum ScriptForClient {
                         systemctl enable "${SERVICE_NAME}"
                         systemctl start "${SERVICE_NAME}"
 
-                        echo "[成功] 已安装并启动：${SERVICE_NAME}"
+                        echo "[Success] Installed and started: ${SERVICE_NAME}"
                     }
 
                     uninstall_service() {
@@ -191,7 +191,7 @@ public enum ScriptForClient {
                         rm -f "${SERVICE_FILE}"
                         rm -f "${INSTALL_PATH}"
                         systemctl daemon-reload
-                        echo "[成功] 已卸载：${SERVICE_NAME}"
+                        echo "[Success] Uninstalled: ${SERVICE_NAME}"
                     }
 
                     if [ "$1" = "run" ]; then
@@ -201,12 +201,12 @@ public enum ScriptForClient {
 
                     while true; do
                         print_menu
-                        read -p "请选择 [1-3]: " choice
+                        read -p "Please select [1-3]: " choice
                         case "${choice}" in
                             1) install_service ;;
                             2) uninstall_service ;;
-                            3) echo "再见"; exit 0 ;;
-                            *) echo "[错误] 无效选择" ;;
+                            3) echo "exit"; exit 0 ;;
+                            *) echo "[Error] Invalid selection" ;;
                         esac
                     done
                     """.formatted(server, mac, deviceId, deviceToken);
@@ -219,7 +219,7 @@ public enum ScriptForClient {
         return switch (os.toLowerCase()) {
             case "windows" -> WINDOWS;
             case "linux" -> LINUX;
-            default -> throw new BusinessException("不支持的系统：" + os);
+            default -> throw new BusinessException("Unsupported OS: " + os);
         };
     }
 }

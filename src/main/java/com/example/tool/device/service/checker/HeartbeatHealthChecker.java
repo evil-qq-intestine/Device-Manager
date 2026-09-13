@@ -12,12 +12,12 @@ public class HeartbeatHealthChecker implements DeviceHealthChecker {
     @Override
     public boolean isAlive(Device device){
         if (device == null) {
-            log.error("无设备信息，无法计算心跳是否超时");
+            log.error("No device info, cannot check heartbeat timeout");
             return false;
         }
         LocalDateTime lastOnlineTime = device.getLastOnlineTime();
         if (lastOnlineTime == null) {
-            log.error("无设备心跳超时设定，请检查是否已设置心跳超时时间");
+            log.error("No heartbeat timeout configured, please check whether the heartbeat timeout is set");
             return false;
         }
         return device.getResponseTimeout() > Duration.between(lastOnlineTime, LocalDateTime.now()).getSeconds();

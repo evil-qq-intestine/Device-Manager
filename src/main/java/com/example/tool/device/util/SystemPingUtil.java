@@ -16,11 +16,11 @@ public class SystemPingUtil {
      */
     public static boolean ping(String ip, int timeoutSeconds) {
         if (ip == null || ip.isBlank()) {
-            log.warn("IP 地址为空，无法 Ping");
+            log.warn("IP is empty, cannot ping");
             return false;
         }
         if (timeoutSeconds < 0) {
-            log.warn("超时时间不合法");
+            log.warn("Invalid timeout");
             return false;
         }
         String os =  System.getProperty("os.name");
@@ -45,17 +45,17 @@ public class SystemPingUtil {
             boolean finished = process.waitFor(timeoutSeconds + 1, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
-                log.error("Ping进程超时，强制结束，IP：{}", ip);
+                log.error("Ping process timed out, forcefully terminated, IP: {}", ip);
             }
             int exitCode = process.exitValue();
             boolean reachable = (exitCode == 0);
             if (log.isDebugEnabled()){
-                log.debug("Ping {} 结果：{}，退出码：{}，输出：{}",
-                        ip, reachable ? "通" : "不通", exitCode, output.toString().trim());
+                log.debug("Ping {} result: {}, exit code: {}, output: {}",
+                        ip, reachable ? "reachable" : "unreachable", exitCode, output.toString().trim());
             }
             return reachable;
         } catch (Exception e) {
-            log.error("执行 Ping 命令异常，IP: {}", ip, e);
+            log.error("Failed to execute ping command, IP: {}", ip, e);
             return false;
         } finally {
             if (process != null && process.isAlive()) {

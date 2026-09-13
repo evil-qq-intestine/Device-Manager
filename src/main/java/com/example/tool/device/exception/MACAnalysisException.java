@@ -1,23 +1,16 @@
 package com.example.tool.device.exception;
 
-import java.io.Serial;
-
-public class MACAnalysisException extends RuntimeException {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private final Integer code;
+/**
+ * Raised when a MAC address cannot be parsed or is missing.
+ * Inherits the {@code code} field from {@link BusinessException}.
+ */
+public class MACAnalysisException extends BusinessException {
 
     public MACAnalysisException(Integer code, String message) {
-        super(message);
-        this.code = code;
+        super(code, message);
     }
 
     public MACAnalysisException(Integer code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
-    }
-
-    public Integer getCode() {
-        return code;
+        super(code, message, cause);
     }
 }

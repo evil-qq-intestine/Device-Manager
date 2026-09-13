@@ -3,6 +3,7 @@ package com.example.tool.device.validator;
 import com.example.tool.device.entity.DeviceMonitor;
 import com.example.tool.device.entity.DeviceMonitorModeEnum;
 import com.example.tool.device.entity.DeviceStatusEnum;
+import com.example.tool.device.exception.BusinessException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,14 +11,14 @@ public class DeviceMonitorValidator {
     public void validateBeforeUpdate(DeviceMonitor deviceMonitor) {
         if (deviceMonitor.getMonitorMode() != null) {
             if (DeviceMonitorModeEnum.PING != deviceMonitor.getMonitorMode() && DeviceMonitorModeEnum.HEARTBEAT != deviceMonitor.getMonitorMode()) {
-                throw new RuntimeException("监控模式只能为 PING 或 HEARTBEAT");
+                throw new BusinessException("Monitor mode must be PING or HEARTBEAT");
             }
         }
 
         if (deviceMonitor.getPingTimeout() != null && deviceMonitor.getPingInterval() != null) {
             if (deviceMonitor.getPingTimeout() >= deviceMonitor.getPingInterval()) {
-                throw new RuntimeException("ping超时时间(" + deviceMonitor.getPingTimeout()
-                        + ") 必须小于检测间隔(" + deviceMonitor.getPingInterval() + ")");
+                throw new BusinessException("Ping timeout (" + deviceMonitor.getPingTimeout()
+                        + ") must be less than check interval (" + deviceMonitor.getPingInterval() + ")");
             }
         }
     }
