@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+# GraalVM native 可执行文件 → 极简运行镜像
+# 需先在 CI/本地执行：./mvnw -Pnative -DskipTests native:compile
+# 产物：target/tool（Spring Boot native 可执行文件）
+
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+# 非 root 运行；数据目录持久化 SQLite 与主密钥
+RUN useradd -r -u 10001 app \
+    && mkdir -p /app/data \
+    && chown -R app:app /app
+
+COPY --chown=app:app target/tool /app/app
+
+ENV SPRING_PROFILES_ACTIVE=docker \
+    SPRING_DATASOURCE_URL="jdbc:sqlite:/app/data/data.db" \
+    APP_SCRIPT_MASTER_KEY_FILE="/app/data/.master-key" \
+    APP_SERVER_URL="http://localhost:8080"
+
+VOLUME ["/app/data"]
+EXPOSE 8080
+USER app
+
+ENTRYPOINT ["/app/app"]

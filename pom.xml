@@ -118,6 +118,20 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- 声明后由父 POM 的 native profile 装配；用 -Pnative 激活 -->
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+				<configuration>
+					<!-- 启用 GraalVM 可达性元数据仓库（SQLite / 等第三方库的反射配置） -->
+					<metadataRepository>
+						<enabled>true</enabled>
+					</metadataRepository>
+					<buildArgs>
+						<buildArg>-H:+ReportExceptionStackTraces</buildArg>
+					</buildArgs>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

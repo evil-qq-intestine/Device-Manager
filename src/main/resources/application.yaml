@@ -8,6 +8,15 @@ spring:
     # SQLite 不需要用户名密码，保留空值即可
     username:
     password:
+    hikari:
+      # SQLite 是单文件、写操作串行，固定单连接最稳，也最省内存
+      pool-name: sqlite-pool
+      maximum-pool-size: 1
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 0
+      max-lifetime: 0
+      connection-init-sql: "PRAGMA busy_timeout=5000"
 
   jpa:
     hibernate:

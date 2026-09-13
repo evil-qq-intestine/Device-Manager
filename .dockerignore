@@ -1,0 +1,20 @@
+# 构建上下文瘦身：不要把产物、IDE、数据与密钥送进镜像
+target/
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+.settings/
+*.iml
+*.iws
+*.ipr
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.aeg
+.master-key
+HELP.md
+Dockerfile
+.dockerignore

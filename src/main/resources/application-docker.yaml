@@ -1,0 +1,33 @@
+# ============================================================
+# 资源紧凑设备（Docker）运行配置
+# 激活方式：SPRING_PROFILES_ACTIVE=docker（Dockerfile 已默认设置）
+# ============================================================
+
+spring:
+  jpa:
+    show-sql: false            # 生产关掉 SQL 打印，省 CPU/IO
+  datasource:
+    hikari:
+      maximum-pool-size: 1     # SQLite 单连接
+      minimum-idle: 1
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  port: 8080
+  shutdown: graceful           # 优雅停机，给异步脚本任务收尾时间
+  compression:
+    enabled: true              # 压缩静态资源与 JSON，省带宽
+  tomcat:
+    threads:
+      max: 8                   # 默认 200，小内存设备压到 8
+      min-spare: 2
+    max-connections: 16
+    accept-count: 16
+    connection-timeout: 20s
+
+logging:
+  level:
+    root: WARN
+    com.example.tool: INFO
+    org.hibernate.SQL: WARN
