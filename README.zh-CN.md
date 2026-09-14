@@ -164,7 +164,7 @@ Windows 目标则要求 SSH 用户为管理员。
 **Docker 部署**：点开提示弹窗，复制更新命令执行即可（镜像同时发布到 GHCR 与 Docker Hub，后者默认 `emmmm666/device-manager`，可用仓库变量 `DOCKERHUB_IMAGE` 覆盖）：
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.1
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.2
 ```
 
 镜像名由 `app.update.docker-image` 配置；拉取后请按你的方式重启容器（如 `docker compose up -d` 或 `docker restart <容器名>`）。

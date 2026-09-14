@@ -1,13 +1,15 @@
 package com.example.tool.user.controller;
 
+import com.example.tool.user.request.AdminChangePasswordRequest;
 import com.example.tool.user.request.CreateUserRequest;
 import com.example.tool.user.response.UserResponse;
-import com.example.tool.user.entity.User;
 import com.example.tool.user.service.UserService;
+import com.example.tool.user.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,8 +52,10 @@ public class AdminController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatePassword(@PathVariable Integer id, @Valid @RequestBody User user) {
-        userService.updatePassword(id, user.getPassword());
+    public void updatePassword(@PathVariable Integer id,
+                               @Valid @RequestBody AdminChangePasswordRequest req,
+                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.updatePassword(userDetails.getUserId(), id, req.getAdminPassword(), req.getNewPassword());
     }
 
     private boolean isNumeric(String value) {

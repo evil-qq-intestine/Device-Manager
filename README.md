@@ -166,7 +166,7 @@ On startup the app periodically (every 6 hours by default) calls the GitHub Rele
 **Docker deployments**: open the notice and copy the update command (images are published to both GHCR and Docker Hub, the latter defaulting to `emmmm666/device-manager` and overridable via the `DOCKERHUB_IMAGE` repository variable):
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.1
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.2
 ```
 
 The image name comes from `app.update.docker-image`; after pulling, restart the container your usual way (e.g. `docker compose up -d` or `docker restart <name>`).

@@ -109,7 +109,7 @@
             admin: {
                 title: "用户管理", search: "搜索用户", addUser: "新建用户", refresh: "刷新",
                 id: "ID", name: "用户名", role: "角色", actions: "操作",
-                changePwd: "改密码", newPassword: "新密码",
+                changePwd: "改密码", newPassword: "新密码", adminPassword: "管理员密码",
                 createTitle: "新建用户", username: "用户名", password: "密码",
                 confirmDelete: "确定删除用户 {name} 吗？", deleteTitle: "删除用户"
             },
@@ -221,7 +221,7 @@
             admin: {
                 title: "User management", search: "Search users", addUser: "New user", refresh: "Refresh",
                 id: "ID", name: "Username", role: "Role", actions: "Actions",
-                changePwd: "Password", newPassword: "New password",
+                changePwd: "Password", newPassword: "New password", adminPassword: "Admin password",
                 createTitle: "New user", username: "Username", password: "Password",
                 confirmDelete: "Delete user {name}?", deleteTitle: "Delete user"
             },
@@ -655,8 +655,11 @@
 
   <el-dialog v-model="adminPwd.visible" :title="t('admin.changePwd')" width="420px">
     <el-form label-position="top">
+      <el-form-item :label="t('admin.adminPassword')">
+        <el-input v-model="adminPwd.adminPassword" type="password" show-password @keyup.enter="changePassword" />
+      </el-form-item>
       <el-form-item :label="t('admin.newPassword')">
-        <el-input v-model="adminPwd.password" show-password />
+        <el-input v-model="adminPwd.password" type="password" show-password @keyup.enter="changePassword" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -760,7 +763,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.1",
+                version: "1.0.2",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },
@@ -785,7 +788,7 @@
                 profileDialog: { visible: false, username: "" },
                 selfPwdDialog: { visible: false, oldPassword: "", newPassword: "" },
                 adminCreate: { visible: false, form: { username: "", password: "", role: "USER" } },
-                adminPwd: { visible: false, id: null, password: "" },
+                adminPwd: { visible: false, id: null, password: "", adminPassword: "" },
                 scriptSelectedId: null,
                 deviceSshDialog: { visible: false, deviceId: null, form: { sshHost: "", sshPort: 22, sshUser: "", sshType: "BASH", sshPrivateKey: "", sshKeyPassphrase: "", sudoPassword: "" } }
             };
@@ -1444,13 +1447,14 @@
             openChangePassword(row) {
                 this.adminPwd.id = row.userId;
                 this.adminPwd.password = "";
+                this.adminPwd.adminPassword = "";
                 this.adminPwd.visible = true;
             },
             async changePassword() {
-                if (!this.adminPwd.password) return;
+                if (!this.adminPwd.adminPassword || !this.adminPwd.password) return;
                 this.saving = true;
                 try {
-                    await this.api("/api/admin/" + this.adminPwd.id, { method: "PUT", body: { password: this.adminPwd.password } });
+                    await this.api("/api/admin/" + this.adminPwd.id, { method: "PUT", body: { adminPassword: this.adminPwd.adminPassword, newPassword: this.adminPwd.password } });
                     ElMessage.success(this.t("common.success"));
                     this.adminPwd.visible = false;
                 } catch (e) {

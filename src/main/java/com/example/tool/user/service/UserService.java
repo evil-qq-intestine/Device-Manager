@@ -86,8 +86,15 @@ public class UserService {
         return new UserResponse(saved);
     }
 
-    public UserResponse updatePassword(Integer userId, String newPassword) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException("User not found, id: " + userId));
+    public UserResponse updatePassword(Integer operatorId, Integer targetUserId, String operatorPassword, String newPassword) {
+        User operator = userRepository.findById(operatorId)
+                .orElseThrow(() -> new BusinessException("User not found, id: " + operatorId));
+        if (!passwordEncoder.matches(operatorPassword, operator.getPassword())) {
+            throw new BusinessException("管理员密码不正确");
+        }
+
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new BusinessException("User not found, id: " + targetUserId));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setTokenVersion((user.getTokenVersion() == null ? 0 : user.getTokenVersion()) + 1);
