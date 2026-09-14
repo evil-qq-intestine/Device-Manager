@@ -48,6 +48,14 @@ ping:
   task-time: 10
 
 app:
+  # 构建时由 Maven 资源过滤注入（@project.version@）
+  version: "@project.version@"
+  update:
+    github-repo: evil-qq-intestine/Device-Manager  # 版本检测来源（GitHub Releases）
+    check-interval-ms: 21600000                    # 定时检测间隔，默认 6 小时
+    initial-delay-ms: 15000                        # 启动后首次检测延迟
+    docker-image: ghcr.io/evil-qq-intestine/device-manager
+    asset-prefix: device-manager                   # Release 产物前缀（<prefix>-linux-amd64 等）
   server-url: http://10.34.70.66:8080
   script:
     # 未设置环境变量 APP_MASTER_KEY 时，读取/自动生成该本地密钥文件

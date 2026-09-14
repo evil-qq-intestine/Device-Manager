@@ -460,6 +460,55 @@ html.dark {
 }
 .theme-toggle:hover { color: var(--text-hi); border-color: var(--stroke-strong); box-shadow: var(--shadow-sm); }
 
+.update-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 149, 0, 0.45);
+    background: rgba(255, 149, 0, 0.12);
+    color: var(--accent-orange);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.update-badge:hover { background: rgba(255, 149, 0, 0.2); }
+
+.update-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 13.5px;
+    color: var(--text-mid);
+    border-bottom: 1px solid var(--stroke);
+}
+.update-command {
+    margin: 8px 0 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--fill);
+    color: var(--text-hi);
+    font-size: 12.5px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.update-notes {
+    margin: 8px 0 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--fill);
+    color: var(--text-mid);
+    font-size: 12.5px;
+    max-height: 200px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .lang-switch {
     display: inline-flex;
     padding: 3px;

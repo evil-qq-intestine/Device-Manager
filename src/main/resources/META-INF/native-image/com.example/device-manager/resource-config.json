@@ -17,6 +17,9 @@
         "pattern": "META-INF/persistence.xml"
       },
       {
+        "pattern": "META-INF/resources/api/me"
+      },
+      {
         "pattern": "META-INF/resources/index.html"
       },
       {
@@ -45,6 +48,9 @@
       },
       {
         "pattern": "META-INF/services/jakarta.validation.valueextraction.ValueExtractor"
+      },
+      {
+        "pattern": "META-INF/services/java.net.spi.InetAddressResolverProvider"
       },
       {
         "pattern": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
@@ -347,6 +353,15 @@
         "pattern": "com/example/tool/scripttask/validator/ScriptTaskValidator.class"
       },
       {
+        "pattern": "com/example/tool/system/entity/SystemConfig.class"
+      },
+      {
+        "pattern": "com/example/tool/system/repository/SystemConfigRepository.class"
+      },
+      {
+        "pattern": "com/example/tool/system/service/SystemConfigService.class"
+      },
+      {
         "pattern": "com/example/tool/user/controller/AdminController.class"
       },
       {
@@ -380,7 +395,19 @@
         "pattern": "com/example/tool/user/validator/UserValidator.class"
       },
       {
+        "pattern": "com/example/tool/versionController/GithubReleaseClient.class"
+      },
+      {
+        "pattern": "com/example/tool/versionController/UpdateService.class"
+      },
+      {
+        "pattern": "com/example/tool/versionController/VersionCheckTask.class"
+      },
+      {
         "pattern": "com/example/tool/versionController/VersionController.class"
+      },
+      {
+        "pattern": "com/example/tool/versionController/VersionService.class"
       },
       {
         "pattern": "com/example/tool/webController/WebController.class"
@@ -434,10 +461,22 @@
         "pattern": "jakarta/servlet/LocalStrings_en.properties"
       },
       {
+        "pattern": "jakarta/servlet/LocalStrings_en_US.properties"
+      },
+      {
         "pattern": "jakarta/servlet/http/LocalStrings.properties"
       },
       {
         "pattern": "jakarta/servlet/http/LocalStrings_en.properties"
+      },
+      {
+        "pattern": "jakarta/servlet/http/LocalStrings_en_US.properties"
+      },
+      {
+        "pattern": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
+      },
+      {
+        "pattern": "jdk/internal/icu/impl/data/icudt76b/uprops.icu"
       },
       {
         "pattern": "jndi.properties"
@@ -543,6 +582,9 @@
       },
       {
         "pattern": "org/apache/naming/LocalStrings_en.properties"
+      },
+      {
+        "pattern": "org/apache/naming/LocalStrings_en_US.properties"
       },
       {
         "pattern": "org/apache/sshd/client/keyverifier/ServerKeyVerifier.class"
@@ -1259,6 +1301,9 @@
         "pattern": "org/springframework/context/ApplicationContextAware.class"
       },
       {
+        "pattern": "org/springframework/context/ApplicationContextInitializer.class"
+      },
+      {
         "pattern": "org/springframework/context/EmbeddedValueResolverAware.class"
       },
       {
@@ -1313,16 +1358,28 @@
         "pattern": "org/springframework/data/jpa/repository/JpaRepository.class"
       },
       {
+        "pattern": "org/springframework/data/jpa/repository/aot/AotRepositoryFragmentSupport.class"
+      },
+      {
         "pattern": "org/springframework/data/jpa/repository/support/JpaRepositoryFactoryBean.class"
       },
       {
         "pattern": "org/springframework/data/jpa/util/JpaMetamodelCacheCleanup.class"
       },
       {
+        "pattern": "org/springframework/data/mapping/PersistentPropertyAccessor.class"
+      },
+      {
+        "pattern": "org/springframework/data/mapping/model/ClassGeneratingEntityInstantiator$ObjectInstantiator.class"
+      },
+      {
         "pattern": "org/springframework/data/repository/CrudRepository.class"
       },
       {
         "pattern": "org/springframework/data/repository/ListCrudRepository.class"
+      },
+      {
+        "pattern": "org/springframework/data/repository/core/support/RepositoryFactoryBeanSupport$RepositoryFragmentsFunction.class"
       },
       {
         "pattern": "org/springframework/data/web/config/EnableSpringDataWebSupport$QuerydslActivator.class"
@@ -1526,6 +1583,12 @@
         "pattern": "org/sqlite/native/Linux/x86_64/libsqlitejdbc.so"
       },
       {
+        "pattern": "public/api/me"
+      },
+      {
+        "pattern": "resources/api/me"
+      },
+      {
         "pattern": "resources/index.html"
       },
       {
@@ -1541,10 +1604,13 @@
         "pattern": "sqlite-jdbc.properties"
       },
       {
+        "pattern": "static/api/me"
+      },
+      {
         "pattern": "static/index.html"
       },
       {
-        "pattern": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
+        "pattern": "sun/net/idn/uidna.spp"
       }
     ]
   },

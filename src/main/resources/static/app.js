@@ -87,6 +87,18 @@
                 save: "保存", test: "测试连接", testOk: "连接成功，主机指纹：{fp}",
                 notConfigured: "未配置", saved: "已保存", required: "请填写主机、端口和用户"
             },
+            update: {
+                title: "版本更新", available: "有新版本 {latest}", upToDate: "已是最新版本",
+                current: "当前版本", latest: "最新版本", deployedAs: "部署方式",
+                check: "检查更新", checking: "检查中…", command: "更新命令", copy: "复制命令",
+                copied: "命令已复制", copyFailed: "复制失败，请手动复制",
+                afterPull: "拉取后请按你的方式重启容器（如 docker compose up -d / docker restart <容器名>）。",
+                notes: "更新说明", watchdog: "下载看门狗脚本",
+                enableDirect: "允许直接更新（裸机部署）",
+                directHint: "开启后可在本页下载新版本并替换当前程序；进程退出后由看门狗脚本拉起。Docker 部署不支持直接更新。",
+                direct: "立即更新",
+                confirmDirect: "确定立即下载并更新到 {latest} 吗？更新后进程会退出，由看门狗拉起新版本。"
+            },
             profile: { title: "修改用户名", username: "用户名", password: "修改密码" },
             password: {
                 title: "修改密码", old: "当前密码", new: "新密码",
@@ -186,6 +198,18 @@
                 passphrase: "Key passphrase", sudoPassword: "sudo password",
                 save: "Save", test: "Test connection", testOk: "Connected, host fingerprint: {fp}",
                 notConfigured: "Not configured", saved: "Saved", required: "Fill in host, port and user"
+            },
+            update: {
+                title: "Version update", available: "New version {latest}", upToDate: "You are up to date",
+                current: "Current", latest: "Latest", deployedAs: "Deployment",
+                check: "Check now", checking: "Checking…", command: "Update command", copy: "Copy command",
+                copied: "Command copied", copyFailed: "Copy failed, please copy manually",
+                afterPull: "After pulling, restart the container your usual way (e.g. docker compose up -d / docker restart <name>).",
+                notes: "Release notes", watchdog: "Download watchdog script",
+                enableDirect: "Allow direct update (bare-metal only)",
+                directHint: "When enabled you can download and replace the running app here; the watchdog script restarts it after the process exits. Docker deployments are not supported.",
+                direct: "Update now",
+                confirmDirect: "Download and update to {latest} now? The process will exit and the watchdog will start the new version."
             },
             profile: { title: "Change username", username: "Username", password: "Change password" },
             password: {
@@ -315,6 +339,9 @@
       </div>
     </nav>
     <div class="topbar__spacer"></div>
+    <button v-if="updateAvailable" class="update-badge" :title="t('update.title')" @click="openUpdate">
+      <el-icon><Download/></el-icon><span>{{ t('update.available', {latest: latestVersion}) }}</span>
+    </button>
     <div class="live-dot"><i></i>{{ t('toolbar.live') }}</div>
     <button class="theme-toggle" :title="t('theme.toggle')" @click="toggleTheme">
       <el-icon v-if="theme==='light'"><Moon/></el-icon>
@@ -676,6 +703,35 @@
       <el-button type="primary" :loading="saving" @click="saveDeviceSsh">{{ t('common.save') }}</el-button>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="updateDialog.visible" :title="t('update.title')" width="620px">
+    <div class="update-row"><span>{{ t('update.current') }}</span><span class="mono">v{{ versionInfo ? versionInfo.current : version }}</span></div>
+    <div class="update-row"><span>{{ t('update.latest') }}</span><span class="mono">{{ latestVersion ? ('v' + latestVersion) : '-' }}</span></div>
+    <div class="update-row"><span>{{ t('update.deployedAs') }}</span><span class="mono">{{ versionInfo ? versionInfo.deploymentMode : '-' }}</span></div>
+    <template v-if="updateAvailable">
+      <div v-if="versionInfo.updateCommand" style="margin-top:14px">
+        <div class="field-hint">{{ t('update.command') }}</div>
+        <pre class="update-command mono">{{ versionInfo.updateCommand }}</pre>
+        <el-button size="small" @click="copyCommand"><el-icon><DocumentCopy/></el-icon>&nbsp;{{ t('update.copy') }}</el-button>
+        <div class="field-hint" style="margin-top:8px">{{ t('update.afterPull') }}</div>
+      </div>
+      <div v-if="versionInfo.releaseNotes" style="margin-top:14px">
+        <div class="field-hint">{{ t('update.notes') }}</div>
+        <pre class="update-notes">{{ versionInfo.releaseNotes }}</pre>
+      </div>
+    </template>
+    <div v-else class="field-hint" style="margin-top:14px">{{ t('update.upToDate') }}</div>
+    <div v-if="isAdmin" style="margin-top:16px">
+      <el-checkbox v-model="versionSettings.directUpdateEnabled" @change="saveVersionSettings">{{ t('update.enableDirect') }}</el-checkbox>
+      <div class="field-hint">{{ t('update.directHint') }}</div>
+    </div>
+    <template #footer>
+      <el-button @click="checkVersion" :loading="checkingVersion"><el-icon><Refresh/></el-icon>&nbsp;{{ t('update.check') }}</el-button>
+      <el-button v-if="isAdmin" @click="downloadWatchdog">{{ t('update.watchdog') }}</el-button>
+      <el-button @click="updateDialog.visible=false">{{ t('common.close') }}</el-button>
+      <el-button v-if="isAdmin && versionInfo && versionInfo.directUpdateSupported" type="primary" :loading="saving" @click="doDirectUpdate">{{ t('update.direct') }}</el-button>
+    </template>
+  </el-dialog>
 </div>
 `;
 
@@ -704,7 +760,11 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.0",
+                version: "1.0.1",
+                versionInfo: null,
+                checkingVersion: false,
+                updateDialog: { visible: false },
+                versionSettings: { directUpdateEnabled: false },
                 lang: localStorage.getItem("devicemanager.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
                 theme: localStorage.getItem("devicemanager.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
                 view: "dashboard",
@@ -742,6 +802,12 @@
         computed: {
             isAdmin() {
                 return this.user.role === "ADMIN";
+            },
+            updateAvailable() {
+                return !!(this.versionInfo && this.versionInfo.updateAvailable);
+            },
+            latestVersion() {
+                return (this.versionInfo && this.versionInfo.latest) || "";
             },
             avatarText() {
                 return (this.user.username || "?").charAt(0).toUpperCase();
@@ -982,8 +1048,98 @@
             async fetchVersion() {
                 try {
                     const v = await this.api("/api/version");
-                    if (typeof v === "string" && v) this.version = v;
+                    if (v && typeof v === "object") {
+                        this.versionInfo = v;
+                        if (v.current) this.version = v.current;
+                    } else if (typeof v === "string" && v) {
+                        this.version = v;
+                    }
                 } catch (e) { /* ignore */ }
+            },
+            /* ---------- 版本更新 ---------- */
+            openUpdate() {
+                this.updateDialog.visible = true;
+                if (this.isAdmin) this.loadVersionSettings();
+            },
+            async checkVersion() {
+                this.checkingVersion = true;
+                try {
+                    const v = await this.api("/api/version/check", { method: "POST" });
+                    if (v && typeof v === "object") {
+                        this.versionInfo = v;
+                        if (v.current) this.version = v.current;
+                    }
+                    ElMessage.success(v && v.updateAvailable
+                        ? this.t("update.available", { latest: this.latestVersion })
+                        : this.t("update.upToDate"));
+                } catch (e) {
+                    ElMessage.error(e.message);
+                } finally {
+                    this.checkingVersion = false;
+                }
+            },
+            async loadVersionSettings() {
+                try {
+                    const s = await this.api("/api/version/settings");
+                    this.versionSettings.directUpdateEnabled = !!(s && s.directUpdateEnabled);
+                } catch (e) { /* ignore */ }
+            },
+            async saveVersionSettings() {
+                try {
+                    await this.api("/api/version/settings", {
+                        method: "PUT",
+                        body: { directUpdateEnabled: this.versionSettings.directUpdateEnabled }
+                    });
+                    ElMessage.success(this.t("common.success"));
+                    await this.fetchVersion();
+                } catch (e) {
+                    ElMessage.error(e.message);
+                }
+            },
+            async copyCommand() {
+                const command = this.versionInfo && this.versionInfo.updateCommand;
+                if (!command) return;
+                try {
+                    await navigator.clipboard.writeText(command);
+                    ElMessage.success(this.t("update.copied"));
+                } catch (e) {
+                    ElMessage.error(this.t("update.copyFailed"));
+                }
+            },
+            async doDirectUpdate() {
+                try {
+                    await ElMessageBox.confirm(
+                        this.t("update.confirmDirect", { latest: this.latestVersion }),
+                        this.t("update.title"),
+                        { type: "warning" });
+                } catch (e) {
+                    return;
+                }
+                this.saving = true;
+                try {
+                    const r = await this.api("/api/version/update", { method: "POST" });
+                    ElMessage.success((r && r.message) || this.t("common.success"));
+                } catch (e) {
+                    ElMessage.error(e.message);
+                } finally {
+                    this.saving = false;
+                }
+            },
+            async downloadWatchdog() {
+                try {
+                    const res = await this.api("/api/version/watchdog", { raw: true });
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "device-manager-watchdog.sh";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    ElMessage.error(e.message);
+                }
             },
             async refresh() {
                 if (!this.authed) return;
