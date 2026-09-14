@@ -82,8 +82,9 @@
             deviceSsh: {
                 title: "设备 SSH 配置", button: "设备 SSH", hint: "用于设备级关机，与脚本任务相互独立。",
                 host: "SSH 主机", port: "端口", user: "SSH 用户", type: "目标系统",
-                privateKey: "SSH 私钥", privateKeyHint: "首次必须填写；之后留空表示不修改。",
+                privateKey: "SSH 私钥", privateKeyHint: "首次必须填写；之后留空表示不修改。请使用 OpenSSH 格式私钥（ssh-keygen 生成），不支持 PuTTY 的 .ppk。",
                 passphrase: "私钥口令", sudoPassword: "sudo 密码",
+                sudoWindowsHint: "Windows 目标没有 sudo：关机要求 SSH 用户本身是管理员，此密码不适用。",
                 save: "保存", test: "测试连接", testOk: "连接成功，主机指纹：{fp}",
                 notConfigured: "未配置", saved: "已保存", required: "请填写主机、端口和用户"
             },
@@ -194,8 +195,9 @@
             deviceSsh: {
                 title: "Device SSH", button: "Device SSH", hint: "Used for device-level shutdown, independent of script tasks.",
                 host: "SSH host", port: "Port", user: "SSH user", type: "Target OS",
-                privateKey: "SSH private key", privateKeyHint: "Required on first setup; leave empty to keep it.",
+                privateKey: "SSH private key", privateKeyHint: "Required on first setup; leave empty to keep it. Use an OpenSSH-format key (from ssh-keygen), not a PuTTY .ppk.",
                 passphrase: "Key passphrase", sudoPassword: "sudo password",
+                sudoWindowsHint: "Windows targets have no sudo: shutdown requires the SSH user to be an administrator, so this password does not apply.",
                 save: "Save", test: "Test connection", testOk: "Connected, host fingerprint: {fp}",
                 notConfigured: "Not configured", saved: "Saved", required: "Fill in host, port and user"
             },
@@ -695,9 +697,12 @@
       <el-form-item :label="t('deviceSsh.passphrase')">
         <el-input v-model="deviceSshDialog.form.sshKeyPassphrase" show-password />
       </el-form-item>
-      <el-form-item>
+      <el-form-item v-if="deviceSshDialog.form.sshType === 'BASH'">
         <template #label><span>{{ t('deviceSsh.sudoPassword') }}<hint-icon><sudo-hint /></hint-icon></span></template>
         <el-input v-model="deviceSshDialog.form.sudoPassword" show-password />
+      </el-form-item>
+      <el-form-item v-else :label="t('deviceSsh.sudoPassword')">
+        <div class="field-hint">{{ t('deviceSsh.sudoWindowsHint') }}</div>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -763,7 +768,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.2",
+                version: "1.0.3",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },

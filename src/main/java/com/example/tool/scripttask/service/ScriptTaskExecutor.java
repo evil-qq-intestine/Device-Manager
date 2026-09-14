@@ -98,7 +98,7 @@ public class ScriptTaskExecutor {
     }
 
     private boolean triggerShutdown(ScriptTask task, Device device, SshConfig config, ScriptType type) {
-        boolean withPassword = device.getSudoPasswordEncrypted() != null;
+        boolean withPassword = type == ScriptType.BASH && device.getSudoPasswordEncrypted() != null;
         String command = ShutdownCommands.forTask(task, type, withPassword);
         String stdin = withPassword ? cryptoService.decrypt(device.getSudoPasswordEncrypted()) + "\n" : null;
         SshResult result = sshExecutor.executeCommand(config, command, stdin, commandTimeoutMs);

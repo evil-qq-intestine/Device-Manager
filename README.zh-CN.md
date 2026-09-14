@@ -155,7 +155,11 @@ Linux 目标机推荐配置免密 sudo（服务端无需保存密码）：
 ```
 
 若不便改 sudoers，也可在设备 / 任务里填写 **sudo 密码**，服务端会用 `sudo -S` 通过 stdin 传入（不会出现在命令行中）。
-Windows 目标则要求 SSH 用户为管理员。
+Windows 目标则要求 SSH 用户为管理员；Windows 没有 sudo，该密码不适用（PowerShell 目标下输入框会隐藏）。
+
+### SSH 私钥格式
+
+SSH 连接**仅支持密钥认证**。请使用 **OpenSSH 格式**私钥（`ssh-keygen` 生成）；不支持 PuTTY 的 `.ppk`（会解析失败）。私钥有口令时请填写「私钥口令」。
 
 ## 版本检测与更新
 
@@ -164,7 +168,7 @@ Windows 目标则要求 SSH 用户为管理员。
 **Docker 部署**：点开提示弹窗，复制更新命令执行即可（镜像同时发布到 GHCR 与 Docker Hub，后者默认 `emmmm666/device-manager`，可用仓库变量 `DOCKERHUB_IMAGE` 覆盖）：
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.2
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.3
 ```
 
 镜像名由 `app.update.docker-image` 配置；拉取后请按你的方式重启容器（如 `docker compose up -d` 或 `docker restart <容器名>`）。

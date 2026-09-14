@@ -131,7 +131,7 @@ public class MinaSshExecutor implements SshExecutor {
             List<KeyPair> result = new ArrayList<>();
             pairs.forEach(result::add);
             if (result.isEmpty()) {
-                throw new BusinessException("私钥解析失败，请检查私钥内容");
+                throw new BusinessException("私钥解析失败：请确认是 OpenSSH/PEM 格式私钥（不支持 PuTTY .ppk）");
             }
             return result;
         } catch (BusinessException e) {
