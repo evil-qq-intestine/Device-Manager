@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>device-manager</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<name>设备管家 Device Manager</name>
 	<description>设备在线监控 · Wake-on-LAN · SSH 脚本任务</description>
 	<url/>
@@ -110,6 +110,13 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- 仅用于编译 native 构建期 Feature（BouncyCastleFeature）；运行期不需要，故 provided -->
+		<dependency>
+			<groupId>org.graalvm.sdk</groupId>
+			<artifactId>nativeimage</artifactId>
+			<version>25.0.2</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -148,6 +155,9 @@
 						<buildArg>--future-defaults=run-time-initialize-file-system-providers,run-time-initialize-security-providers</buildArg>
 						<!-- xerial sqlite-jdbc 的原生库需打进镜像 -->
 						<buildArg>-H:IncludeResources=org/sqlite/native/.*</buildArg>
+						<!-- MINA SSHD 运行时会注册 BouncyCastle Provider；native 必须在构建期登记，否则首次 SSH 报 SecurityException。
+						     注意：该选项取的是 provider 的「全限定类名」，不是 provider 名（写 BC 无效）。 -->
+						<buildArg>-H:AdditionalSecurityProviders=org.bouncycastle.jce.provider.BouncyCastleProvider</buildArg>
 					</buildArgs>
 				</configuration>
 			</plugin>

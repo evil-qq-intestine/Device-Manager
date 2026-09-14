@@ -57,9 +57,10 @@ public class MinaSshExecutor implements SshExecutor {
 
     @Override
     public String testConnection(SshConfig config, long timeoutMs) {
-        SshClient client = newClient(config);
+        ClientHandle handle = newClient(config);
         try {
-            try (ClientSession session = authenticate(client, config, timeoutMs)) {
+            try (ClientSession session = authenticate(handle.client(), config, timeoutMs)) {
+                recordHostKeyIfNew(config, handle.verifier());
                 return hostKeyService.findFingerprint(config.host(), config.port()).orElse("connected");
             }
         } catch (BusinessException e) {
@@ -67,14 +68,15 @@ public class MinaSshExecutor implements SshExecutor {
         } catch (Exception e) {
             throw new BusinessException("SSH 连接失败: " + rootMessage(e), e);
         } finally {
-            client.stop();
+            handle.client().stop();
         }
     }
 
     private SshResult exec(SshConfig config, String command, String stdin, long timeoutMs) {
-        SshClient client = newClient(config);
+        ClientHandle handle = newClient(config);
         try {
-            try (ClientSession session = authenticate(client, config, timeoutMs)) {
+            try (ClientSession session = authenticate(handle.client(), config, timeoutMs)) {
+                recordHostKeyIfNew(config, handle.verifier());
                 ClientChannel channel = session.createExecChannel(command);
                 LimitedByteArrayOutputStream out = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES);
                 LimitedByteArrayOutputStream err = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES);
@@ -98,15 +100,28 @@ public class MinaSshExecutor implements SshExecutor {
             log.warn("SSH execution failed for {}:{} - {}", config.host(), config.port(), rootMessage(e));
             return SshResult.error("SSH 执行失败: " + rootMessage(e));
         } finally {
-            client.stop();
+            handle.client().stop();
         }
     }
 
-    private SshClient newClient(SshConfig config) {
+    private ClientHandle newClient(SshConfig config) {
+        String knownFingerprint = hostKeyService.findFingerprint(config.host(), config.port()).orElse(null);
+        FingerprintServerKeyVerifier verifier =
+                new FingerprintServerKeyVerifier(config.host(), config.port(), knownFingerprint);
         SshClient client = SshClient.setUpDefaultClient();
-        client.setServerKeyVerifier(new FingerprintServerKeyVerifier(hostKeyService, config.host(), config.port()));
+        client.setServerKeyVerifier(verifier);
         client.start();
-        return client;
+        return new ClientHandle(client, verifier);
+    }
+
+    private void recordHostKeyIfNew(SshConfig config, FingerprintServerKeyVerifier verifier) {
+        if (verifier.knownFingerprint() == null && verifier.observedFingerprint() != null) {
+            hostKeyService.verifyOrRegister(config.host(), config.port(),
+                    verifier.observedKeyType(), verifier.observedFingerprint());
+        }
+    }
+
+    private record ClientHandle(SshClient client, FingerprintServerKeyVerifier verifier) {
     }
 
     private ClientSession authenticate(SshClient client, SshConfig config, long timeoutMs) throws Exception {

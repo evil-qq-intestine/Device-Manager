@@ -127,6 +127,8 @@ docker run -d --name device-manager \
 
 ### native 运行期排错（可选，遇到再处理）
 
+> ⚠️ **`1.0.3` 及更早版本的 native 包无法使用 SSH 相关功能**（测试 SSH、执行脚本任务、远程关机）—— 会报 `Internal server error`，原因是 BouncyCastle 安全提供者在 native 构建期未被注册。该问题已在 **`1.0.4`** 修复：请使用 `1.0.4+`，或使用 JVM 镜像（从未受影响）。旧 native 镜像请拉取 `latest-native` / `1.0.4-native`。
+
 GraalVM native 是封闭世界分析，第三方库用到的反射必须提前登记。本项目已处理
 `FileSystemProvider`、安全 Provider 与 sqlite 的元数据；如果实际使用时（尤其是 SSH 脚本任务）
 报 `MissingReflectionRegistrationError`，用 tracing agent **精确**生成配置，而不是手写猜：
@@ -168,7 +170,7 @@ SSH 连接**仅支持密钥认证**。请使用 **OpenSSH 格式**私钥（`ssh-
 **Docker 部署**：点开提示弹窗，复制更新命令执行即可（镜像同时发布到 GHCR 与 Docker Hub，后者默认 `emmmm666/device-manager`，可用仓库变量 `DOCKERHUB_IMAGE` 覆盖）：
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.3
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.4
 ```
 
 镜像名由 `app.update.docker-image` 配置；拉取后请按你的方式重启容器（如 `docker compose up -d` 或 `docker restart <容器名>`）。

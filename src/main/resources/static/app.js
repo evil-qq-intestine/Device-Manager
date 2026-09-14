@@ -768,7 +768,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.3",
+                version: "1.0.4",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },

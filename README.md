@@ -127,6 +127,8 @@ docker run -d --name device-manager \
 
 ### Troubleshooting native at runtime (optional)
 
+> ⚠️ **Native images up to and including `1.0.3` cannot use SSH features** (test SSH, run script tasks, remote shutdown) — they fail with `Internal server error` because the BouncyCastle security provider was not registered at native-image build time. Fixed in **`1.0.4`**: use `1.0.4+` or the JVM image (never affected). On an older native image, pull `latest-native` / `1.0.4-native`.
+
 GraalVM native is a closed-world analysis, so reflection used by third-party libraries must be
 registered ahead of time. This project already handles `FileSystemProvider`, security providers
 and the sqlite metadata. If you hit `MissingReflectionRegistrationError` at runtime (especially
@@ -170,7 +172,7 @@ On startup the app periodically (every 6 hours by default) calls the GitHub Rele
 **Docker deployments**: open the notice and copy the update command (images are published to both GHCR and Docker Hub, the latter defaulting to `emmmm666/device-manager` and overridable via the `DOCKERHUB_IMAGE` repository variable):
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.3
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.4
 ```
 
 The image name comes from `app.update.docker-image`; after pulling, restart the container your usual way (e.g. `docker compose up -d` or `docker restart <name>`).
