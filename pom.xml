@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>device-manager</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+		<artifactId>device-manager</artifactId>
+		<version>1.0.0</version>
 	<name>设备管家 Device Manager</name>
 	<description>设备在线监控 · Wake-on-LAN · SSH 脚本任务</description>
 	<url/>

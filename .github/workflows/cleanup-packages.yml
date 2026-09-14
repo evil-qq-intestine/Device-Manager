@@ -1,0 +1,71 @@
+name: Cleanup GHCR package versions
+
+# 手动触发：删除 GHCR 上历史的/损坏的镜像版本，保留 keep_regex 命中的标签。
+# 默认 dry_run=true，只打印将要删除的版本，确认后再置为 false 真正删除。
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_regex:
+        description: '要保留的标签正则（匹配任一标签即保留该版本）'
+        required: true
+        default: '^(latest|main|[0-9]+\.[0-9]+(\.[0-9]+)?)(-native)?(-amd64|-arm64)?$'
+      delete_untagged:
+        description: '同时删除无标签的版本（旧 manifest，谨慎）'
+        type: boolean
+        default: false
+      dry_run:
+        description: '仅打印，不实际删除'
+        type: boolean
+        default: true
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  cleanup:
+    name: Delete old package versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PKG: device-manager
+          KEEP_REGEX: ${{ inputs.keep_regex }}
+          DELETE_UNTAGGED: ${{ inputs.delete_untagged }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          owner_lc=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          pkg_lc=$(echo "$PKG" | tr '[:upper:]' '[:lower:]')
+          echo "package: $owner_lc/$pkg_lc  dry_run=$DRY_RUN  delete_untagged=$DELETE_UNTAGGED"
+          echo "keep_regex: $KEEP_REGEX"
+
+          gh api --paginate "/users/$owner_lc/packages/container/$pkg_lc/versions" \
+            | jq -s 'add' > /tmp/versions.json
+          echo "total versions: $(jq 'length' /tmp/versions.json)"
+
+          jq -r --arg re "$KEEP_REGEX" --argjson du "$DELETE_UNTAGGED" '
+            .[] |
+            (.metadata.container.tags // []) as $t |
+            (($t | map(select(test($re))) | length) > 0) as $keep |
+            select(($keep | not) and ($du or (($t | length) > 0))) |
+            "\(.id)\t\($t | join(","))"' /tmp/versions.json > /tmp/to_delete.tsv
+
+          n=$(wc -l < /tmp/to_delete.tsv | tr -d ' ')
+          echo "to delete: $n"
+          cat /tmp/to_delete.tsv
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN — 未删除任何版本"
+            exit 0
+          fi
+
+          while IFS=$'\t' read -r id tags; do
+            [ -z "$id" ] && continue
+            echo "DELETE id=$id tags=[$tags]"
+            gh api -X DELETE "/users/$owner_lc/packages/container/$pkg_lc/versions/$id" \
+              && echo "  ok" || echo "  FAILED"
+          done < /tmp/to_delete.tsv
