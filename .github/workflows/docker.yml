@@ -178,7 +178,11 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}
-          flavor: suffix=-native
+          # latest=false：关闭 metadata-action 在 tag 事件下自动生成的裸 latest，
+          # 否则会用 native 镜像覆盖 JVM 的 latest。native 的 latest-native 由下面显式 raw 标签生成。
+          flavor: |
+            latest=false
+            suffix=-native
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
