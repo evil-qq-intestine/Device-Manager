@@ -18,7 +18,8 @@
 | 📡 在线监控 | `PING`（系统 ping）或 `HEARTBEAT`（设备定时上报）两种模式，状态 `ONLINE / OFFLINE / PROBE / UNKNOWN`，可配置检测间隔、超时与离线容忍 |
 | ⚡ 网络唤醒 | Wake-on-LAN 魔术包，IPv4 广播 / IPv6 组播；唤醒后进入 `PROBE` 等待上线，超时判定为离线 |
 | 🔌 远程关机 | 通过 SSH 关机，支持免密 sudo（`sudo -n`）或 sudo 密码（`sudo -S`），bash / PowerShell 目标均可 |
-| 📜 脚本任务 | **一个脚本可挂多台设备**；触发方式：`ONCE`（定时一次）/ `CRON`（周期）/ `ON_BOOT`（设备上线时）；脚本成功后可选择不关机 / 立即关机 / 延迟关机；每个目标设备独立记录执行日志 |
+| 📜 脚本任务 | **一个脚本可挂多台设备**；触发方式：`MANUAL`（仅界面手动执行）/ `ONCE`（定时一次）/ `CRON`（周期）/ `ON_BOOT`（设备上线时）；脚本成功后可选择不关机 / 立即关机 / 延迟关机；每个目标设备独立记录执行日志 |
+| 🧭 脚本检查 | 内置纯前端语法检查，编译器风格编辑器：行号、语法高亮、错误 / 警告标记与可跳转的诊断列表；支持 Bash / PowerShell（引号、括号、here-doc、`if/fi` 配对、CRLF 等） |
 | ⬇️ 心跳脚本 | 一键生成并下载 Linux（systemd）或 Windows（计划任务）心跳上报脚本 |
 | 🚀 版本更新 | 定时对比 GitHub Releases 检测新版本并在界面提示；Docker 部署给出更新命令，裸机部署可开启「直接更新」下载产物替换自身（看门狗脚本负责拉起） |
 | 👤 用户与权限 | JWT 登录，`ADMIN` / `USER` 角色，管理员可管理用户，所有人可改自己的用户名与密码 |
@@ -29,7 +30,7 @@
 
 - **后端**：Spring Boot 4.1、Java 21、Spring Web MVC、Spring Data JPA、Spring Security + JJWT、SQLite（xerial JDBC，单连接）、Apache MINA SSHD、BouncyCastle、Lombok
 - **前端**：Vue 3 + Element Plus + ECharts + dayjs（全部本地 vendor，无需 Node / 构建步骤）
-- **构建与部署**：Maven、Docker（多架构 amd64/arm64）、GitHub Actions → GHCR + Docker Hub、GraalVM Native Image（实验性）
+- **构建与部署**：Maven、Docker（多架构 amd64/arm64）、GitHub Actions → GHCR + Docker Hub。**不再构建 / 发布 GraalVM native 镜像**（封闭世界编译坑太多、维护成本高），只维护 JVM 镜像。
 
 ## 快速开始
 
@@ -88,14 +89,6 @@ docker run -d --name device-manager \
 
 资源更紧张的设备可把 `-Xmx` 调到 `192m` 甚至 `128m`。
 
-**native 镜像内存参数**：native 可执行文件用 `-XX:` 前缀传运行时参数：
-
-```bash
-docker run -d ... device-manager-native -XX:MaxHeapSize=192m
-```
-
-native 默认最大堆约为物理内存的 80%，小内存设备建议显式限制。
-
 **关键环境变量**：
 
 | 变量 | 说明 | 默认 |
@@ -125,28 +118,11 @@ docker run -d --name device-manager \
   ghcr.io/evil-qq-intestine/device-manager:latest
 ```
 
-### native 运行期排错（可选，遇到再处理）
+### native 镜像已停止维护
 
-> ⚠️ **`1.0.3` 及更早版本的 native 包无法使用 SSH 相关功能**（测试 SSH、执行脚本任务、远程关机）—— 会报 `Internal server error`，原因是 BouncyCastle 安全提供者在 native 构建期未被注册。该问题已在 **`1.0.4`** 修复：请使用 `1.0.4+`，或使用 JVM 镜像（从未受影响）。旧 native 镜像请拉取 `latest-native` / `1.0.4-native`。
-
-GraalVM native 是封闭世界分析，第三方库用到的反射必须提前登记。本项目已处理
-`FileSystemProvider`、安全 Provider 与 sqlite 的元数据；如果实际使用时（尤其是 SSH 脚本任务）
-报 `MissingReflectionRegistrationError`，用 tracing agent **精确**生成配置，而不是手写猜：
-
-```bash
-# 需要 GraalVM（自带 native-image-agent）
-# 1) 以 agent 方式启动 JVM 应用
-java -agentlib:native-image-agent=config-merge-dir=target/native-config \
-     -jar target/device-manager-*.jar
-# 2) 在界面上把相关功能点一遍：登录 → 新建并执行脚本任务 → 测试 SSH → 设备关机
-# 3) Ctrl-C 停止，配置会写到 target/native-config/
-# 4) 拷进源码，重新构建 native
-mkdir -p src/main/resources/META-INF/native-image/com.example/device-manager
-cp target/native-config/*.json src/main/resources/META-INF/native-image/com.example/device-manager/
-./mvnw -Pnative -DskipTests native:compile
-```
-
-生成的文件会随源码提交，之后 native 构建会自动读取。没遇到问题就不需要加。
+> ⚠️ 自 `1.0.5` 起**不再构建、不再发布 GraalVM native 镜像**，只维护 JVM 镜像与可执行 jar。native 封闭世界编译的坑太多（反射、动态代理、运行期注册安全 Provider），维护成本不划算。请使用 `ghcr.io/evil-qq-intestine/device-manager:latest`（或 Docker Hub 镜像）。
+>
+> 历史说明：`1.0.3` 及更早的 native 包 SSH 功能完全不可用（报 `Internal server error`，BouncyCastle 提供者未在构建期注册）；`1.0.4` 修复了该问题，但随后即放弃 native。
 
 ## 远程关机与 sudo
 
@@ -170,16 +146,16 @@ SSH 连接**仅支持密钥认证**。请使用 **OpenSSH 格式**私钥（`ssh-
 **Docker 部署**：点开提示弹窗，复制更新命令执行即可（镜像同时发布到 GHCR 与 Docker Hub，后者默认 `emmmm666/device-manager`，可用仓库变量 `DOCKERHUB_IMAGE` 覆盖）：
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.4
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.5
 ```
 
 镜像名由 `app.update.docker-image` 配置；拉取后请按你的方式重启容器（如 `docker compose up -d` 或 `docker restart <容器名>`）。
 
-**裸机部署（native / jar）**：管理员可在弹窗里开启「直接更新」。开启后应用会下载对应的 Release 产物（`device-manager-linux-amd64` / `device-manager-linux-arm64` / `device-manager.jar`）替换自身并退出，再由**看门狗脚本**拉起新版本。看门狗脚本可直接在弹窗里下载：
+**裸机部署（jar）**：管理员可在弹窗里开启「直接更新」。开启后应用会下载 Release 产物（`device-manager.jar`）替换自身并退出，再由**看门狗脚本**拉起新版本。看门狗脚本可直接在弹窗里下载：
 
 ```bash
-DEVICE_MANAGER_APP=/opt/device-manager/device-manager \
-DEVICE_MANAGER_ARGS="--server.port=8080" \
+DEVICE_MANAGER_APP=java \
+DEVICE_MANAGER_ARGS="-jar /opt/device-manager/device-manager.jar --server.port=8080" \
 ./device-manager-watchdog.sh
 ```
 

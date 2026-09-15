@@ -58,6 +58,7 @@
                 executeSubmitted: "已提交到 {n} 台设备", executeFailCount: "有 {n} 台执行失败",
                 name: "任务名称", description: "描述", scriptContent: "脚本内容", scriptType: "脚本类型",
                 triggerType: "触发方式", triggerOnce: "定时一次", triggerCron: "Cron 周期", triggerOnBoot: "开机上线",
+                triggerManualHint: "不会自动运行，只能在列表中点击「执行」手动运行。",
                 executeAt: "执行时间", cronExpression: "Cron 表达式",
                 sshHost: "SSH 主机", sshPort: "端口", sshUser: "SSH 用户",
                 privateKey: "SSH 私钥", privateKeyHint: "仅支持密钥认证。编辑时留空表示不修改原私钥。",
@@ -78,6 +79,33 @@
                 confirmExecute: "确定立即执行任务「{name}」吗？",
                 confirmShutdown: "确定立即关闭「{name}」的所有目标设备吗？",
                 stdout: "标准输出", stderr: "错误输出", detail: "执行详情"
+            },
+            scriptCheck: {
+                run: "检查代码", checking: "检查中…",
+                noIssues: "未发现问题。", statusOk: "未发现问题",
+                errors: "{n} 个错误", warnings: "{n} 个警告", error: "错误", warning: "警告",
+                hint: "仅做语法结构检查（引号/括号/here-doc/关键字配对），不能保证运行结果正确。",
+                msg: {
+                    unterminatedSingle: "单引号未闭合",
+                    unterminatedDouble: "双引号未闭合",
+                    unterminatedBacktick: "反引号未闭合",
+                    unterminatedHeredoc: "here-document 未结束（缺少结束标记）",
+                    unterminatedHereString: "here-string 未结束（缺少结束标记 {term}）",
+                    unterminatedBlockComment: "块注释未结束（缺少 #>）",
+                    unclosedParen: "括号 ( 未闭合",
+                    unclosedBrace: "花括号 { 未闭合",
+                    unclosedBracket: "方括号 [ 未闭合",
+                    unmatchedCloseParen: "多余的右括号 )",
+                    unmatchedCloseBrace: "多余的花括号 }",
+                    unmatchedCloseBracket: "多余的方括号 ]",
+                    crlf: "检测到 Windows 换行符（CRLF），在 Linux 上执行可能报错",
+                    missingFi: "疑似缺少 {n} 个 fi（if 未闭合）",
+                    extraFi: "疑似多余 {n} 个 fi",
+                    missingDone: "疑似缺少 {n} 个 done（循环未闭合）",
+                    extraDone: "疑似多余 {n} 个 done",
+                    missingEsac: "疑似缺少 {n} 个 esac（case 未闭合）",
+                    extraEsac: "疑似多余 {n} 个 esac"
+                }
             },
             deviceSsh: {
                 title: "设备 SSH 配置", button: "设备 SSH", hint: "用于设备级关机，与脚本任务相互独立。",
@@ -171,6 +199,7 @@
                 executeSubmitted: "Submitted to {n} device(s)", executeFailCount: "{n} device(s) failed",
                 name: "Task name", description: "Description", scriptContent: "Script content", scriptType: "Script type",
                 triggerType: "Trigger", triggerOnce: "Once", triggerCron: "Cron", triggerOnBoot: "On boot",
+                triggerManualHint: "Never runs automatically; use Run in the list to execute it.",
                 executeAt: "Execute at", cronExpression: "Cron expression",
                 sshHost: "SSH host", sshPort: "Port", sshUser: "SSH user",
                 privateKey: "SSH private key", privateKeyHint: "Key authentication only. Leave empty on edit to keep the existing key.",
@@ -191,6 +220,33 @@
                 confirmExecute: "Run task “{name}” now?",
                 confirmShutdown: "Shut down all targets of “{name}” now?",
                 stdout: "stdout", stderr: "stderr", detail: "Execution detail"
+            },
+            scriptCheck: {
+                run: "Check", checking: "Checking…",
+                noIssues: "No problems found.", statusOk: "No problems",
+                errors: "{n} error(s)", warnings: "{n} warning(s)", error: "Error", warning: "Warning",
+                hint: "Structural checks only (quotes/brackets/here-doc/keyword pairing); it cannot guarantee runtime correctness.",
+                msg: {
+                    unterminatedSingle: "Unterminated single quote",
+                    unterminatedDouble: "Unterminated double quote",
+                    unterminatedBacktick: "Unterminated backtick",
+                    unterminatedHeredoc: "Unterminated here-document",
+                    unterminatedHereString: "Unterminated here-string (missing {term})",
+                    unterminatedBlockComment: "Unterminated block comment (missing #>)",
+                    unclosedParen: "Unclosed (",
+                    unclosedBrace: "Unclosed {",
+                    unclosedBracket: "Unclosed [",
+                    unmatchedCloseParen: "Unmatched )",
+                    unmatchedCloseBrace: "Unmatched }",
+                    unmatchedCloseBracket: "Unmatched ]",
+                    crlf: "Windows line endings (CRLF) detected; may fail on Linux",
+                    missingFi: "Possibly missing {n} fi (unclosed if)",
+                    extraFi: "Possibly extra {n} fi",
+                    missingDone: "Possibly missing {n} done (unclosed loop)",
+                    extraDone: "Possibly extra {n} done",
+                    missingEsac: "Possibly missing {n} esac (unclosed case)",
+                    extraEsac: "Possibly extra {n} esac"
+                }
             },
             deviceSsh: {
                 title: "Device SSH", button: "Device SSH", hint: "Used for device-level shutdown, independent of script tasks.",
@@ -768,7 +824,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.4",
+                version: "1.0.5",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },
@@ -1623,6 +1679,12 @@
     app.component("SudoHint", SudoHint);
     if (window.ScriptTaskPanel) {
         app.component("ScriptTaskPanel", window.ScriptTaskPanel);
+    }
+    if (window.ScriptCodeEditor) {
+        app.component("ScriptCodeEditor", window.ScriptCodeEditor);
+    }
+    if (window.ScriptCheckPanel) {
+        app.component("ScriptCheckPanel", window.ScriptCheckPanel);
     }
     for (const [name, comp] of Object.entries(ElementPlusIconsVue)) {
         app.component(name, comp);

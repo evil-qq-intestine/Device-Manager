@@ -91,13 +91,15 @@
   </el-table>
   <el-empty v-else :description="t('scriptTask.empty')" v-loading="loading" />
 
-  <el-dialog v-model="editor.visible" :title="editor.id ? t('scriptTask.edit') : t('scriptTask.add')" width="680px" append-to-body>
+  <el-dialog v-model="editor.visible" :title="editor.id ? t('scriptTask.edit') : t('scriptTask.add')" width="800px" append-to-body>
     <el-form label-position="top">
       <el-form-item :label="t('scriptTask.name')"><el-input v-model="editor.form.name" /></el-form-item>
       <el-form-item :label="t('scriptTask.description')"><el-input v-model="editor.form.description" /></el-form-item>
 
       <el-form-item :label="t('scriptTask.scriptContent')">
-        <el-input v-model="editor.form.scriptContent" type="textarea" :rows="6" class="mono" />
+        <script-check-panel v-model="editor.form.scriptContent" :language="editor.lang"
+                            @update:language="v => editor.lang = v" height="260px" />
+        <div class="field-hint">{{ t('scriptCheck.hint') }}</div>
       </el-form-item>
 
       <el-form-item :label="t('scriptTask.targets')">
@@ -110,10 +112,12 @@
 
       <el-form-item :label="t('scriptTask.triggerType')">
         <el-radio-group v-model="editor.form.triggerType">
+          <el-radio-button label="MANUAL">{{ t('scriptTask.triggerManual') }}</el-radio-button>
           <el-radio-button label="ONCE">{{ t('scriptTask.triggerOnce') }}</el-radio-button>
           <el-radio-button label="CRON">{{ t('scriptTask.triggerCron') }}</el-radio-button>
           <el-radio-button label="ON_BOOT">{{ t('scriptTask.triggerOnBoot') }}</el-radio-button>
         </el-radio-group>
+        <div v-if="editor.form.triggerType === 'MANUAL'" class="field-hint">{{ t('scriptTask.triggerManualHint') }}</div>
       </el-form-item>
       <el-form-item v-if="editor.form.triggerType === 'ONCE'" :label="t('scriptTask.executeAt')">
         <el-date-picker v-model="editor.form.executeAt" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss" style="width:100%" />
@@ -132,7 +136,7 @@
       <el-form-item v-if="editor.form.shutdownMode === 'DELAYED'" :label="t('scriptTask.shutdownDelay')">
         <el-input-number v-model="editor.form.shutdownDelaySeconds" :min="1" :max="86400" style="width:100%" />
       </el-form-item>
-      <el-form-item :label="t('scriptTask.enabled')"><el-switch v-model="editor.form.enabled" /></el-form-item>
+      <el-form-item v-if="editor.form.triggerType !== 'MANUAL'" :label="t('scriptTask.enabled')"><el-switch v-model="editor.form.enabled" /></el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="editor.visible = false">{{ t('common.cancel') }}</el-button>
@@ -179,7 +183,7 @@
                 tasks: [],
                 loading: false,
                 saving: false,
-                editor: { visible: false, id: null, form: emptyForm() },
+                editor: { visible: false, id: null, lang: "BASH", form: emptyForm() },
                 logs: { visible: false, taskId: null, taskName: "", items: [], total: 0, page: 0, size: 10, loading: false, detail: null }
             };
         },
@@ -404,7 +408,7 @@
                 return { text: ok + "/" + targets.length, cls: failed ? "stp__fail" : "stp__ok" };
             },
             triggerLabel(type) {
-                return { ONCE: this.t("scriptTask.triggerOnce"), CRON: this.t("scriptTask.triggerCron"), ON_BOOT: this.t("scriptTask.triggerOnBoot") }[type] || type;
+                return { MANUAL: this.t("scriptTask.triggerManual"), ONCE: this.t("scriptTask.triggerOnce"), CRON: this.t("scriptTask.triggerCron"), ON_BOOT: this.t("scriptTask.triggerOnBoot") }[type] || type;
             },
             triggeredByLabel(by) {
                 return { SCHEDULE: this.t("scriptTask.triggerSchedule"), HEARTBEAT: this.t("scriptTask.triggerHeartbeat"), MANUAL: this.t("scriptTask.triggerManual") }[by] || by;

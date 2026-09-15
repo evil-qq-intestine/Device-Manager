@@ -18,7 +18,8 @@
 | 📡 Monitoring | `PING` (system ping) or `HEARTBEAT` (device reports in), statuses `ONLINE / OFFLINE / PROBE / UNKNOWN`, with configurable interval, timeout and offline tolerance |
 | ⚡ Wake-on-LAN | Magic packets over IPv4 broadcast / IPv6 multicast; after waking the device enters `PROBE` and is marked offline if it never comes up |
 | 🔌 Remote shutdown | Over SSH with passwordless sudo (`sudo -n`) or a sudo password (`sudo -S`); works for Bash and PowerShell targets |
-| 📜 Script tasks | **One script can target many devices**; triggers: `ONCE`, `CRON`, `ON_BOOT`; on success optionally shut down (never / immediately / after a delay); one log per target device |
+| 📜 Script tasks | **One script can target many devices**; triggers: `MANUAL` (run from the UI only), `ONCE`, `CRON`, `ON_BOOT`; on success optionally shut down (never / immediately / after a delay); one log per target device |
+| 🧭 Script checker | Built-in, frontend-only syntax check for Bash / PowerShell with a compiler-style editor: line numbers, syntax highlighting, error/warning markers and a jump-to-line diagnostics list (quotes, brackets, here-docs, `if/fi`… pairing, CRLF) |
 | ⬇️ Heartbeat script | Generate and download a Linux (systemd) or Windows (scheduled task) heartbeat agent |
 | 🚀 Version update | Periodically compares against GitHub Releases and notifies in the UI; Docker deployments get a copy-paste update command, bare-metal deployments can enable a "direct update" that downloads the release asset and replaces itself (a watchdog script restarts it) |
 | 👤 Users & roles | JWT login, `ADMIN` / `USER`, admin user management, self-service username / password change |
@@ -29,7 +30,7 @@
 
 - **Backend**: Spring Boot 4.1, Java 21, Spring Web MVC, Spring Data JPA, Spring Security + JJWT, SQLite (xerial JDBC, single connection), Apache MINA SSHD, BouncyCastle, Lombok
 - **Frontend**: Vue 3 + Element Plus + ECharts + dayjs (all vendored locally, no Node or build step)
-- **Build & deploy**: Maven, Docker (multi-arch amd64/arm64), GitHub Actions → GHCR + Docker Hub, GraalVM Native Image (experimental)
+- **Build & deploy**: Maven, Docker (multi-arch amd64/arm64), GitHub Actions → GHCR + Docker Hub. GraalVM native images are **no longer built or published** (too fragile); only the JVM image is maintained.
 
 ## Quick start
 
@@ -88,14 +89,6 @@ Settings live in `src/main/resources/application.yaml` and can be overridden wit
 
 On tighter devices lower `-Xmx` to `192m` or even `128m`.
 
-**native image memory flag**: pass runtime options with the `-XX:` prefix:
-
-```bash
-docker run -d ... device-manager-native -XX:MaxHeapSize=192m
-```
-
-A native image defaults to ~80% of physical RAM as max heap; cap it explicitly on small devices.
-
 **Key environment variables**:
 
 | Variable | Description | Default |
@@ -125,30 +118,11 @@ docker run -d --name device-manager \
   ghcr.io/evil-qq-intestine/device-manager:latest
 ```
 
-### Troubleshooting native at runtime (optional)
+### Native images are discontinued
 
-> ⚠️ **Native images up to and including `1.0.3` cannot use SSH features** (test SSH, run script tasks, remote shutdown) — they fail with `Internal server error` because the BouncyCastle security provider was not registered at native-image build time. Fixed in **`1.0.4`**: use `1.0.4+` or the JVM image (never affected). On an older native image, pull `latest-native` / `1.0.4-native`.
-
-GraalVM native is a closed-world analysis, so reflection used by third-party libraries must be
-registered ahead of time. This project already handles `FileSystemProvider`, security providers
-and the sqlite metadata. If you hit `MissingReflectionRegistrationError` at runtime (especially
-with SSH script tasks), generate the config **precisely** with the tracing agent instead of guessing:
-
-```bash
-# requires GraalVM (ships native-image-agent)
-# 1) start the JVM app with the agent
-java -agentlib:native-image-agent=config-merge-dir=target/native-config \
-     -jar target/device-manager-*.jar
-# 2) exercise the relevant features: log in -> create & run a script task -> test SSH -> shut down
-# 3) Ctrl-C; configs are written to target/native-config/
-# 4) copy them into the sources and rebuild native
-mkdir -p src/main/resources/META-INF/native-image/com.example/device-manager
-cp target/native-config/*.json src/main/resources/META-INF/native-image/com.example/device-manager/
-./mvnw -Pnative -DskipTests native:compile
-```
-
-The generated files are committed with the source and picked up automatically. You do not need
-them unless you actually hit a problem.
+> ⚠️ GraalVM native images are **no longer built or published** (dropped in `1.0.5`). Only the JVM image and the runnable jar are maintained. Native builds kept hitting closed-world pitfalls (reflection, dynamic proxies, runtime-registered security providers) that were not worth the maintenance cost. Use `ghcr.io/evil-qq-intestine/device-manager:latest` (or the Docker Hub mirror) instead.
+>
+> Historical note: native images up to and including `1.0.3` could not use SSH features at all (`Internal server error` — the BouncyCastle provider was not registered at native-image build time). `1.0.4` fixed it, but native was dropped right after.
 
 ## Remote shutdown & sudo
 
@@ -172,16 +146,16 @@ On startup the app periodically (every 6 hours by default) calls the GitHub Rele
 **Docker deployments**: open the notice and copy the update command (images are published to both GHCR and Docker Hub, the latter defaulting to `emmmm666/device-manager` and overridable via the `DOCKERHUB_IMAGE` repository variable):
 
 ```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.4
+docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.5
 ```
 
 The image name comes from `app.update.docker-image`; after pulling, restart the container your usual way (e.g. `docker compose up -d` or `docker restart <name>`).
 
-**Bare-metal deployments (native / jar)**: an admin can enable "direct update". The app then downloads the matching release asset (`device-manager-linux-amd64` / `device-manager-linux-arm64` / `device-manager.jar`), replaces itself and exits, after which the **watchdog script** starts the new version. Download the watchdog from the same dialog:
+**Bare-metal deployments (jar)**: an admin can enable "direct update". The app then downloads the release asset (`device-manager.jar`), replaces itself and exits, after which the **watchdog script** starts the new version. Download the watchdog from the same dialog:
 
 ```bash
-DEVICE_MANAGER_APP=/opt/device-manager/device-manager \
-DEVICE_MANAGER_ARGS="--server.port=8080" \
+DEVICE_MANAGER_APP=java \
+DEVICE_MANAGER_ARGS="-jar /opt/device-manager/device-manager.jar --server.port=8080" \
 ./device-manager-watchdog.sh
 ```
 

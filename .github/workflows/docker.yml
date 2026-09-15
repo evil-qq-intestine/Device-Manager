@@ -15,6 +15,9 @@ env:
   # fork 后可在 Settings → Variables 里改成自己的命名空间。
   DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'emmmm666/device-manager' }}
 
+# 说明：自 1.0.4 起不再维护 GraalVM native 二进制镜像（编译坑太多），
+# 只构建 JVM 多架构镜像；tag 推送时额外构建可执行 jar 并创建 GitHub Release
+# （版本检测与「直接更新」依赖 Release 产物）。
 jobs:
   # ============================================================
   # JVM 镜像（多架构：amd64 + arm64，默认标签）
@@ -81,176 +84,6 @@ jobs:
           cache-to: type=gha,mode=max,scope=jvm
 
   # ============================================================
-  # GraalVM native 镜像
-  # native 可执行文件是平台相关的（架构+libc），不能跨架构，必须在目标架构上编译：
-  #   amd64 -> ubuntu-latest ；arm64 -> ubuntu-24.04-arm（公共仓库免费）
-  # 每个架构先按 digest 推送到 GHCR，最后合并成多架构 manifest（标签带 -native 后缀）
-  # ============================================================
-  native:
-    name: Native build (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: amd64
-            runner: ubuntu-latest
-            platform: linux/amd64
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-            platform: linux/arm64
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Compute lowercase image name
-        id: img
-        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          # Spring Boot 4.1 的 native 构建要求 GraalVM 25（编译产物仍按 java.version=21）
-          java-version: '25'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: 'maven'
-
-      - name: Build native binary
-        run: |
-          chmod +x mvnw
-          ./mvnw -B -Pnative -DskipTests native:compile
-
-      # tag 推送时把裸二进制作为 Release 产物（供「直接更新」下载）
-      - name: Prepare native release asset
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: cp target/device-manager "device-manager-linux-${{ matrix.arch }}"
-
-      - name: Upload native release asset
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-linux-${{ matrix.arch }}
-          path: device-manager-linux-${{ matrix.arch }}
-          if-no-files-found: error
-          retention-days: 7
-
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push by digest
-        id: build
-        if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.native
-          platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ steps.img.outputs.name }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=native-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=native-${{ matrix.arch }}
-
-      - name: Export digest
-        if: github.event_name != 'pull_request'
-        run: |
-          mkdir -p /tmp/digests
-          echo "${{ steps.build.outputs.digest }}" > "/tmp/digests/${{ matrix.arch }}.digest"
-
-      - uses: actions/upload-artifact@v4
-        if: github.event_name != 'pull_request'
-        with:
-          name: digest-${{ matrix.arch }}
-          path: /tmp/digests/${{ matrix.arch }}.digest
-          if-no-files-found: error
-          retention-days: 1
-
-  # ============================================================
-  # 合并 native 多架构 manifest，并同时推送到 GHCR 与 Docker Hub
-  # ============================================================
-  merge-native:
-    name: Merge native manifest
-    runs-on: ubuntu-latest
-    needs: native
-    if: github.event_name != 'pull_request'
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Compute lowercase image name
-        id: img
-        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: /tmp/digests
-          pattern: digest-*
-          merge-multiple: true
-
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Image metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}
-            ${{ env.DOCKERHUB_IMAGE }}
-          # latest=false：关闭 metadata-action 在 tag 事件下自动生成的裸 latest，
-          # 否则会用 native 镜像覆盖 JVM 的 latest。native 的 latest-native 由下面显式 raw 标签生成。
-          flavor: |
-            latest=false
-            suffix=-native
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Create multi-arch manifest + per-arch tags
-        env:
-          IMAGE: ${{ env.REGISTRY }}/${{ steps.img.outputs.name }}
-        working-directory: /tmp/digests
-        run: |
-          set -euo pipefail
-          # steps.build.outputs.digest 已包含 "sha256:" 前缀
-          AMD="$IMAGE@$(cat amd64.digest)"
-          ARM="$IMAGE@$(cat arm64.digest)"
-          # 多架构 manifest：docker pull 会自动选架构。
-          # 目标标签同时包含 GHCR 与 Docker Hub，imagetools 会把清单跨仓库复制过去。
-          docker buildx imagetools create \
-            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            "$AMD" "$ARM"
-          # 额外的单架构标签（每个仓库各一份），方便明确指定
-          while IFS= read -r tag; do
-            docker buildx imagetools create -t "${tag}-amd64" "$AMD"
-            docker buildx imagetools create -t "${tag}-arm64" "$ARM"
-          done < <(jq -r '.tags[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-          docker buildx imagetools inspect "$(jq -r '.tags[0]' <<< "$DOCKER_METADATA_OUTPUT_JSON")"
-
-  # ============================================================
   # tag 推送时额外构建可执行 jar，作为「直接更新」的产物
   # ============================================================
   jar:
@@ -284,13 +117,13 @@ jobs:
           retention-days: 7
 
   # ============================================================
-  # tag 推送时创建 GitHub Release，并附上 native 二进制与 jar
-  # 版本检测（GitHub Releases API）与「直接更新」都依赖这些产物
+  # tag 推送时创建 GitHub Release，并附上可执行 jar
+  # 版本检测（GitHub Releases API）与「直接更新」都依赖该产物
   # ============================================================
   release:
     name: GitHub Release
     runs-on: ubuntu-latest
-    needs: [ native, jar ]
+    needs: [ jar ]
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
