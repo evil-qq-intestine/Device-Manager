@@ -1,6 +1,7 @@
 package com.example.tool.device.service.checker;
 
 import java.net.InetAddress;
+import java.util.Set;
 
 /**
  * 设备IP策略检查接口，
@@ -13,5 +14,5 @@ public interface DeviceIpChecker {
      * @param deviceId 要唤醒的设备
      * @return InetAddress对象，工具类拿到直接发包
      */
-    InetAddress resolveDestinationAddress(Integer deviceId);
+    Set<InetAddress> resolveDestinationAddress(Integer deviceId);
 }

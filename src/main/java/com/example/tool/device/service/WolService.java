@@ -33,7 +33,7 @@ public class WolService {
             throw new BusinessException("deviceId is null");
         }
         Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new BusinessException("Device not found, id: " + deviceId));
-        boolean sendSuccess = ipStrategy(device, MacUtils.parse(device.getMac()));
+        boolean sendSuccess = ipStrategy(device, device.getMac());
         if (!sendSuccess) {
             throw new BusinessException("device send magic packet failed");
         }
@@ -42,7 +42,7 @@ public class WolService {
         deviceRepository.save(device);
     }
 
-    private boolean ipStrategy(Device device, byte[] payload) {
+    private boolean ipStrategy(Device device, String payload) {
         if (device.getIpMode() == null) {
             log.error("ip mode is null,id:{}", device.getDeviceId());
             throw new BusinessException("ip mode is null");
@@ -55,7 +55,7 @@ public class WolService {
         }
     }
 
-    private boolean ipSendChecker(Device device, byte[] payload, int ipGrade) {
+    private boolean ipSendChecker(Device device, String payload, int ipGrade) {
         String key = "deviceIpv" + ipGrade + "Checker";
         if (ipCheckerMap.get(key) == null) {
             log.error("{} checkerMap is null, ID : {}", key, device.getDeviceId());

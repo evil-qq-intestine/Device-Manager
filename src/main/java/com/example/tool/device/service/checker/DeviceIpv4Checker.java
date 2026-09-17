@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.*;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Slf4j
 @Component("deviceIpv4Checker")
@@ -25,14 +28,75 @@ public class DeviceIpv4Checker implements DeviceIpChecker {
     }
 
     @Override
-    public InetAddress resolveDestinationAddress(Integer deviceId) {
-        InetAddress broadcast;
+    public Set<InetAddress> resolveDestinationAddress(Integer deviceId) {
+//        InetAddress broadcast;
+//        try {
+//            broadcast = InetAddress.getByAddress(ipAddressBytes);
+//        } catch (IOException e) {
+//            log.error("Failed to build InetAddress, id: {}", deviceId, e);
+//            throw new BusinessException("Failed to construct InetAddress", e);
+//        }
+//        return broadcast;
+        Set<InetAddress> broadCasts = new LinkedHashSet<>();
         try {
-            broadcast = InetAddress.getByAddress(ipAddressBytes);
-        } catch (IOException e) {
-            log.error("Failed to build InetAddress, id: {}", deviceId, e);
-            throw new BusinessException("Failed to construct InetAddress", e);
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (!networkInterface.isLoopback() || !networkInterface.isUp() || networkInterface.isVirtual()) {
+                    continue;
+                }
+                String name = networkInterface.getName();
+                if (name.startsWith("tun") || name.startsWith("tap")) {
+                    continue;
+                } else if (name.startsWith("docker")) {
+                    log.warn("Docker environment detected. Please check whether Docker is configured with the host setting; otherwise, this WOL feature will not work.");
+                    continue;
+                }
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    InetAddress broadcast = interfaceAddress.getBroadcast();
+                    if (broadcast != null) {// 注意
+                        broadCasts.add(broadcast);
+                    }
+                }
+                broadCasts.add(InetAddress.getByName(broadcastAddress));
+            }
+        } catch (SocketException e) {
+            log.error("Failed to discover broad casts", e);
+        } catch (UnknownHostException e) {
+            log.debug("IPV4 Environment variable settings are incorrect : {}",broadcastAddress, e);
         }
-        return broadcast;
+        return broadCasts;
     }
+
+//    private Set<InetAddress> discoverBroadCasts() {
+//        Set<InetAddress> broadCasts = new LinkedHashSet<>();
+//        try {
+//            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+//            while (interfaces.hasMoreElements()) {
+//                NetworkInterface networkInterface = interfaces.nextElement();
+//                if (!networkInterface.isLoopback() || !networkInterface.isUp() || networkInterface.isVirtual()) {
+//                    continue;
+//                }
+//                String name = networkInterface.getName();
+//                if (name.startsWith("tun") || name.startsWith("tap")) {
+//                    continue;
+//                } else if (name.startsWith("docker")) {
+//                    log.warn("Docker environment detected. Please check whether Docker is configured with the host setting; otherwise, this WOL feature will not work.");
+//                    continue;
+//                }
+//                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+//                    InetAddress broadcast = interfaceAddress.getBroadcast();
+//                    if (broadcast != null) {// 注意
+//                        broadCasts.add(broadcast);
+//                    }
+//                }
+//                broadCasts.add(InetAddress.getByName(broadcastAddress));
+//            }
+//        } catch (SocketException e) {
+//            log.error("Failed to discover broad casts", e);
+//        } catch (UnknownHostException e) {
+//            log.debug("IPV4 Environment variable settings are incorrect : {}",broadcastAddress, e);
+//        }
+//        return broadCasts;
+//    }
 }
