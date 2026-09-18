@@ -1,4 +1,4 @@
-# Device Manager
+# Device Manager (Beta)
 
 > Self-hosted device monitoring, Wake-on-LAN and SSH remote operations console
 
