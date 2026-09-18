@@ -1,4 +1,4 @@
-# 设备管家 · Device Manager
+# 设备管家 · Device Manager (Beta)
 
 > 自托管的设备在线监控、网络唤醒与 SSH 远程运维控制台
 
