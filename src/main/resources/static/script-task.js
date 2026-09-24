@@ -29,9 +29,10 @@
             devices: { type: Array, default: () => [] }
         },
         inject: ["nd"],
+        emits: ["mode-change"],
         template: `
 <div class="stp">
-  <transition name="vsc-push" mode="out-in">
+  <transition name="vsc-push" mode="out-in" @after-enter="onTabsAfterEnter">
     <div v-if="mode === 'list'" key="list" class="stp__list">
       <div class="stp__bar">
         <el-button type="primary" @click="openCreate"><el-icon><Plus/></el-icon>&nbsp;{{ t('scriptTask.add') }}</el-button>
@@ -160,11 +161,19 @@
         <section class="vsc__center">
           <div class="vsc__tabs">
             <span class="vsc__back" @click="closeActive"><el-icon><Back/></el-icon>&nbsp;{{ t('scriptExplorer.back') }}</span>
-            <div v-for="tab in tabs" :key="tab.key" class="vsc__tab"
-                 :class="{ active: tab.key === activeKey }" @click="activate(tab)">
-              <span class="vsc__tab-name">{{ tabLabel(tab) }}</span>
-              <span class="vsc__tab-dot" v-if="tabDirty(tab)"></span>
-              <span class="vsc__tab-close" @click.stop="closeTab(tab)"><el-icon><Close/></el-icon></span>
+            <div class="vsc__tabs-fade" :class="{ 'is-left': tabsView.left, 'is-right': tabsView.right }">
+              <div class="vsc__tabs-track" ref="tabsTrack" @scroll="onTabsScroll">
+                <div v-for="tab in tabs" :key="tab.key" class="vsc__tab"
+                     :class="{ active: tab.key === activeKey }" @click="activate(tab)">
+                  <span class="vsc__tab-name">{{ tabLabel(tab) }}</span>
+                  <span class="vsc__tab-dot" v-if="tabDirty(tab)"></span>
+                  <span class="vsc__tab-close" @click.stop="closeTab(tab)"><el-icon><Close/></el-icon></span>
+                </div>
+              </div>
+            </div>
+            <div class="vsc__tabs-nav" :class="{ on: tabsView.overflow }">
+              <span class="vsc__tabs-arrow" :class="{ off: !tabsView.left }" @click="scrollTabs(-1)"><el-icon><ArrowLeft/></el-icon></span>
+              <span class="vsc__tabs-arrow" :class="{ off: !tabsView.right }" @click="scrollTabs(1)"><el-icon><ArrowRight/></el-icon></span>
             </div>
           </div>
           <div class="vsc__editor">
@@ -305,6 +314,7 @@
                 tabs: [],
                 activeKey: null,
                 _tabSeq: 0,
+                tabsView: { overflow: false, left: false, right: false },
                 logs: { visible: false, taskId: null, taskName: "", items: [], total: 0, page: 0, size: 10, loading: false, detail: null }
             };
         },
@@ -329,6 +339,21 @@
         },
         created() {
             this.load();
+        },
+        updated() {
+            this.scheduleTabsMeasure();
+        },
+        watch: {
+            mode(v) {
+                this.$emit("mode-change", v);
+                this.scheduleTabsMeasure();
+            },
+            activeKey() {
+                this.$nextTick(() => {
+                    this.scrollActiveIntoView();
+                    this.measureTabs();
+                });
+            }
         },
         methods: {
             t(key, params) {
@@ -450,6 +475,52 @@
             },
             gotoProblem(d) {
                 if (this.$refs.scp) this.$refs.scp.goto(d);
+            },
+            scheduleTabsMeasure() {
+                if (this._tabsRaf) return;
+                this._tabsRaf = requestAnimationFrame(() => {
+                    this._tabsRaf = null;
+                    this.measureTabs();
+                });
+            },
+            measureTabs() {
+                const el = this.$refs.tabsTrack;
+                if (!el) {
+                    this.tabsView.overflow = false;
+                    this.tabsView.left = false;
+                    this.tabsView.right = false;
+                    return;
+                }
+                const max = el.scrollWidth - el.clientWidth;
+                const overflow = max > 2;
+                this.tabsView.overflow = overflow;
+                this.tabsView.left = overflow && el.scrollLeft > 2;
+                this.tabsView.right = overflow && el.scrollLeft < max - 2;
+            },
+            onTabsScroll() {
+                this.measureTabs();
+            },
+            scrollTabs(dir) {
+                const el = this.$refs.tabsTrack;
+                if (!el) return;
+                el.scrollBy({ left: dir * Math.max(el.clientWidth - 64, 96), behavior: "smooth" });
+            },
+            scrollActiveIntoView() {
+                const el = this.$refs.tabsTrack;
+                if (!el) return;
+                const act = el.querySelector(".vsc__tab.active");
+                if (!act) return;
+                const bar = el.getBoundingClientRect();
+                const tab = act.getBoundingClientRect();
+                const pad = 6;
+                if (tab.left < bar.left + pad) el.scrollLeft -= bar.left + pad - tab.left;
+                else if (tab.right > bar.right - pad) el.scrollLeft += tab.right - bar.right + pad;
+            },
+            onTabsAfterEnter() {
+                this.$nextTick(() => {
+                    this.measureTabs();
+                    this.scrollActiveIntoView();
+                });
             },
             async save() {
                 const tab = this.currentTab();
@@ -641,9 +712,15 @@
         },
         mounted() {
             this._alive = true;
+            this.$emit("mode-change", this.mode);
+            this._onTabsResize = () => this.scheduleTabsMeasure();
+            window.addEventListener("resize", this._onTabsResize);
+            this.scheduleTabsMeasure();
         },
         beforeUnmount() {
             this._alive = false;
+            if (this._onTabsResize) window.removeEventListener("resize", this._onTabsResize);
+            if (this._tabsRaf) cancelAnimationFrame(this._tabsRaf);
         }
     };
 })();

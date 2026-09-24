@@ -441,7 +441,7 @@
     </el-dropdown>
   </header>
 
-  <main class="main">
+  <main class="main" :class="{ 'main--wide': view === 'script' && scriptEditorMode === 'editor' }">
     <template v-if="view==='dashboard'">
       <div class="section-title"><span class="spark"></span><h2>{{ t('dashboard.title') }}</h2></div>
 
@@ -542,7 +542,7 @@
 
     <template v-else-if="view==='script'">
       <div class="section-title"><span class="spark"></span><h2>{{ t('nav.script') }}</h2></div>
-      <script-task-panel :devices="devices" />
+      <script-task-panel :devices="devices" @mode-change="scriptEditorMode = $event" />
     </template>
 
     <template v-else-if="view==='admin'">
@@ -817,6 +817,7 @@
                 lang: localStorage.getItem("devicemanager.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
                 theme: localStorage.getItem("devicemanager.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
                 view: "dashboard",
+                scriptEditorMode: "list",
                 loggingIn: false,
                 saving: false,
                 loading: false,

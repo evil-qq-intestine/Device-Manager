@@ -559,7 +559,8 @@ html.dark .role-tag { color: #ffb340; }
 html.dark .role-tag--user { background: rgba(10, 132, 255, 0.18); color: var(--accent-blue); }
 
 /* ---------- 主区域 ---------- */
-main.main { flex: 1; width: min(1240px, 100%); margin: 0 auto; padding: 34px 28px 64px; }
+main.main { flex: 1; width: min(1240px, 100%); margin: 0 auto; padding: 34px 28px 64px; transition: width 0.28s ease; }
+main.main--wide { width: min(1760px, 100%); padding-left: 20px; padding-right: 20px; }
 .section-title { display: flex; align-items: center; gap: 11px; margin: 2px 0 20px; }
 .section-title h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .section-title .spark { width: 4px; height: 20px; border-radius: 3px; background: var(--accent-blue); }
@@ -811,6 +812,7 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.32
 .field-hint { font-size: 12px; color: var(--text-low); line-height: 1.5; margin-top: 4px; }
 
 /* ---------- 脚本任务面板 ---------- */
+.stp__list { max-width: 1240px; }
 .stp__bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .stp__spacer { flex: 1; }
 .stp__name { font-weight: 600; color: var(--text-hi); }
@@ -1063,10 +1065,39 @@ html.dark .vsc { background: #1b1b1d; }
     background: var(--panel-soft);
     border-bottom: 1px solid var(--stroke);
     height: 38px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    overflow: hidden;
 }
-.vsc__tabs::-webkit-scrollbar { display: none; }
+/* 标签滚动区：滚动条隐藏，改用左右淡出提示还有更多标签 */
+.vsc__tabs-fade { position: relative; flex: 1; min-width: 0; align-self: stretch; }
+.vsc__tabs-fade::before,
+.vsc__tabs-fade::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 16px;
+    opacity: 0; transition: opacity 0.15s ease; pointer-events: none; z-index: 1;
+}
+.vsc__tabs-fade::before { left: 0; background: linear-gradient(to right, var(--panel-soft), rgba(0, 0, 0, 0)); }
+.vsc__tabs-fade::after { right: 0; background: linear-gradient(to left, var(--panel-soft), rgba(0, 0, 0, 0)); }
+.vsc__tabs-fade.is-left::before,
+.vsc__tabs-fade.is-right::after { opacity: 1; }
+.vsc__tabs-track {
+    display: flex; align-items: center; gap: 2px;
+    height: 100%;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.vsc__tabs-track::-webkit-scrollbar { display: none; }
+.vsc__tabs-nav {
+    display: flex; align-items: center; gap: 2px;
+    flex: 0 0 auto; margin-left: 6px;
+    opacity: 0; transition: opacity 0.15s ease;
+}
+.vsc__tabs-nav.on { opacity: 1; }
+.vsc__tabs-arrow {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 6px; flex: 0 0 auto;
+    color: var(--text-mid); cursor: pointer;
+}
+.vsc__tabs-arrow:hover { background: var(--hover); color: var(--text-hi); }
+.vsc__tabs-arrow.off { opacity: 0.3; pointer-events: none; }
 .vsc__back {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 4px 8px; margin-right: 6px; cursor: pointer;
