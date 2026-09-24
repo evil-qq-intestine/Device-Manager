@@ -262,12 +262,13 @@
         props: {
             modelValue: { type: String, default: "" },
             language: { type: String, default: "BASH" },
-            height: { type: String, default: "320px" }
+            height: { type: String, default: "320px" },
+            page: { type: Boolean, default: false }
         },
-        emits: ["update:modelValue", "update:language"],
+        emits: ["update:modelValue", "update:language", "update:diagnostics"],
         inject: ["nd"],
         template: `
-<div class="scp">
+<div class="scp" :class="{ 'scp--page': page }">
   <div class="scp__bar">
     <el-radio-group :model-value="language" size="small" @update:model-value="setLanguage">
       <el-radio-button label="BASH">Bash</el-radio-button>
@@ -275,11 +276,11 @@
     </el-radio-group>
     <el-button size="small" type="primary" plain @click="run"><el-icon><Search/></el-icon>&nbsp;{{ t('scriptCheck.run') }}</el-button>
     <span class="scp__spacer"></span>
-    <span v-if="checked" class="scp__status" :class="statusClass">{{ statusText }}</span>
+    <span v-if="checked && page" class="scp__status" :class="statusClass">{{ statusText }}</span>
   </div>
   <script-code-editor :model-value="modelValue" :language="language" :diagnostics="diagnostics"
-                      :height="height" @update:model-value="v => $emit('update:modelValue', v)" ref="editor" />
-  <div class="scp__result" v-if="checked">
+                      :height="height" :stretch="page" @update:model-value="v => $emit('update:modelValue', v)" ref="editor" />
+  <div class="scp__result" v-if="checked && !page">
     <div v-if="!diagnostics.length" class="scp__ok">{{ t('scriptCheck.noIssues') }}</div>
     <template v-else>
       <div class="scp__problems-head">
@@ -347,6 +348,7 @@
                     message: this.t("scriptCheck.msg." + d.key, d.params)
                 }));
                 this.checked = true;
+                this.$emit("update:diagnostics", this.diagnostics);
             },
             goto: function (d) {
                 if (this.$refs.editor) this.$refs.editor.focusPosition(d.line, d.col);

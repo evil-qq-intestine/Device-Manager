@@ -108,6 +108,13 @@
                     extraEsac: "疑似多余 {n} 个 esac"
                 }
             },
+            scriptExplorer: {
+                title: "脚本资源管理器", new: "新建脚本",
+                allScripts: "全部脚本", devices: "设备",
+                noTarget: "该设备暂无目标脚本", noTasks: "无目标脚本",
+                untitled: "未命名", back: "返回列表", config: "配置",
+                unsaved: "当前修改尚未保存，确定离开吗？"
+            },
             deviceSsh: {
                 title: "设备 SSH 配置", button: "设备 SSH", hint: "用于设备级关机，与脚本任务相互独立。",
                 host: "SSH 主机", port: "端口", user: "SSH 用户", type: "目标系统",
@@ -249,6 +256,13 @@
                     missingEsac: "Possibly missing {n} esac (unclosed case)",
                     extraEsac: "Possibly extra {n} esac"
                 }
+            },
+            scriptExplorer: {
+                title: "Script Explorer", new: "New script",
+                allScripts: "All scripts", devices: "Devices",
+                noTarget: "No scripts target this device", noTasks: "No targeted scripts",
+                untitled: "Untitled", back: "Back to list", config: "Configuration",
+                unsaved: "You have unsaved changes. Leave anyway?"
             },
             deviceSsh: {
                 title: "Device SSH", button: "Device SSH", hint: "Used for device-level shutdown, independent of script tasks.",
@@ -528,38 +542,7 @@
 
     <template v-else-if="view==='script'">
       <div class="section-title"><span class="spark"></span><h2>{{ t('nav.script') }}</h2></div>
-      <div class="script-layout">
-        <div class="script-side glass">
-          <div class="script-side__title">{{ t('scriptTask.devices') }}</div>
-          <div class="script-device" :class="{ active: !scriptSelected }" @click="selectScriptDevice(null)">
-            <span class="script-device__name">{{ t('scriptTask.allDevices') }}</span>
-          </div>
-          <div v-for="d in devices" :key="d.id" class="script-device"
-               :class="{ active: scriptSelected && scriptSelected.id === d.id }" @click="selectScriptDevice(d)">
-            <span class="script-device__dot" :class="statusBadgeClass(d.status)"></span>
-            <span class="script-device__name">{{ d.name || d.mac }}</span>
-            <span v-if="d.sshConfigured" class="chip">SSH</span>
-          </div>
-          <el-empty v-if="!devices.length" :description="t('device.empty')" :image-size="60" />
-        </div>
-
-        <div class="script-main">
-          <div class="glass script-ssh" v-if="scriptSelected">
-            <div class="script-ssh__head">
-              <h3>{{ t('deviceSsh.title') }}</h3>
-              <el-button size="small" @click="openDeviceSsh(scriptSelected)"><el-icon><Edit/></el-icon>&nbsp;{{ t('device.edit') }}</el-button>
-            </div>
-            <div class="script-ssh__body">
-              <template v-if="scriptSelected.sshConfigured">
-                <span class="mono">{{ scriptSelected.sshUser }}@{{ scriptSelected.sshHost }}:{{ scriptSelected.sshPort }}</span>
-                <span class="chip">{{ scriptSelected.sshType }}</span>
-              </template>
-              <span v-else class="stp__muted">{{ t('deviceSsh.notConfigured') }}</span>
-            </div>
-          </div>
-          <script-task-panel :key="scriptSelected ? scriptSelected.id : 'all'" :device="scriptSelected" :devices="devices" />
-        </div>
-      </div>
+      <script-task-panel :devices="devices" />
     </template>
 
     <template v-else-if="view==='admin'">
@@ -1692,4 +1675,5 @@
         app.component(name, comp);
     }
     app.mount("#app");
+
 })();
