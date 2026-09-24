@@ -11,8 +11,8 @@ import java.util.Set;
 public interface DeviceIpChecker {
     /**
      * 根据设备IP策略发出魔包的地址
-     * @param deviceId 要唤醒的设备
+     * @param deviceIp 要唤醒的设备
      * @return InetAddress对象，工具类拿到直接发包
      */
-    Set<InetAddress> resolveDestinationAddress(Integer deviceId);
+    Set<InetAddress> resolveDestinationAddress(String deviceIp);
 }

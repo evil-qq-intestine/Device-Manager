@@ -1,9 +1,10 @@
 /* ============================================================
-   ScriptCheck · 脚本代码检查（纯前端，无后端）
+   ScriptCheck · 脚本代码结构检查（纯前端，无后端）
    - ScriptChecker.check(code, language) -> diagnostic[]
      diagnostic = { line, col, endLine, endCol, severity, key, params }
-   - ScriptCodeEditor  行号 + 语法高亮 + 诊断行标记（Vue 组件）
-   - ScriptCheckPanel  工具条 + 编辑器 + 诊断面板（Vue 组件）
+   - ScriptCheckPanel  工具条 + 编辑器 + 问题面板（Vue 组件）
+     编辑器使用 Monaco 内核的 <script-code-editor>（见 monaco-code-editor.js），
+     检查结果以行内波浪线(marker) + 问题列表呈现。
    ============================================================ */
 (function () {
     "use strict";
@@ -255,149 +256,6 @@
 
     window.ScriptChecker = { check: check };
 
-    /* ---------------- 语法高亮 ---------------- */
-    function esc(s) {
-        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-
-    const BASH_TOKENS = [
-        { cls: "tok-comment", re: /#[^\n]*/y, comment: true },
-        { cls: "tok-str", re: /"(?:\\.|[^"\\])*"?/y },
-        { cls: "tok-str", re: /'(?:[^']*)'?/y },
-        { cls: "tok-var", re: /\$\{[^}]*\}?|\$[A-Za-z_][A-Za-z0-9_]*|\$[0-9@*#?$!-]/y },
-        { cls: "tok-kw", re: /\b(?:if|then|else|elif|fi|for|in|do|done|while|until|case|esac|function|select|return|exit|local|export|readonly|declare|source|set|unset|shift|break|continue|eval|exec|trap|wait|test)\b/y },
-        { cls: "tok-builtin", re: /\b(?:echo|printf|read|cd|ls|cp|mv|rm|mkdir|rmdir|touch|cat|head|tail|grep|sed|awk|sort|uniq|cut|tr|find|xargs|curl|wget|sleep|kill|pkill|chmod|chown|systemctl|service|apt|apt-get|yum|dnf|pacman|sudo|ssh|scp|rsync|tar|gzip|unzip|reboot|shutdown|hostname|ip|df|du|free|ps|top|date|env|which|tee)\b/y },
-        { cls: "tok-num", re: /\b\d+(?:\.\d+)?\b/y },
-        { cls: "tok-op", re: /[|&;<>(){}[\]$`\\=!+\-*/%.,:]+/y },
-        { cls: "", re: /\s+/y },
-        { cls: "", re: /[\s\S]/y }
-    ];
-
-    const PS_TOKENS = [
-        { cls: "tok-comment", re: /#[^\n]*/y, comment: true },
-        { cls: "tok-str", re: /"(?:`[\s\S]|[^"`])*"?/y },
-        { cls: "tok-str", re: /'(?:''|[^'])*'?/y },
-        { cls: "tok-var", re: /\$\{[^}]*\}?|\$[A-Za-z_][A-Za-z0-9_:]*|\$[?$_^]/y },
-        { cls: "tok-kw", re: /\b(?:if|elseif|else|switch|foreach|for|while|do|until|function|param|return|throw|try|catch|finally|break|continue|in|class|enum|begin|process|end|filter|trap|exit)\b/y },
-        { cls: "tok-builtin", re: /\b[A-Z][a-z]+-[A-Z][A-Za-z]+\b/y },
-        { cls: "tok-num", re: /\b\d+(?:\.\d+)?\b/y },
-        { cls: "tok-op", re: /[|&;<>(){}[\]$`\\=!+\-*/%.,:?]+/y },
-        { cls: "", re: /\s+/y },
-        { cls: "", re: /[\s\S]/y }
-    ];
-
-    function highlightLine(line, language) {
-        const rules = String(language).toUpperCase() === "POWERSHELL" ? PS_TOKENS : BASH_TOKENS;
-        let html = "";
-        let i = 0;
-        while (i < line.length) {
-            let matched = false;
-            for (let k = 0; k < rules.length; k++) {
-                const rule = rules[k];
-                if (rule.comment && !(i === 0 || /[\s;&|({]/.test(line[i - 1]))) continue;
-                rule.re.lastIndex = i;
-                const m = rule.re.exec(line);
-                if (m && m.index === i && m[0].length) {
-                    html += rule.cls ? '<span class="' + rule.cls + '">' + esc(m[0]) + "</span>" : esc(m[0]);
-                    i += m[0].length;
-                    matched = true;
-                    break;
-                }
-            }
-            if (!matched) { html += esc(line[i]); i++; }
-        }
-        return html;
-    }
-
-    /* ---------------- 编辑器组件 ---------------- */
-    const ScriptCodeEditor = {
-        name: "ScriptCodeEditor",
-        props: {
-            modelValue: { type: String, default: "" },
-            language: { type: String, default: "BASH" },
-            diagnostics: { type: Array, default: function () { return []; } },
-            height: { type: String, default: "320px" }
-        },
-        emits: ["update:modelValue"],
-        template: `
-<div class="sce" :style="{ height: height }">
-  <div class="sce__gutter" ref="gutter">
-    <div v-for="n in lineCount" :key="n" class="sce__ln" :class="lineMark(n)">
-      <span class="sce__dot" :class="lineMark(n)"></span>{{ n }}
-    </div>
-  </div>
-  <div class="sce__body">
-    <pre class="sce__highlight" ref="hl" aria-hidden="true"><div v-for="(l, i) in lines" :key="i" class="sce__hl-line" :class="lineMark(i + 1)" v-html="renderLine(l, i + 1)"></div></pre>
-    <textarea class="sce__input" ref="input" :value="modelValue" wrap="off" spellcheck="false"
-              autocapitalize="off" autocomplete="off" @input="onInput" @scroll="onScroll" @keydown="onKeydown"></textarea>
-  </div>
-</div>
-`,
-        computed: {
-            lines: function () {
-                return this.modelValue.split("\n");
-            },
-            lineCount: function () {
-                return this.lines.length;
-            },
-            byLine: function () {
-                const map = {};
-                this.diagnostics.forEach(function (d) {
-                    if (!map[d.line] || d.severity === "error") map[d.line] = d.severity;
-                });
-                return map;
-            }
-        },
-        methods: {
-            renderLine: function (line, n) {
-                const html = highlightLine(line, this.language);
-                return html === "" ? "&#8203;" : html;
-            },
-            lineMark: function (n) {
-                const s = this.byLine[n];
-                return s ? (s === "error" ? "sce--error" : "sce--warn") : "";
-            },
-            onInput: function (e) {
-                this.$emit("update:modelValue", e.target.value);
-            },
-            onScroll: function (e) {
-                if (this.$refs.hl) {
-                    this.$refs.hl.scrollTop = e.target.scrollTop;
-                    this.$refs.hl.scrollLeft = e.target.scrollLeft;
-                }
-                if (this.$refs.gutter) {
-                    this.$refs.gutter.scrollTop = e.target.scrollTop;
-                }
-            },
-            onKeydown: function (e) {
-                if (e.key === "Tab") {
-                    e.preventDefault();
-                    const ta = e.target;
-                    const start = ta.selectionStart;
-                    const end = ta.selectionEnd;
-                    const v = ta.value.slice(0, start) + "    " + ta.value.slice(end);
-                    this.$emit("update:modelValue", v);
-                    this.$nextTick(function () {
-                        ta.selectionStart = ta.selectionEnd = start + 4;
-                    });
-                }
-            },
-            focusPosition: function (line, col) {
-                const ta = this.$refs.input;
-                if (!ta) return;
-                const rows = this.modelValue.split("\n");
-                let offset = 0;
-                for (let i = 0; i < line - 1 && i < rows.length; i++) offset += rows[i].length + 1;
-                offset += Math.max(0, (col || 1) - 1);
-                ta.focus();
-                ta.setSelectionRange(offset, offset);
-                const lh = ta.scrollHeight / Math.max(rows.length, 1);
-                ta.scrollTop = Math.max(0, (line - 2) * lh - ta.clientHeight / 3);
-                this.onScroll({ target: ta });
-            }
-        }
-    };
-
     /* ---------------- 检查面板组件 ---------------- */
     const ScriptCheckPanel = {
         name: "ScriptCheckPanel",
@@ -423,13 +281,20 @@
                       :height="height" @update:model-value="v => $emit('update:modelValue', v)" ref="editor" />
   <div class="scp__result" v-if="checked">
     <div v-if="!diagnostics.length" class="scp__ok">{{ t('scriptCheck.noIssues') }}</div>
-    <div v-else class="scp__list">
-      <div v-for="(d, i) in diagnostics" :key="i" class="scp__item" :class="d.severity" @click="goto(d)">
-        <span class="scp__loc">{{ d.line }}:{{ d.col }}</span>
-        <span class="scp__sev">{{ d.severity === 'error' ? t('scriptCheck.error') : t('scriptCheck.warning') }}</span>
-        <span class="scp__msg">{{ t('scriptCheck.msg.' + d.key, d.params) }}</span>
+    <template v-else>
+      <div class="scp__problems-head">
+        <span class="scp__problems-title">{{ t('scriptCheck.problems') }}</span>
+        <span v-if="errorCount" class="scp__problems-count is-error">{{ t('scriptCheck.errors', { n: errorCount }) }}</span>
+        <span v-if="warningCount" class="scp__problems-count is-warn">{{ t('scriptCheck.warnings', { n: warningCount }) }}</span>
       </div>
-    </div>
+      <div class="scp__list">
+        <div v-for="(d, i) in diagnostics" :key="i" class="scp__item" :class="d.severity" @click="goto(d)">
+          <span class="scp__sev" :class="'is-' + d.severity">{{ d.severity === 'error' ? t('scriptCheck.error') : t('scriptCheck.warning') }}</span>
+          <span class="scp__msg">{{ d.message }}</span>
+          <span class="scp__loc">{{ d.line }}:{{ d.col }}</span>
+        </div>
+      </div>
+    </template>
   </div>
 </div>
 `,
@@ -478,7 +343,9 @@
                 this.timer = setTimeout(function () { self.run(); }, 350);
             },
             run: function () {
-                this.diagnostics = window.ScriptChecker.check(this.modelValue, this.language);
+                this.diagnostics = window.ScriptChecker.check(this.modelValue, this.language).map((d) => Object.assign({}, d, {
+                    message: this.t("scriptCheck.msg." + d.key, d.params)
+                }));
                 this.checked = true;
             },
             goto: function (d) {
@@ -487,6 +354,5 @@
         }
     };
 
-    window.ScriptCodeEditor = ScriptCodeEditor;
     window.ScriptCheckPanel = ScriptCheckPanel;
 })();

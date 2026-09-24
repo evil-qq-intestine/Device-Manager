@@ -19,7 +19,7 @@
 | ⚡ 网络唤醒 | Wake-on-LAN 魔术包，IPv4 广播 / IPv6 组播；唤醒后进入 `PROBE` 等待上线，超时判定为离线 |
 | 🔌 远程关机 | 通过 SSH 关机，支持免密 sudo（`sudo -n`）或 sudo 密码（`sudo -S`），bash / PowerShell 目标均可 |
 | 📜 脚本任务 | **一个脚本可挂多台设备**；触发方式：`MANUAL`（仅界面手动执行）/ `ONCE`（定时一次）/ `CRON`（周期）/ `ON_BOOT`（设备上线时）；脚本成功后可选择不关机 / 立即关机 / 延迟关机；每个目标设备独立记录执行日志 |
-| 🧭 脚本检查 | 内置纯前端语法检查，编译器风格编辑器：行号、语法高亮、错误 / 警告标记与可跳转的诊断列表；支持 Bash / PowerShell（引号、括号、here-doc、`if/fi` 配对、CRLF 等） |
+| 🧭 脚本检查 | 内置纯前端语法检查，编辑器基于 **Monaco**（VS Code 同款内核，本地 vendor，离线可用）：语法高亮、minimap、代码折叠、查找替换、括号配对 / 着色，检查结果以行内波浪线 + 问题面板呈现；支持 Bash / PowerShell（引号、括号、here-doc、`if/fi` 配对、CRLF 等） |
 | ⬇️ 心跳脚本 | 一键生成并下载 Linux（systemd）或 Windows（计划任务）心跳上报脚本 |
 | 🚀 版本更新 | 定时对比 GitHub Releases 检测新版本并在界面提示；Docker 部署给出更新命令，裸机部署可开启「直接更新」下载产物替换自身（看门狗脚本负责拉起） |
 | 👤 用户与权限 | JWT 登录，`ADMIN` / `USER` 角色，管理员可管理用户，所有人可改自己的用户名与密码 |
@@ -29,7 +29,7 @@
 ## 技术栈
 
 - **后端**：Spring Boot 4.1、Java 21、Spring Web MVC、Spring Data JPA、Spring Security + JJWT、SQLite（xerial JDBC，单连接）、Apache MINA SSHD、BouncyCastle、Lombok
-- **前端**：Vue 3 + Element Plus + ECharts + dayjs（全部本地 vendor，无需 Node / 构建步骤）
+- **前端**：Vue 3 + Element Plus + ECharts + Monaco（全部本地 vendor，无需 Node / 构建步骤）
 - **构建与部署**：Maven、Docker（多架构 amd64/arm64）、GitHub Actions → GHCR + Docker Hub。**不再构建 / 发布 GraalVM native 镜像**（封闭世界编译坑太多、维护成本高），只维护 JVM 镜像。
 
 ## 快速开始
@@ -178,7 +178,7 @@ src/main/java/com/example/tool
 ├── versionController/  # 版本检测、更新与看门狗脚本
 └── config/        # 安全配置、异步、全局异常
 src/main/resources
-├── static/        # 零构建前端（Vue 3 + Element Plus + ECharts，含 vendor）
+├── static/        # 零构建前端（Vue 3 + Element Plus + ECharts + Monaco，含 vendor）
 ├── application.yaml
 └── application-docker.yaml
 ```

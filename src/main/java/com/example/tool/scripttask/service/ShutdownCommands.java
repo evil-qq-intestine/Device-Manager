@@ -4,6 +4,7 @@ import com.example.tool.scripttask.entity.ScriptTask;
 import com.example.tool.scripttask.entity.ScriptType;
 import com.example.tool.scripttask.entity.ShutdownMode;
 import com.example.tool.scripttask.service.ssh.SshResult;
+import org.springframework.stereotype.Component;
 
 /**
  * 关机命令生成。bash 与 powershell 目标分别处理。
@@ -14,6 +15,7 @@ import com.example.tool.scripttask.service.ssh.SshResult;
  *   <li>有密码：{@code sudo -S -p ''}，密码通过 SSH stdin 传入，不出现在命令行里</li>
  * </ul>
  */
+@Component
 public final class ShutdownCommands {
 
     private ShutdownCommands() {
@@ -33,8 +35,10 @@ public final class ShutdownCommands {
 
     public static String command(ScriptType type, boolean immediate, int delaySeconds, boolean withPassword) {
         if (type == ScriptType.POWERSHELL) {
-            // Windows 需要 SSH 用户是管理员；/t 单位是秒
-            return immediate ? "Stop-Computer -Force" : "shutdown /s /t " + delaySeconds + " /f";
+            // Windows 需要 SSH 用户是管理员；/t 单位是秒。
+            // 用 shutdown.exe 而不是 PowerShell cmdlet Stop-Computer：
+            // Windows OpenSSH 默认 shell 是 cmd.exe，Stop-Computer 无法识别。
+            return "shutdown /s /t " + (immediate ? 0 : delaySeconds) + " /f";
         }
         if (immediate) {
             return withPassword

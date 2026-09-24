@@ -17,21 +17,15 @@ import java.util.*;
 @RequiredArgsConstructor
 public class DeviceIpv6Checker implements DeviceIpChecker {
 
-//    @Value("${wol.ipv6.multicast-address: ff02::1}")
-//    private String multicastAddress;
-//
-//    @Value("${wol.ipv6.networkCard:}")
-//    private String networkCard;
-
     private final WolIpv6Properties wolIpv6Properties;
 
     @Override
-    public Set<InetAddress> resolveDestinationAddress(Integer deviceId){
+    public Set<InetAddress> resolveDestinationAddress(String deviceIp){
         try {
             if (useRelay()){
-                return resolveRelay(deviceId);
+                return resolveRelay(deviceIp);
             } else if (!useRelay()){
-                return resolveMulticast(deviceId);
+                return resolveMulticast(deviceIp);
             }
         } catch (UnknownHostException e) {
             log.error("IPV6 Address resolution failed");
@@ -51,14 +45,16 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
     }
 
     //中继
-    private Set<InetAddress> resolveRelay(Integer deviceId) throws UnknownHostException {
-        InetAddress[] addresses = InetAddress.getAllByName(wolIpv6Properties.getRelayHost());
-        log.info("IPV6 relayHost mode, deviceId:{}, relay:{}, number of address:{}", deviceId, wolIpv6Properties.getRelayHost(), addresses.length);
-        return Set.of(addresses);
+    private Set<InetAddress> resolveRelay(String deviceIp) throws UnknownHostException {
+        InetAddress[] addressesList = InetAddress.getAllByName(wolIpv6Properties.getRelayHost());
+        log.info("IPV6 relayHost mode, device IP:{}, relay:{}, number of address:{}", deviceIp, wolIpv6Properties.getRelayHost(), addressesList.length);
+        Set<InetAddress> addresses = new LinkedHashSet<>(Arrays.asList(addressesList));
+        addresses.add(InetAddress.getByName(deviceIp));
+        return addresses;
     }
 
     //组播
-    private Set<InetAddress> resolveMulticast(Integer deviceId) throws UnknownHostException {
+    private Set<InetAddress> resolveMulticast(String deviceIp) throws UnknownHostException {
         Set<String> cards = wolIpv6Properties.getNetworkCards();
         if (cards == null || cards.isEmpty()) {
             cards = detectIpv6NetworkCards();
@@ -66,14 +62,17 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
         }
         if (cards.isEmpty()) {
             log.warn("No available network interface cards detected for IPV6; WOL may not function");
-            return Set.of(InetAddress.getByName(wolIpv6Properties.getMulticastAddress()));
+            Set<InetAddress> addresses = new LinkedHashSet<>();
+            addresses.add(InetAddress.getByName(wolIpv6Properties.getMulticastAddress()));
+            addresses.add(InetAddress.getByName(deviceIp));
+            return addresses;
         }
         Set<InetAddress> addresses = new HashSet<>(cards.size());
         for (String card : cards) {
             String addr = wolIpv6Properties.getMulticastAddress() + "%" + card;
             addresses.add(InetAddress.getByName(addr));
         }
-        log.info("IPV6 multicast mode, deviceId:{}", deviceId);
+        log.info("IPV6 multicast mode, device IP:{}", deviceIp);
         return addresses;
     }
 
@@ -85,10 +84,17 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
                     NetworkInterface.getNetworkInterfaces();
             while (ifaces.hasMoreElements()) {
                 NetworkInterface iface = ifaces.nextElement();
-                if (!iface.isUp() || iface.isLoopback() || iface.isVirtual()) continue;
+                if (!iface.isUp() || iface.isLoopback() || iface.isVirtual()) {
+                    continue;
+                }
                 String name = iface.getName();
-                if (name.startsWith("tun") || name.startsWith("tap")) continue;
-
+                if (name.startsWith("tun") || name.startsWith("tap")) {
+                    continue;
+                }
+                if (name.startsWith("docker")) {
+                    log.warn("Docker environment detected. Please check whether Docker is configured with the host setting; otherwise, this WOL feature will not work.");
+                    continue;
+                }
                 boolean hasIpv6 = false;
                 for (InterfaceAddress ia : iface.getInterfaceAddresses()) {
                     if (ia.getAddress() instanceof Inet6Address) {
@@ -103,20 +109,4 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
         }
         return cards;
     }
-
-//    @Override
-//    public InetAddress resolveDestinationAddress(Integer deviceId) {
-//        if (networkCard == null) {
-//            log.warn("To enable IPv6, you must configure the network interface used for sending data in the environment variables");
-//            throw new BusinessException("To enable IPv6, you must configure the network interface used for sending data in the environment variables");
-//        }
-//        InetAddress multicast;
-//        try {
-//            multicast = InetAddress.getByName(multicastAddress + "%" + networkCard);
-//        } catch (UnknownHostException e) {
-//            log.error("Failed to build InetAddress, id: {}", deviceId, e);
-//            throw new BusinessException("Failed to construct InetAddress", e);
-//        }
-//        return multicast;
-//    }
 }

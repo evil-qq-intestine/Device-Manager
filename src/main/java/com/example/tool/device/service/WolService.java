@@ -62,7 +62,7 @@ public class WolService {
             return false;
         }
         try {
-            magicPacketComponent.sendMagicPacket(payload, ipCheckerMap.get("deviceIpv" + ipGrade + "Checker").resolveDestinationAddress(device.getDeviceId()));
+            magicPacketComponent.sendMagicPacket(payload, ipCheckerMap.get("deviceIpv" + ipGrade + "Checker").resolveDestinationAddress(device.getIp()));
             return true;
         } catch (Exception e) {
             log.error("send magic packet error", e);

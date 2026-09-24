@@ -885,7 +885,7 @@ html.dark .chip--warn { background: rgba(255, 159, 10, 0.18); color: #ffc266; }
 html.dark .stp__warn { color: #ffc266; }
 
 /* ============================================================
-   脚本代码检查（编译器风格编辑器）
+   脚本代码检查（Monaco 内核编辑器 + 问题面板）
    ============================================================ */
 .scp { display: flex; flex-direction: column; gap: 8px; width: 100%; }
 .scp__bar { display: flex; align-items: center; gap: 8px; }
@@ -898,68 +898,15 @@ html.dark .scp__status.is-ok { color: #5ee27f; }
 html.dark .scp__status.is-warn { color: #ffc266; }
 html.dark .scp__status.is-error { color: #ff8a80; }
 
-.sce {
-    --sce-lh: 20px;
-    --sce-fs: 12.5px;
-    display: flex;
+.mce {
+    position: relative;
+    width: 100%;
     border: 1px solid var(--stroke-strong);
     border-radius: 10px;
     overflow: hidden;
     background: var(--surface-solid);
-    font-family: var(--font-mono);
-    font-size: var(--sce-fs);
-    line-height: var(--sce-lh);
 }
-.sce__gutter {
-    flex: 0 0 auto;
-    padding: 10px 0;
-    min-width: 46px;
-    overflow: hidden;
-    background: var(--panel-soft);
-    border-right: 1px solid var(--stroke);
-    color: var(--text-low);
-    text-align: right;
-    user-select: none;
-}
-.sce__ln { padding: 0 8px 0 4px; height: var(--sce-lh); position: relative; font-variant-numeric: tabular-nums; }
-.sce__dot {
-    display: inline-block;
-    width: 6px; height: 6px; border-radius: 50%;
-    margin-right: 5px; vertical-align: middle;
-    background: transparent;
-}
-.sce__dot.sce--error { background: var(--accent-red); }
-.sce__dot.sce--warn { background: var(--accent-orange); }
-.sce__body { position: relative; flex: 1 1 auto; min-width: 0; }
-.sce__highlight {
-    position: absolute; inset: 0; margin: 0; padding: 10px 12px;
-    overflow: hidden; pointer-events: none;
-    white-space: pre; tab-size: 4;
-    color: var(--text-hi);
-}
-.sce__hl-line { height: var(--sce-lh); white-space: pre; }
-.sce__hl-line.sce--error { background: rgba(255, 59, 48, 0.10); }
-.sce__hl-line.sce--warn { background: rgba(255, 149, 0, 0.10); }
-.sce__input {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    margin: 0; padding: 10px 12px; border: 0; outline: 0; resize: none;
-    background: transparent; color: transparent; caret-color: var(--text-hi);
-    font: inherit; line-height: inherit; white-space: pre; tab-size: 4;
-    overflow: auto;
-}
-.sce__input::selection { background: rgba(0, 113, 227, 0.28); }
-.tok-comment { color: var(--text-low); font-style: italic; }
-.tok-str { color: #c41a16; }
-.tok-var { color: #3f6ec6; }
-.tok-kw { color: #9b2393; font-weight: 600; }
-.tok-builtin { color: #0b7285; }
-.tok-num { color: #1c00cf; }
-.tok-op { color: var(--text-mid); }
-html.dark .tok-str { color: #ff8170; }
-html.dark .tok-var { color: #6bd6ff; }
-html.dark .tok-kw { color: #ff7ab2; }
-html.dark .tok-builtin { color: #4fd6be; }
-html.dark .tok-num { color: #d0bf69; }
+.mce__container { position: absolute; inset: 0; }
 
 .scp__result {
     border: 1px solid var(--stroke);
@@ -971,6 +918,20 @@ html.dark .tok-num { color: #d0bf69; }
 }
 .scp__ok { padding: 10px 12px; color: #1f8a3b; }
 html.dark .scp__ok { color: #5ee27f; }
+.scp__problems-head {
+    position: sticky; top: 0; z-index: 2;
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px;
+    background: var(--panel-soft);
+    border-bottom: 1px solid var(--stroke);
+    font-size: 12px;
+}
+.scp__problems-title { font-weight: 600; color: var(--text-hi); }
+.scp__problems-count { font-size: 11px; }
+.scp__problems-count.is-error { color: #c0271d; }
+.scp__problems-count.is-warn { color: #b26a00; }
+html.dark .scp__problems-count.is-error { color: #ff8a80; }
+html.dark .scp__problems-count.is-warn { color: #ffc266; }
 .scp__item {
     display: flex; align-items: baseline; gap: 10px;
     padding: 6px 12px; cursor: pointer;
@@ -980,8 +941,12 @@ html.dark .scp__ok { color: #5ee27f; }
 .scp__item:hover { background: var(--hover); }
 .scp__loc { font-family: var(--font-mono); color: var(--text-low); flex: 0 0 auto; min-width: 52px; }
 .scp__sev { flex: 0 0 auto; font-size: 11px; padding: 1px 7px; border-radius: 999px; }
+.scp__sev.is-error,
 .scp__item.error .scp__sev { color: #c0271d; background: rgba(255, 59, 48, 0.14); }
+.scp__sev.is-warn,
 .scp__item.warning .scp__sev { color: #b26a00; background: rgba(255, 149, 0, 0.16); }
+html.dark .scp__sev.is-error,
 html.dark .scp__item.error .scp__sev { color: #ff8a80; }
+html.dark .scp__sev.is-warn,
 html.dark .scp__item.warning .scp__sev { color: #ffc266; }
 .scp__msg { color: var(--text-hi); }

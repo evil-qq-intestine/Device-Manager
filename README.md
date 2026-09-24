@@ -19,7 +19,7 @@
 | ⚡ Wake-on-LAN | Magic packets over IPv4 broadcast / IPv6 multicast; after waking the device enters `PROBE` and is marked offline if it never comes up |
 | 🔌 Remote shutdown | Over SSH with passwordless sudo (`sudo -n`) or a sudo password (`sudo -S`); works for Bash and PowerShell targets |
 | 📜 Script tasks | **One script can target many devices**; triggers: `MANUAL` (run from the UI only), `ONCE`, `CRON`, `ON_BOOT`; on success optionally shut down (never / immediately / after a delay); one log per target device |
-| 🧭 Script checker | Built-in, frontend-only syntax check for Bash / PowerShell with a compiler-style editor: line numbers, syntax highlighting, error/warning markers and a jump-to-line diagnostics list (quotes, brackets, here-docs, `if/fi`… pairing, CRLF) |
+| 🧭 Script checker | Built-in, frontend-only syntax check for Bash / PowerShell. The editor is powered by **Monaco** (the editor engine behind VS Code, vendored locally – offline-friendly): syntax highlighting, minimap, code folding, find & replace, bracket matching/colorization; check results appear as inline squiggles plus a problems panel (quotes, brackets, here-docs, `if/fi`… pairing, CRLF) |
 | ⬇️ Heartbeat script | Generate and download a Linux (systemd) or Windows (scheduled task) heartbeat agent |
 | 🚀 Version update | Periodically compares against GitHub Releases and notifies in the UI; Docker deployments get a copy-paste update command, bare-metal deployments can enable a "direct update" that downloads the release asset and replaces itself (a watchdog script restarts it) |
 | 👤 Users & roles | JWT login, `ADMIN` / `USER`, admin user management, self-service username / password change |
@@ -29,7 +29,7 @@
 ## Tech stack
 
 - **Backend**: Spring Boot 4.1, Java 21, Spring Web MVC, Spring Data JPA, Spring Security + JJWT, SQLite (xerial JDBC, single connection), Apache MINA SSHD, BouncyCastle, Lombok
-- **Frontend**: Vue 3 + Element Plus + ECharts + dayjs (all vendored locally, no Node or build step)
+- **Frontend**: Vue 3 + Element Plus + ECharts + Monaco (all vendored locally, no Node or build step)
 - **Build & deploy**: Maven, Docker (multi-arch amd64/arm64), GitHub Actions → GHCR + Docker Hub. GraalVM native images are **no longer built or published** (too fragile); only the JVM image is maintained.
 
 ## Quick start
@@ -178,7 +178,7 @@ src/main/java/com/example/tool
 ├── versionController/  # version check, update and watchdog script
 └── config/        # security, async, global exception handling
 src/main/resources
-├── static/        # zero-build frontend (Vue 3 + Element Plus + ECharts, vendored)
+├── static/        # zero-build frontend (Vue 3 + Element Plus + ECharts + Monaco, vendored)
 ├── application.yaml
 └── application-docker.yaml
 ```

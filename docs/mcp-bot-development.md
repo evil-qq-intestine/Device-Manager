@@ -938,7 +938,7 @@ ENTRYPOINT ["node", "dist/index.js"]
 
 ### 11.5 SSH 目标（Windows / 密钥格式）
 1. **密钥格式**：仅支持 OpenSSH / PEM 私钥（`ssh-keygen`）；PuTTY `.ppk` 会解析失败，报 `私钥解析失败：请确认是 OpenSSH/PEM 格式私钥（不支持 PuTTY .ppk）`（`MinaSshExecutor.loadKeyPairs`）。
-2. **Windows 无 sudo**：`sudoPassword` 只对 BASH 目标生效（`ScriptTaskExecutor.triggerShutdown` 里 `withPassword = type == BASH && ...`）；`POWERSHELL` 分支用 `Stop-Computer -Force` / `shutdown /s /t`，要求 **SSH 用户本身是管理员**。`set_device_ssh` 工具对 Windows 设备传 `sudoPassword` 无意义。
+2. **Windows 无 sudo**：`sudoPassword` 只对 BASH 目标生效（`ScriptTaskExecutor.triggerShutdown` 里 `withPassword = type == BASH && ...`）；`POWERSHELL` 分支统一用 `shutdown /s /t N /f`（不用 `Stop-Computer`，因为 Windows OpenSSH 默认 shell 是 cmd.exe，认不出这个 PowerShell cmdlet），要求 **SSH 用户本身是管理员**。`set_device_ssh` 工具对 Windows 设备传 `sudoPassword` 无意义。
 3. **sudo 密码只服务关机**：脚本内容不会自动加 sudo（`MinaSshExecutor.executeScript` 只是 `bash -s` 灌 stdin），脚本要提权需目标机配 NOPASSWD。
 
 ---

@@ -83,6 +83,7 @@
             scriptCheck: {
                 run: "检查代码", checking: "检查中…",
                 noIssues: "未发现问题。", statusOk: "未发现问题",
+                problems: "问题",
                 errors: "{n} 个错误", warnings: "{n} 个警告", error: "错误", warning: "警告",
                 hint: "仅做语法结构检查（引号/括号/here-doc/关键字配对），不能保证运行结果正确。",
                 msg: {
@@ -224,6 +225,7 @@
             scriptCheck: {
                 run: "Check", checking: "Checking…",
                 noIssues: "No problems found.", statusOk: "No problems",
+                problems: "Problems",
                 errors: "{n} error(s)", warnings: "{n} warning(s)", error: "Error", warning: "Warning",
                 hint: "Structural checks only (quotes/brackets/here-doc/keyword pairing); it cannot guarantee runtime correctness.",
                 msg: {

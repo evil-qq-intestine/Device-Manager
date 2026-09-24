@@ -47,7 +47,7 @@ class ShutdownCommandsTest {
 
     @Test
     void powershellCommands() {
-        assertEquals("Stop-Computer -Force", ShutdownCommands.immediate(ScriptType.POWERSHELL, false));
+        assertEquals("shutdown /s /t 0 /f", ShutdownCommands.immediate(ScriptType.POWERSHELL, false));
         assertEquals("shutdown /s /t 15 /f",
                 ShutdownCommands.forTask(task(ShutdownMode.DELAYED, 15), ScriptType.POWERSHELL, false));
     }
