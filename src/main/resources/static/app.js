@@ -809,7 +809,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.6",
+                version: "1.0.7",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },

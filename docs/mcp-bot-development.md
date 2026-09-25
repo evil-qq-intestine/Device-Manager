@@ -2,7 +2,7 @@
 
 > 目标读者：本项目后端开发者（会 Java / Spring，首次接触 MCP；后续要把后端全量重构成 Go，见 §13）。
 > 分工：**后端（Java MCP Server + TypeScript 机器人）由你写；前端由我写**。本文档是"接口契约 + 实现规格 + 踩坑清单"，你照着写即可。
-> 版本：对应 device-manager `1.0.6`；MCP 协议目标 **`2026-07-28`（Modern，无状态）**。
+> 版本：对应 device-manager `1.0.7`；MCP 协议目标 **`2026-07-28`（Modern，无状态）**。
 
 ---
 
@@ -145,7 +145,7 @@ Client                                                 Server
     "supportedVersions": ["2026-07-28"],
     "capabilities": { "tools": { "listChanged": false } },
     "_meta": {
-      "io.modelcontextprotocol/serverInfo": { "name": "device-manager", "version": "1.0.6" }
+      "io.modelcontextprotocol/serverInfo": { "name": "device-manager", "version": "1.0.7" }
     },
     "instructions": "设备管家 MCP Server。只读工具可直接调用；写/执行类工具需要 TRUSTED 令牌。",
     "ttlMs": 3600000,
@@ -862,7 +862,7 @@ ENTRYPOINT ["node", "dist/index.js"]
 
 ### 9.2 CI（`.github/workflows/docker.yml` 新增 job）
 
-- `bot` job：`actions/setup-node@v4`（`node-version: 22`、`cache: pnpm`）→ `corepack enable` → `pnpm install --frozen-lockfile` → `pnpm run typecheck`（`tsc --noEmit`）→ `pnpm test`（vitest）→ buildx 推 GHCR + Docker Hub `device-manager-bot`（`latest-bot` / `1.0.6-bot`，与核心 tag 对齐）。
+- `bot` job：`actions/setup-node@v4`（`node-version: 22`、`cache: pnpm`）→ `corepack enable` → `pnpm install --frozen-lockfile` → `pnpm run typecheck`（`tsc --noEmit`）→ `pnpm test`（vitest）→ buildx 推 GHCR + Docker Hub `device-manager-bot`（`latest-bot` / `1.0.7-bot`，与核心 tag 对齐）。
 - 触发条件与现有 `jvm`/`native` 一致（tag 时发版本 tag）。
 - Docker Hub 仓库名沿用 `emmmm666/device-manager-bot`（或 `vars.DOCKERHUB_IMAGE` 同源）。
 
