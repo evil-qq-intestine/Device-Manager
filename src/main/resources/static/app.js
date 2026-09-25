@@ -463,14 +463,7 @@
   <el-dialog v-model="updateDialog.visible" :title="t('update.title')" width="620px">
     <div class="update-row"><span>{{ t('update.current') }}</span><span class="mono">v{{ versionInfo ? versionInfo.current : version }}</span></div>
     <div class="update-row"><span>{{ t('update.latest') }}</span><span class="mono">{{ latestVersion ? ('v' + latestVersion) : '-' }}</span></div>
-    <div class="update-row"><span>{{ t('update.deployedAs') }}</span><span class="mono">{{ versionInfo ? versionInfo.deploymentMode : '-' }}</span></div>
     <template v-if="updateAvailable">
-      <div v-if="versionInfo.updateCommand" style="margin-top:14px">
-        <div class="field-hint">{{ t('update.command') }}</div>
-        <pre class="update-command mono">{{ versionInfo.updateCommand }}</pre>
-        <el-button size="small" @click="copyCommand"><el-icon><DocumentCopy/></el-icon>&nbsp;{{ t('update.copy') }}</el-button>
-        <div class="field-hint" style="margin-top:8px">{{ t('update.afterPull') }}</div>
-      </div>
       <div v-if="versionInfo.releaseNotes" style="margin-top:14px">
         <div class="field-hint">{{ t('update.notes') }}</div>
         <pre class="update-notes">{{ versionInfo.releaseNotes }}</pre>
@@ -872,16 +865,6 @@
                     await this.fetchVersion();
                 } catch (e) {
                     ElMessage.error(e.message);
-                }
-            },
-            async copyCommand() {
-                const command = this.versionInfo && this.versionInfo.updateCommand;
-                if (!command) return;
-                try {
-                    await navigator.clipboard.writeText(command);
-                    ElMessage.success(this.t("update.copied"));
-                } catch (e) {
-                    ElMessage.error(this.t("update.copyFailed"));
                 }
             },
             async doDirectUpdate() {

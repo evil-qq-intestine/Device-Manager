@@ -91,10 +91,6 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
                 if (name.startsWith("tun") || name.startsWith("tap")) {
                     continue;
                 }
-                if (name.startsWith("docker")) {
-                    log.warn("Docker environment detected. Please check whether Docker is configured with the host setting; otherwise, this WOL feature will not work.");
-                    continue;
-                }
                 boolean hasIpv6 = false;
                 for (InterfaceAddress ia : iface.getInterfaceAddresses()) {
                     if (ia.getAddress() instanceof Inet6Address) {

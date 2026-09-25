@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
-import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,6 @@ public class VersionService {
 
     @Value("${app.update.check-interval-ms:21600000}")
     private long checkIntervalMs;
-
-    @Value("${app.update.docker-image:ghcr.io/evil-qq-intestine/device-manager}")
-    private String dockerImage;
 
     @Autowired
     private GithubReleaseClient githubReleaseClient;
@@ -91,20 +87,9 @@ public class VersionService {
         return cachedAssets;
     }
 
-    public String deploymentMode() {
-        if (new File("/.dockerenv").exists()) {
-            return "docker";
-        }
-        if (System.getProperty("org.graalvm.nativeimage.imagecode") != null) {
-            return "native";
-        }
-        return "jar";
-    }
-
     private VersionInfo placeholder() {
         VersionInfo info = new VersionInfo();
         info.setCurrent(currentVersion);
-        info.setDeploymentMode(deploymentMode());
         info.setDirectUpdateEnabled(systemConfigService.getBoolean(SystemConfigService.DIRECT_UPDATE_ENABLED, false));
         return info;
     }
@@ -119,21 +104,15 @@ public class VersionService {
         info.setPublishedAt(publishedAt);
         info.setCheckedAt(Instant.now().toString());
         info.setError(error);
-        info.setDeploymentMode(deploymentMode());
         info.setUpdateAvailable(latest != null && compareVersions(latest, currentVersion) > 0);
         applyDirectUpdateFlags(info);
-        if (info.isUpdateAvailable() && "docker".equals(info.getDeploymentMode())) {
-            info.setUpdateCommand("docker pull " + dockerImage + ":" + latest);
-        }
         return info;
     }
 
     private void applyDirectUpdateFlags(VersionInfo info) {
         boolean enabled = systemConfigService.getBoolean(SystemConfigService.DIRECT_UPDATE_ENABLED, false);
         info.setDirectUpdateEnabled(enabled);
-        info.setDirectUpdateSupported(enabled
-                && info.isUpdateAvailable()
-                && !"docker".equals(info.getDeploymentMode()));
+        info.setDirectUpdateSupported(enabled && info.isUpdateAvailable());
     }
 
     public static String normalize(String tag) {

@@ -46,9 +46,6 @@ public class DeviceIpv4Checker implements DeviceIpChecker {
                 String name = networkInterface.getName();
                 if (name.startsWith("tun") || name.startsWith("veth") || name.startsWith("br-") || name.startsWith("virbr") || name.startsWith("tap")) {
                     continue;
-                } else if (name.startsWith("docker")) {
-                    log.warn("Docker environment detected. Please check whether Docker is configured with the host setting; otherwise, this WOL feature will not work.");
-                    continue;
                 }
                 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                     InetAddress broadcast = interfaceAddress.getBroadcast();

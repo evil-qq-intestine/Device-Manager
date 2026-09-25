@@ -91,12 +91,6 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-docker-compose</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
@@ -108,13 +102,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- 仅用于编译 native 构建期 Feature（BouncyCastleFeature）；运行期不需要，故 provided -->
-		<dependency>
-			<groupId>org.graalvm.sdk</groupId>
-			<artifactId>nativeimage</artifactId>
-			<version>25.0.2</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -138,27 +125,6 @@
 							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-			<!-- 声明后由父 POM 的 native profile 装配；用 -Pnative 激活 -->
-			<plugin>
-				<groupId>org.graalvm.buildtools</groupId>
-				<artifactId>native-maven-plugin</artifactId>
-				<configuration>
-					<!-- 启用 GraalVM 可达性元数据仓库（SQLite / 等第三方库的反射配置） -->
-					<metadataRepository>
-						<enabled>true</enabled>
-					</metadataRepository>
-					<buildArgs>
-						<buildArg>-H:+ReportExceptionStackTraces</buildArg>
-						<!-- 让 FileSystemProvider / 安全 Provider 在运行时初始化，避免第三方类进镜像堆 -->
-						<buildArg>--future-defaults=run-time-initialize-file-system-providers,run-time-initialize-security-providers</buildArg>
-						<!-- xerial sqlite-jdbc 的原生库需打进镜像 -->
-						<buildArg>-H:IncludeResources=org/sqlite/native/.*</buildArg>
-						<!-- MINA SSHD 运行时会注册 BouncyCastle Provider；native 必须在构建期登记，否则首次 SSH 报 SecurityException。
-						     注意：该选项取的是 provider 的「全限定类名」，不是 provider 名（写 BC 无效）。 -->
-						<buildArg>-H:AdditionalSecurityProviders=org.bouncycastle.jce.provider.BouncyCastleProvider</buildArg>
-					</buildArgs>
 				</configuration>
 			</plugin>
 		</plugins>

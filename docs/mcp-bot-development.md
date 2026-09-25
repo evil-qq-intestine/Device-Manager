@@ -651,7 +651,6 @@ bot/
 │   ├── mcp/client.ts            # 官方 MCP TS SDK 封装
 │   ├── auth/binding.ts          # 白名单 + 绑定
 │   └── audit.ts
-├── Dockerfile
 └── README.md
 ```
 
@@ -787,7 +786,7 @@ export interface Adapter {
 1. **`strict: true` 必开**；别用 `any`，用 `unknown` + 类型收窄。
 2. **ESM/CJS**：`"module":"nodenext"` + `package.json` 的 `"type":"module"`；本地相对导入可能需带 `.js` 后缀。
 3. **异步错误**：`await` 的 `try/catch` 不能漏；未处理的 Promise rejection 会崩进程（监听 `process.on("unhandledRejection")`）。
-4. **Node 版本**：锁定 `engines.node`（如 `>=22`），本地与 Docker 一致。
+4. **Node 版本**：锁定 `engines.node`（如 `>=22`），本地与 CI 一致。
 5. **超时**：所有网络调用都用 `AbortSignal.timeout(...)`。
 6. **依赖锁定**：提交 `pnpm-lock.yaml`，CI 用 `--frozen-lockfile`。
 7. **类型声明**：装 `@types/node`；无类型的库补 `.d.ts`。
@@ -833,46 +832,13 @@ export interface Adapter {
 
 ---
 
-## 9. 打包与 CI
+## 9. 构建与 CI
 
-### 9.1 bot 镜像（多阶段）
+bot 模块用 `pnpm` 构建，产物是 `dist/`（`tsc` 输出），不打包镜像：
 
-```dockerfile
-# ---- build ----
-FROM node:22-alpine AS build
-WORKDIR /app
-RUN corepack enable
-COPY bot/package.json bot/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY bot/ .
-RUN pnpm run build            # tsc -> dist/
-
-# ---- run ----
-FROM node:22-alpine
-WORKDIR /app
-ENV NODE_ENV=production
-COPY bot/package.json bot/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
-COPY --from=build /app/dist ./dist
-USER node
-ENTRYPOINT ["node", "dist/index.js"]
-```
-- 基于 `node:22-alpine`；想更小可换多阶段 `gcr.io/distroless/nodejs22-debian12`（需自行 copy `node_modules`）。
-- 多架构用 buildx：`--platform linux/amd64,linux/arm64`。
-
-### 9.2 CI（`.github/workflows/docker.yml` 新增 job）
-
-- `bot` job：`actions/setup-node@v4`（`node-version: 22`、`cache: pnpm`）→ `corepack enable` → `pnpm install --frozen-lockfile` → `pnpm run typecheck`（`tsc --noEmit`）→ `pnpm test`（vitest）→ buildx 推 GHCR + Docker Hub `device-manager-bot`（`latest-bot` / `1.0.8-bot`，与核心 tag 对齐）。
-- 触发条件与现有 `jvm`/`native` 一致（tag 时发版本 tag）。
-- Docker Hub 仓库名沿用 `emmmm666/device-manager-bot`（或 `vars.DOCKERHUB_IMAGE` 同源）。
-
-### 9.3 发布矩阵（最终）
-
-| 产物 | 用途 |
-|---|---|
-| `device-manager:latest` / `:1.0.x`（JVM） | 通用部署（含 MCP） |
-| `device-manager:latest-native` | 边缘小设备（含 MCP） |
-| `device-manager-bot:latest-bot` | 聊天机器人（TypeScript） |
+- 本地与 CI 同一条链：`corepack enable` → `pnpm install --frozen-lockfile` → `pnpm run typecheck`（`tsc --noEmit`）→ `pnpm test`（vitest）→ `pnpm run build`。
+- CI：`actions/setup-node@v4`（`node-version: 22`、`cache: pnpm`）跑上述步骤，构建成功后把 `dist/` 作为 artifact 上传。
+- `pnpm-lock.yaml` 必须提交，安装一律 `--frozen-lockfile`。
 
 ---
 
@@ -900,8 +866,8 @@ ENTRYPOINT ["node", "dist/index.js"]
 - Discord / Slack（出站），企业微信 / 钉钉 / 飞书（webhook）。
 - **验收**：每个平台能收发一条消息并完成一次只读工具调用。
 
-### M5 — 打包 + CI + 文档
-- bot Dockerfile、CI job、多架构镜像、README（含"对外暴露风险"章节）。
+### M5 — CI + 文档
+- bot CI job、README（含"对外暴露风险"章节）。
 
 ### 前端（我负责，等 M1/M2 接口就绪）
 - MCP 设置页（开关 + 绑地址 + 只读模式 + 风险提示）
@@ -922,7 +888,6 @@ ENTRYPOINT ["node", "dist/index.js"]
 3. `Long` 型 ID（taskId/logId）在 JSON 里是 number，`JsonNode.asLong()` 取值；前端/LLM 可能传字符串，做兼容。
 4. 审计写库用异步，别在请求线程里同步写 SQLite（单连接，会串行化拖慢）。
 5. SQLite 单连接（Hikari `maximum-pool-size:1`）：**长事务会阻塞一切**，工具实现里别开大事务。
-6. native 镜像：自研 MCP 若新增反射（`@RequestBody JsonNode` 不会），一般**无需**改 reflect-config；如启动报类缺失，重跑 tracing agent（见 README native 章节）。
 
 ### 11.3 TypeScript / Node
 见 §7.10（8 条）。补充：
@@ -971,7 +936,7 @@ ENTRYPOINT ["node", "dist/index.js"]
 > 本节是路线图，**现在不用做**；但写 Java 时注意把工具/鉴权逻辑与 Spring 框架尽量解耦，降低平移成本。
 
 ### 13.1 目标
-- 单静态二进制、无 JVM，边缘设备启动更快、内存更小（不再需要 GraalVM native）。
+- 单静态二进制、无 JVM，边缘设备启动更快、内存更小。
 - 前端（`src/main/resources/static/`）**完全不动**，Go 直接托管同一份静态资源。
 - SQLite 数据文件**格式不变**：Hibernate `ddl-auto=update` 建的表结构保持不变，Go 侧直读。
 

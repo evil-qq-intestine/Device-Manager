@@ -486,16 +486,6 @@ html.dark {
     color: var(--text-mid);
     border-bottom: 1px solid var(--stroke);
 }
-.update-command {
-    margin: 8px 0 10px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: var(--fill);
-    color: var(--text-hi);
-    font-size: 12.5px;
-    white-space: pre-wrap;
-    word-break: break-all;
-}
 .update-notes {
     margin: 8px 0 0;
     padding: 12px 14px;

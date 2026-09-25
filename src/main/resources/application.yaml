@@ -28,13 +28,9 @@ spring:
               enhance:
                 enableLazyInitialization: true
 
-  docker:
-    compose:
-      enabled: false
-
 jwt:
   # 生产环境务必用环境变量 JWT_SECRET 覆盖（openssl rand -base64 48）；保留占位值可被伪造 token
-  secret: your-256-bit-secret-key-here-at-least-32-characters #密钥
+  secret: your-256-bit-secret-key-here-at-least-32-characters123 #密钥
   expiration: 86400000 # Token有效期24小时
 
 wol:
@@ -58,9 +54,8 @@ app:
   update:
     github-repo: evil-qq-intestine/Device-Manager  # 版本检测来源（GitHub Releases）
     check-interval-ms: 21600000                    # 定时检测间隔，默认 6 小时
-    initial-delay-ms: 15000                        # 启动后首次检测延迟
-    docker-image: ghcr.io/evil-qq-intestine/device-manager
-    asset-prefix: device-manager                   # Release 产物前缀（<prefix>-linux-amd64 等）
+    initial-delay-ms: 15000                    # 启动后首次检测延迟
+    asset-prefix: device-manager                   # Release 产物文件名前缀（<prefix>.jar）
   server-url: http://10.34.70.66:8080
   script:
     # 未设置环境变量 APP_MASTER_KEY 时，读取/自动生成该本地密钥文件

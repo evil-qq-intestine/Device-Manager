@@ -13,10 +13,8 @@ public class VersionInfo {
     private String releaseUrl;
     private String releaseNotes;
     private String publishedAt;
-    private String updateCommand;
     private boolean directUpdateEnabled;
     private boolean directUpdateSupported;
-    private String deploymentMode;
     private String checkedAt;
     private String error;
 }

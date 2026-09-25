@@ -21,7 +21,7 @@
 | 📜 Script tasks | **One script can target many devices**; triggers: `MANUAL` (run from the UI only), `ONCE`, `CRON`, `ON_BOOT`; on success optionally shut down (never / immediately / after a delay); one log per target device |
 | 🧭 Script checker | Built-in, frontend-only syntax check for Bash / PowerShell. The editor is powered by **Monaco** (the editor engine behind VS Code, vendored locally – offline-friendly): syntax highlighting, minimap, code folding, find & replace, bracket matching/colorization; check results appear as inline squiggles plus a problems panel (quotes, brackets, here-docs, `if/fi`… pairing, CRLF) |
 | ⬇️ Heartbeat script | Generate and download a Linux (systemd) or Windows (scheduled task) heartbeat agent |
-| 🚀 Version update | Periodically compares against GitHub Releases and notifies in the UI; Docker deployments get a copy-paste update command, bare-metal deployments can enable a "direct update" that downloads the release asset and replaces itself (a watchdog script restarts it) |
+| 🚀 Version update | Periodically compares against GitHub Releases and notifies in the UI; an admin can enable a "direct update" that downloads the release asset and replaces itself (a watchdog script restarts it) |
 | 👤 Users & roles | JWT login, `ADMIN` / `USER`, admin user management, self-service username / password change |
 | 🌗 UI | Vue 3 + Element Plus + ECharts, light/dark theme, bilingual, 5-second live polling |
 | 🔒 Security | SSH key authentication only; host key fingerprint recorded on first connect and verified afterwards; private keys / passphrases / sudo passwords encrypted with AES-256-GCM and never returned by the API |
@@ -30,7 +30,7 @@
 
 - **Backend**: Spring Boot 4.1, Java 21, Spring Web MVC, Spring Data JPA, Spring Security + JJWT, SQLite (xerial JDBC, single connection), Apache MINA SSHD, BouncyCastle, Lombok
 - **Frontend**: Vue 3 + Element Plus + ECharts + Monaco (all vendored locally, no Node or build step)
-- **Build & deploy**: Maven, Docker (multi-arch amd64/arm64), GitHub Actions → GHCR + Docker Hub. GraalVM native images are **no longer built or published** (too fragile); only the JVM image is maintained.
+- **Build & deploy**: Maven; GitHub Actions builds the runnable jar and attaches it to a GitHub Release on every `v*` tag
 
 ## Quick start
 
@@ -42,19 +42,6 @@ mvnw.cmd spring-boot:run      # Windows
 ```
 
 Open <http://localhost:8080>. On first boot the random admin password is printed to the log (`Password: xxxxx`) — change it right after signing in.
-
-### Docker
-
-```bash
-docker build -t device-manager .
-docker run -d --name device-manager \
-  -p 8080:8080 \
-  -v device-manager-data:/app/data \
-  device-manager
-```
-
-> - Add `--cap-add=NET_RAW` if you need ICMP `ping` inside the container.
-> - Use `--network host` if Wake-on-LAN broadcast / multicast must reach your LAN.
 
 ## Configuration
 
@@ -74,56 +61,22 @@ Settings live in `src/main/resources/application.yaml` and can be overridden wit
 | `app.version` | Current version (injected at build time from `pom.xml`) |
 | `app.update.github-repo` | Repository used for version checks, default `evil-qq-intestine/Device-Manager` |
 | `app.update.check-interval-ms` | Version check interval in ms, default `21600000` (6 hours) |
-| `app.update.docker-image` | Image name used to build the Docker update command (pull only; you restart the container yourself) |
-| `SPRING_PROFILES_ACTIVE` | Set to `docker` for low-memory tuning (no SQL logs, Tomcat threads = 8, graceful shutdown, …) |
+| `app.update.asset-prefix` | File name prefix of the release asset, default `device-manager` (`device-manager.jar`) |
 
 > ⚠️ **Back up the master key.** It encrypts the stored private keys / passphrases; lose it and they cannot be decrypted.
 
 ## Startup & runtime parameters
 
-**JVM image memory flags** (`JAVA_OPTS`, defaults set in the Dockerfile, override with `-e JAVA_OPTS=...`):
-
-```
--Xms48m -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k \
--XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError
-```
-
-On tighter devices lower `-Xmx` to `192m` or even `128m`.
-
 **Key environment variables**:
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `SPRING_PROFILES_ACTIVE` | Set to `docker` for low-memory tuning (no SQL logs, Tomcat threads = 8, graceful shutdown) | empty |
 | `SPRING_DATASOURCE_URL` | SQLite path | `jdbc:sqlite:./data.db` |
 | `APP_SCRIPT_MASTER_KEY_FILE` | Master key file path | `./.master-key` |
 | `APP_MASTER_KEY` | Master key (Base64, 32 bytes), takes precedence over the file | empty |
 | `APP_SERVER_URL` | Server URL baked into device heartbeat scripts | `http://10.34.70.66:8080` |
-| `JAVA_OPTS` | JVM flags (JVM image only) | see above |
-| `TZ` | Time zone, e.g. `Asia/Shanghai` | container default UTC |
-
-**Docker run notes**:
-
-- Persist data: `-v device-manager-data:/app/data` (SQLite and the master key live there — do not lose it)
-- Port: `-p 8080:8080`
-- ICMP ping: `NET_RAW` is in Docker's default capability set, usually nothing extra is needed; if you `--cap-drop=ALL` or enable `no-new-privileges`, add `--cap-add=NET_RAW` (`/bin/ping` is `setcap`-enabled inside the image)
-- Wake-on-LAN broadcast / multicast: prefer `--network host`, otherwise magic packets cannot leave the host's subnet
-- Full example:
-
-```bash
-docker run -d --name device-manager \
-  -p 8080:8080 \
-  -v device-manager-data:/app/data \
-  -e TZ=Asia/Shanghai \
-  --network host \
-  ghcr.io/evil-qq-intestine/device-manager:latest
-```
-
-### Native images are discontinued
-
-> ⚠️ GraalVM native images are **no longer built or published** (dropped in `1.0.5`). Only the JVM image and the runnable jar are maintained. Native builds kept hitting closed-world pitfalls (reflection, dynamic proxies, runtime-registered security providers) that were not worth the maintenance cost. Use `ghcr.io/evil-qq-intestine/device-manager:latest` (or the Docker Hub mirror) instead.
->
-> Historical note: native images up to and including `1.0.3` could not use SSH features at all (`Internal server error` — the BouncyCastle provider was not registered at native-image build time). `1.0.4` fixed it, but native was dropped right after.
+| `JWT_SECRET` | JWT signing key, overrides `jwt.secret` from `application.yaml` | see `jwt.secret` |
+| `TZ` | Time zone, e.g. `Asia/Shanghai` | system default |
 
 ## Remote shutdown & sudo
 
@@ -142,17 +95,9 @@ SSH connections use **key authentication only**. Use an **OpenSSH-format** priva
 
 ## Version detection & update
 
-On startup the app periodically (every 6 hours by default) calls the GitHub Releases API to compare the running version with the latest release, and shows a notice in the top bar when an update is available. The current version is injected at build time (`app.version`, i.e. the `pom.xml` version), so published images always match their release tag.
+On startup the app periodically (every 6 hours by default) calls the GitHub Releases API to compare the running version with the latest release, and shows a notice in the top bar when an update is available. The current version is injected at build time (`app.version`, i.e. the `pom.xml` version), so published releases always match their release tag.
 
-**Docker deployments**: open the notice and copy the update command (images are published to both GHCR and Docker Hub, the latter defaulting to `emmmm666/device-manager` and overridable via the `DOCKERHUB_IMAGE` repository variable):
-
-```bash
-docker pull ghcr.io/evil-qq-intestine/device-manager:1.0.8
-```
-
-The image name comes from `app.update.docker-image`; after pulling, restart the container your usual way (e.g. `docker compose up -d` or `docker restart <name>`).
-
-**Bare-metal deployments (jar)**: an admin can enable "direct update". The app then downloads the release asset (`device-manager.jar`), replaces itself and exits, after which the **watchdog script** starts the new version. Download the watchdog from the same dialog:
+An admin can enable "direct update". The app then downloads the release asset (`device-manager.jar`), replaces itself and exits, after which the **watchdog script** starts the new version. Download the watchdog from the same dialog:
 
 ```bash
 DEVICE_MANAGER_APP=java \
@@ -160,9 +105,8 @@ DEVICE_MANAGER_ARGS="-jar /opt/device-manager/device-manager.jar --server.port=8
 ./device-manager-watchdog.sh
 ```
 
-> ⚠️ A direct update replaces the running executable / jar and exits the process, so it **must** be supervised (watchdog or systemd) or the service will not come back.
+> ⚠️ A direct update replaces the running jar and exits the process, so it **must** be supervised (watchdog or systemd) or the service will not come back.
 > The switch lives in the `system_config` table (key `update.direct-enabled`), defaults to off and is admin-only.
-> Docker deployments do not support direct update (replacing files inside the container is pointless) — use the command above.
 
 ## API
 
@@ -181,7 +125,6 @@ src/main/java/com/example/tool
 src/main/resources
 ├── static/        # zero-build frontend (Vue 3 + Element Plus + ECharts + Monaco, vendored)
 ├── application.yaml
-└── application-docker.yaml
 ```
 
 ## License

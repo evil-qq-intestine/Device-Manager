@@ -1,5 +1,0 @@
-[
-  ["org.apache.sshd.common.session.SessionListener"],
-  ["org.apache.sshd.common.channel.ChannelListener"],
-  ["org.apache.sshd.common.forward.PortForwardingEventListener"]
-]
