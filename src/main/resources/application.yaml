@@ -22,17 +22,18 @@ spring:
     hibernate:
       ddl-auto: update            # 自动更新表结构（推荐开发环境使用）
     database-platform: org.hibernate.community.dialect.SQLiteDialect
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:false}   # 仅打印 SQL 文本（? 占位符，不含绑定值）；排查时设 JPA_SHOW_SQL=true
     properties:
       hibernate:
               enhance:
-                enableLazyInitialization: true                # 打印 SQL，方便调试
+                enableLazyInitialization: true
 
   docker:
     compose:
       enabled: false
 
 jwt:
+  # 生产环境务必用环境变量 JWT_SECRET 覆盖（openssl rand -base64 48）；保留占位值可被伪造 token
   secret: your-256-bit-secret-key-here-at-least-32-characters #密钥
   expiration: 86400000 # Token有效期24小时
 
@@ -50,6 +51,10 @@ ping:
 app:
   # 构建时由 Maven 资源过滤注入（@project.version@）
   version: "@project.version@"
+  security:
+    jwt:
+      # true = 检测到占位/弱 JWT 密钥时拒绝启动；false = 仅告警
+      fail-on-insecure-secret: ${JWT_FAIL_ON_INSECURE:true}
   update:
     github-repo: evil-qq-intestine/Device-Manager  # 版本检测来源（GitHub Releases）
     check-interval-ms: 21600000                    # 定时检测间隔，默认 6 小时

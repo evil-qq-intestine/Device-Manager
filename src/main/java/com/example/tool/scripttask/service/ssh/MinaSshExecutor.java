@@ -66,7 +66,8 @@ public class MinaSshExecutor implements SshExecutor {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            throw new BusinessException("SSH 连接失败: " + rootMessage(e), e);
+            log.warn("SSH connection test failed for {}:{} - {}", config.host(), config.port(), rootMessage(e));
+            throw new BusinessException("SSH 连接失败，请检查主机、端口与网络连通性", e);
         } finally {
             handle.client().stop();
         }
@@ -98,7 +99,7 @@ public class MinaSshExecutor implements SshExecutor {
             return SshResult.error(e.getMessage());
         } catch (Exception e) {
             log.warn("SSH execution failed for {}:{} - {}", config.host(), config.port(), rootMessage(e));
-            return SshResult.error("SSH 执行失败: " + rootMessage(e));
+            return SshResult.error("SSH 执行失败，请查看服务端日志了解详情");
         } finally {
             handle.client().stop();
         }
@@ -152,7 +153,9 @@ public class MinaSshExecutor implements SshExecutor {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            throw new BusinessException("私钥格式错误或口令不正确: " + rootMessage(e), e);
+            log.warn("Failed to parse private key for {}:{} - {}",
+                    config.host(), config.port(), rootMessage(e));
+            throw new BusinessException("私钥格式错误或口令不正确", e);
         }
     }
 

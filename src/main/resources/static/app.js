@@ -711,7 +711,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="deviceSshDialog.visible" :title="t('deviceSsh.title')" width="540px">
+  <el-dialog v-model="deviceSshDialog.visible" :title="t('deviceSsh.title')" width="540px" @closed="clearDeviceSshSecrets">
     <el-form label-position="top">
       <div class="field-hint" style="margin-bottom:12px">{{ t('deviceSsh.hint') }}</div>
       <el-row :gutter="12">
@@ -733,14 +733,14 @@
       </el-form-item>
       <el-form-item>
         <template #label><span>{{ t('deviceSsh.privateKey') }}<hint-icon :text="t('deviceSsh.privateKeyHint')" /></span></template>
-        <el-input v-model="deviceSshDialog.form.sshPrivateKey" type="textarea" :rows="4" class="mono" />
+        <el-input v-model="deviceSshDialog.form.sshPrivateKey" type="textarea" :rows="4" class="mono" autocomplete="off" />
       </el-form-item>
       <el-form-item :label="t('deviceSsh.passphrase')">
-        <el-input v-model="deviceSshDialog.form.sshKeyPassphrase" show-password />
+        <el-input v-model="deviceSshDialog.form.sshKeyPassphrase" show-password autocomplete="off" />
       </el-form-item>
       <el-form-item v-if="deviceSshDialog.form.sshType === 'BASH'">
         <template #label><span>{{ t('deviceSsh.sudoPassword') }}<hint-icon><sudo-hint /></hint-icon></span></template>
-        <el-input v-model="deviceSshDialog.form.sudoPassword" show-password />
+        <el-input v-model="deviceSshDialog.form.sudoPassword" show-password autocomplete="off" />
       </el-form-item>
       <el-form-item v-else :label="t('deviceSsh.sudoPassword')">
         <div class="field-hint">{{ t('deviceSsh.sudoWindowsHint') }}</div>
@@ -1294,6 +1294,13 @@
                 }
                 this.deviceSshDialog.visible = true;
             },
+            clearDeviceSshSecrets() {
+                const f = this.deviceSshDialog.form;
+                if (!f) return;
+                f.sshPrivateKey = "";
+                f.sshKeyPassphrase = "";
+                f.sudoPassword = "";
+            },
             async saveDeviceSsh() {
                 const f = this.deviceSshDialog.form;
                 if (!f.sshHost || !f.sshUser || !f.sshPort) {
@@ -1304,6 +1311,7 @@
                 try {
                     await this.api("/api/device/" + this.deviceSshDialog.deviceId + "/ssh", { method: "PUT", body: f });
                     ElMessage.success(this.t("deviceSsh.saved"));
+                    this.clearDeviceSshSecrets();
                     this.deviceSshDialog.visible = false;
                 } catch (e) {
                     ElMessage.error(e.message);
