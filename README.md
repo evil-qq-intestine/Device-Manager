@@ -69,6 +69,7 @@ Settings live in `src/main/resources/application.yaml` and can be overridden wit
 | `app.script.master-key-file` / `APP_SCRIPT_MASTER_KEY_FILE` | Master key file path (default `./.master-key`) |
 | `APP_MASTER_KEY` | Master key (Base64, 32 bytes); takes precedence over the file |
 | `app.script.ssh.connect-timeout-ms` / `command-timeout-ms` | SSH connect / command timeouts |
+| `app.script.ssh.output-charset` | Remote output decoding: `AUTO` (default; strict UTF-8, fall back to GB18030) or `UTF-8` / `GBK` / `GB18030` / `windows-1252` |
 | `app.script.on-boot-cooldown-seconds` | Cooldown for the same `ON_BOOT` task |
 | `app.version` | Current version (injected at build time from `pom.xml`) |
 | `app.update.github-repo` | Repository used for version checks, default `evil-qq-intestine/Device-Manager` |

@@ -70,3 +70,4 @@ app:
     ssh:
       connect-timeout-ms: 10000      # SSH 连接/认证超时
       command-timeout-ms: 120000     # 远程命令执行超时
+      output-charset: AUTO           # 远程输出解码：AUTO / UTF-8 / GBK / GB18030 / windows-1252

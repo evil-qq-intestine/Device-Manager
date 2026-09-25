@@ -11,6 +11,7 @@ import org.apache.sshd.common.NamedResource;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
 import org.apache.sshd.common.config.keys.loader.KeyPairResourceParser;
 import org.apache.sshd.common.util.security.SecurityUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -31,18 +32,35 @@ public class MinaSshExecutor implements SshExecutor {
 
     private static final int MAX_OUTPUT_BYTES = 1024 * 1024;
 
-    private final SshHostKeyService hostKeyService;
+    /**
+     * PowerShell 引导脚本：用 UTF-8 从 stdin 读取用户脚本再执行，并把输出编码强制为 UTF-8，
+     * 避免 Windows PowerShell 5.1 默认按 CP936/GBK 读写导致中文乱码。
+     * 仅含 ASCII 与单引号，且不含 {@code " & | < > %} 等会被 {@code cmd.exe /c} 解释的字符。
+     */
+    private static final String POWERSHELL_BOOTSTRAP =
+            "try{[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)}catch{};"
+                    + "$r=New-Object IO.StreamReader([Console]::OpenStandardInput(),"
+                    + "[Text.UTF8Encoding]::new($false));$src=$r.ReadToEnd();"
+                    + "if($src.Length -gt 0){iex $src}";
 
-    public MinaSshExecutor(SshHostKeyService hostKeyService) {
+    private final SshHostKeyService hostKeyService;
+    private final OutputCharset outputCharset;
+
+    public MinaSshExecutor(SshHostKeyService hostKeyService,
+                           @Value("${app.script.ssh.output-charset:AUTO}") String outputCharset) {
         this.hostKeyService = hostKeyService;
+        this.outputCharset = OutputCharset.fromConfig(outputCharset);
+    }
+
+    static String scriptCommand(ScriptType type) {
+        return (type == ScriptType.POWERSHELL)
+                ? "powershell -NoProfile -NonInteractive -Command " + POWERSHELL_BOOTSTRAP
+                : "bash -s";
     }
 
     @Override
     public SshResult executeScript(SshConfig config, ScriptType type, String script, long timeoutMs) {
-        String command = (type == ScriptType.POWERSHELL)
-                ? "powershell -NoProfile -NonInteractive -Command -"
-                : "bash -s";
-        return exec(config, command, script, timeoutMs);
+        return exec(config, scriptCommand(type), script, timeoutMs);
     }
 
     @Override
@@ -79,8 +97,8 @@ public class MinaSshExecutor implements SshExecutor {
             try (ClientSession session = authenticate(handle.client(), config, timeoutMs)) {
                 recordHostKeyIfNew(config, handle.verifier());
                 ClientChannel channel = session.createExecChannel(command);
-                LimitedByteArrayOutputStream out = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES);
-                LimitedByteArrayOutputStream err = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES);
+                LimitedByteArrayOutputStream out = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES, outputCharset);
+                LimitedByteArrayOutputStream err = new LimitedByteArrayOutputStream(MAX_OUTPUT_BYTES, outputCharset);
                 channel.setOut(out);
                 channel.setErr(err);
                 byte[] input = stdin != null ? stdin.getBytes(StandardCharsets.UTF_8) : new byte[0];

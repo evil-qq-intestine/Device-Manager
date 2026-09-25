@@ -69,6 +69,7 @@ docker run -d --name device-manager \
 | `app.script.master-key-file` / `APP_SCRIPT_MASTER_KEY_FILE` | 主密钥文件路径（默认 `./.master-key`） |
 | `APP_MASTER_KEY` | 主密钥（Base64，32 字节）。设置后优先于密钥文件 |
 | `app.script.ssh.connect-timeout-ms` / `command-timeout-ms` | SSH 连接 / 命令超时 |
+| `app.script.ssh.output-charset` | 远程输出解码：`AUTO`（默认，严格 UTF-8，失败回退 GB18030）或 `UTF-8` / `GBK` / `GB18030` / `windows-1252` |
 | `app.script.on-boot-cooldown-seconds` | `ON_BOOT` 同一任务冷却时间 |
 | `app.version` | 当前版本号（构建时由 Maven 注入，即 `pom.xml` 的版本） |
 | `app.update.github-repo` | 版本检测来源仓库，默认 `evil-qq-intestine/Device-Manager` |
