@@ -35,7 +35,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/", "/index.html", "/login.html",
                                 "/app.js", "/script-task.js", "/script-check.js", "/monaco-code-editor.js",
                                 "/styles.css", "/favicon.svg",
-                                "/vendor/**").permitAll()
+                                "/i18n/**", "/vendor/**").permitAll()
                         .requestMatchers("/api/auth/**", "/api/heartbeat/**", "/api/version").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

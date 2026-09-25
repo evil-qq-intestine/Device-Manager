@@ -10,306 +10,17 @@
     const ElMessageBox = ElementPlus.ElMessageBox;
 
     /* -------------------- i18n -------------------- */
-    const MESSAGES = {
-        zh: {
-            app: { name: "设备管家", tagline: "设备在线监控 · 网络唤醒控制台" },
-            login: {
-                username: "用户名", password: "密码", submit: "接 入",
-                hint: "首次启动时管理员账号与随机密码会打印在服务端日志中。",
-                welcome: "欢迎回来，{name}"
-            },
-            nav: { dashboard: "控制台", script: "脚本任务", admin: "用户管理" },
-            dashboard: { title: "设备总览" },
-            stats: { total: "设备总数", online: "在线", offline: "离线", probing: "探测中" },
-            panel: { status: "状态分布", rate: "在线率", onlineRate: "在线率" },
-            toolbar: { search: "搜索名称 / MAC / IP", add: "添加设备", live: "实时" },
-            device: {
-                empty: "还没有设备，点击「添加设备」开始吧",
-                wake: "唤醒", script: "下载心跳脚本", edit: "编辑", monitor: "监控设置", delete: "删除", shutdown: "关机",
-                status: "状态", mode: "模式", lastOnline: "最后在线", never: "从未",
-                wakeSent: "魔术包已发送至 {name}", confirmDelete: "确定删除设备 {name} 吗？",
-                deleteTitle: "删除设备",
-                confirmShutdown: "确定立即关闭设备「{name}」吗？", shutdownTitle: "设备关机",
-                shutdownSent: "关机命令已发送", shutdownFail: "关机失败"
-            },
-            status: { online: "在线", offline: "离线", probe: "探测中", unknown: "未知" },
-            form: {
-                addTitle: "添加设备", editTitle: "编辑设备",
-                name: "设备名称", mac: "MAC 地址", ip: "IP 地址",
-                namePlaceholder: "例如：客厅主机",
-                macPlaceholder: "AA:BB:CC:DD:EE:FF",
-                ipPlaceholder: "192.168.1.10"
-            },
-            monitor: {
-                title: "监控设置", mode: "监控模式", ipMode: "IP 协议",
-                ipModeHint: "根据设备 IP 地址自动识别，不可修改",
-                interval: "检测间隔（秒）", pingTimeout: "PING 超时（秒）",
-                responseTimeout: "离线容忍（秒）", heartbeatTimeout: "心跳超时（秒）",
-                wakeTimeout: "开机等待超时（秒）",
-                hint: "PING 超时必须小于检测间隔；心跳模式只需设置心跳超时。"
-            },
-            script: { title: "心跳脚本", download: "下载", loading: "加载中…" },
-            scriptTask: {
-                title: "脚本任务", add: "新建任务", edit: "编辑任务", empty: "还没有脚本任务",
-                devices: "设备列表", pickDevice: "请选择左侧设备", allDevices: "全部设备",
-                targets: "目标设备", targetPlaceholder: "选择目标设备（可多选）",
-                targetsHint: "SSH 连接信息取各设备的「设备 SSH 配置」；未配置 SSH 的设备执行时会失败",
-                device: "设备",
-                executeSubmitted: "已提交到 {n} 台设备", executeFailCount: "有 {n} 台执行失败",
-                name: "任务名称", description: "描述", scriptContent: "脚本内容", scriptType: "脚本类型",
-                triggerType: "触发方式", triggerOnce: "定时一次", triggerCron: "Cron 周期", triggerOnBoot: "开机上线",
-                triggerManualHint: "不会自动运行，只能在列表中点击「执行」手动运行。",
-                executeAt: "执行时间", cronExpression: "Cron 表达式",
-                sshHost: "SSH 主机", sshPort: "端口", sshUser: "SSH 用户",
-                privateKey: "SSH 私钥", privateKeyHint: "仅支持密钥认证。编辑时留空表示不修改原私钥。",
-                passphrase: "私钥口令", passphraseHint: "私钥没有口令可留空。",
-                sudoPassword: "sudo 密码", sudoHintTitle: "目标机免密 sudo 示例",
-                sudoHint: "留空则使用 sudo -n，要求目标机为该 SSH 用户配置 NOPASSWD（或 SSH 用户为 root）。示例：",
-                shutdownMode: "关机行为", shutdownNone: "不关机", shutdownImmediate: "立即关机", shutdownDelayed: "延迟关机",
-                shutdownDelay: "延迟秒数", enabled: "启用",
-                execute: "执行", shutdown: "关机", logs: "日志", delete: "删除",
-                lastResult: "上次结果", never: "从未", success: "成功", failed: "失败", running: "执行中",
-                triggeredBy: "触发来源", exitCode: "退出码", startedAt: "开始时间", finishedAt: "结束时间",
-                triggerSchedule: "定时", triggerHeartbeat: "上线", triggerManual: "手动",
-                sshTest: "测试连接", sshTestOk: "连接成功，主机指纹：{fp}",
-                sshRequired: "请先填写主机、端口、用户和私钥",
-                executed: "已提交执行，正在后台运行…",
-                executeOk: "执行成功（退出码 0）", executeFail: "执行失败（退出码 {code}）{msg}",
-                confirmDelete: "确定删除任务「{name}」吗？", deleteTitle: "删除任务",
-                confirmExecute: "确定立即执行任务「{name}」吗？",
-                confirmShutdown: "确定立即关闭「{name}」的所有目标设备吗？",
-                stdout: "标准输出", stderr: "错误输出", detail: "执行详情"
-            },
-            scriptCheck: {
-                run: "检查代码", checking: "检查中…",
-                noIssues: "未发现问题。", statusOk: "未发现问题",
-                problems: "问题",
-                errors: "{n} 个错误", warnings: "{n} 个警告", error: "错误", warning: "警告",
-                hint: "仅做语法结构检查（引号/括号/here-doc/关键字配对），不能保证运行结果正确。",
-                msg: {
-                    unterminatedSingle: "单引号未闭合",
-                    unterminatedDouble: "双引号未闭合",
-                    unterminatedBacktick: "反引号未闭合",
-                    unterminatedHeredoc: "here-document 未结束（缺少结束标记）",
-                    unterminatedHereString: "here-string 未结束（缺少结束标记 {term}）",
-                    unterminatedBlockComment: "块注释未结束（缺少 #>）",
-                    unclosedParen: "括号 ( 未闭合",
-                    unclosedBrace: "花括号 { 未闭合",
-                    unclosedBracket: "方括号 [ 未闭合",
-                    unmatchedCloseParen: "多余的右括号 )",
-                    unmatchedCloseBrace: "多余的花括号 }",
-                    unmatchedCloseBracket: "多余的方括号 ]",
-                    crlf: "检测到 Windows 换行符（CRLF），在 Linux 上执行可能报错",
-                    missingFi: "疑似缺少 {n} 个 fi（if 未闭合）",
-                    extraFi: "疑似多余 {n} 个 fi",
-                    missingDone: "疑似缺少 {n} 个 done（循环未闭合）",
-                    extraDone: "疑似多余 {n} 个 done",
-                    missingEsac: "疑似缺少 {n} 个 esac（case 未闭合）",
-                    extraEsac: "疑似多余 {n} 个 esac"
-                }
-            },
-            scriptExplorer: {
-                title: "脚本资源管理器", new: "新建脚本",
-                allScripts: "全部脚本", devices: "设备",
-                noTarget: "该设备暂无目标脚本", noTasks: "无目标脚本",
-                untitled: "未命名", back: "返回列表", config: "配置",
-                unsaved: "当前修改尚未保存，确定离开吗？"
-            },
-            deviceSsh: {
-                title: "设备 SSH 配置", button: "设备 SSH", hint: "用于设备级关机，与脚本任务相互独立。",
-                host: "SSH 主机", port: "端口", user: "SSH 用户", type: "目标系统",
-                privateKey: "SSH 私钥", privateKeyHint: "首次必须填写；之后留空表示不修改。请使用 OpenSSH 格式私钥（ssh-keygen 生成），不支持 PuTTY 的 .ppk。",
-                passphrase: "私钥口令", sudoPassword: "sudo 密码",
-                sudoWindowsHint: "Windows 目标没有 sudo：关机要求 SSH 用户本身是管理员，此密码不适用。",
-                save: "保存", test: "测试连接", testOk: "连接成功，主机指纹：{fp}",
-                notConfigured: "未配置", saved: "已保存", required: "请填写主机、端口和用户"
-            },
-            update: {
-                title: "版本更新", available: "有新版本 {latest}", upToDate: "已是最新版本",
-                current: "当前版本", latest: "最新版本", deployedAs: "部署方式",
-                check: "检查更新", checking: "检查中…", command: "更新命令", copy: "复制命令",
-                copied: "命令已复制", copyFailed: "复制失败，请手动复制",
-                afterPull: "拉取后请按你的方式重启容器（如 docker compose up -d / docker restart <容器名>）。",
-                notes: "更新说明", watchdog: "下载看门狗脚本",
-                enableDirect: "允许直接更新（裸机部署）",
-                directHint: "开启后可在本页下载新版本并替换当前程序；进程退出后由看门狗脚本拉起。Docker 部署不支持直接更新。",
-                direct: "立即更新",
-                confirmDirect: "确定立即下载并更新到 {latest} 吗？更新后进程会退出，由看门狗拉起新版本。"
-            },
-            profile: { title: "修改用户名", username: "用户名", password: "修改密码" },
-            password: {
-                title: "修改密码", old: "当前密码", new: "新密码",
-                hint: "修改成功后当前会话会自动更新。",
-                changed: "密码已更新"
-            },
-            theme: { light: "浅色", dark: "深色", toggle: "切换主题" },
-            admin: {
-                title: "用户管理", search: "搜索用户", addUser: "新建用户", refresh: "刷新",
-                id: "ID", name: "用户名", role: "角色", actions: "操作",
-                changePwd: "改密码", newPassword: "新密码", adminPassword: "管理员密码",
-                createTitle: "新建用户", username: "用户名", password: "密码",
-                confirmDelete: "确定删除用户 {name} 吗？", deleteTitle: "删除用户"
-            },
-            common: {
-                save: "保存", cancel: "取消", close: "关闭", logout: "退出登录",
-                confirm: "确定", success: "操作成功"
-            },
-            error: {
-                credentials: "请输入用户名和密码", unauthorized: "登录已过期，请重新登录",
-                request: "请求失败", invalidMac: "MAC 地址格式无效", invalidIp: "请输入 IP 地址",
-                pingTimeout: "PING 超时必须小于检测间隔", passwordLength: "密码长度 6-32"
-            }
-        },
-        en: {
-            app: { name: "Device Manager", tagline: "Device monitor · Wake-on-LAN console" },
-            login: {
-                username: "Username", password: "Password", submit: "CONNECT",
-                hint: "On first boot the admin account and a random password are printed to the server log.",
-                welcome: "Welcome back, {name}"
-            },
-            nav: { dashboard: "Dashboard", script: "Scripts", admin: "Users" },
-            dashboard: { title: "Device overview" },
-            stats: { total: "Total devices", online: "Online", offline: "Offline", probing: "Probing" },
-            panel: { status: "Status distribution", rate: "Uptime", onlineRate: "Online rate" },
-            toolbar: { search: "Search name / MAC / IP", add: "Add device", live: "Live" },
-            device: {
-                empty: "No devices yet — click “Add device” to begin",
-                wake: "Wake", script: "Download heartbeat script", edit: "Edit", monitor: "Monitor", delete: "Delete", shutdown: "Shut down",
-                status: "Status", mode: "Mode", lastOnline: "Last online", never: "Never",
-                wakeSent: "Magic packet sent to {name}", confirmDelete: "Delete device {name}?",
-                deleteTitle: "Delete device",
-                confirmShutdown: "Shut down device “{name}” now?", shutdownTitle: "Device shutdown",
-                shutdownSent: "Shutdown command sent", shutdownFail: "Shutdown failed"
-            },
-            status: { online: "Online", offline: "Offline", probe: "Probing", unknown: "Unknown" },
-            form: {
-                addTitle: "Add device", editTitle: "Edit device",
-                name: "Device name", mac: "MAC address", ip: "IP address",
-                namePlaceholder: "e.g. Living room PC",
-                macPlaceholder: "AA:BB:CC:DD:EE:FF",
-                ipPlaceholder: "192.168.1.10"
-            },
-            monitor: {
-                title: "Monitor settings", mode: "Monitor mode", ipMode: "IP protocol",
-                ipModeHint: "Detected automatically from the device IP and cannot be changed",
-                interval: "Check interval (s)", pingTimeout: "Ping timeout (s)",
-                responseTimeout: "Offline tolerance (s)", heartbeatTimeout: "Heartbeat timeout (s)",
-                wakeTimeout: "Wake wait timeout (s)",
-                hint: "Ping timeout must be smaller than the check interval; heartbeat mode only needs a heartbeat timeout."
-            },
-            script: { title: "Heartbeat script", download: "Download", loading: "Loading…" },
-            scriptTask: {
-                title: "Script tasks", add: "New task", edit: "Edit task", empty: "No script tasks yet",
-                devices: "Devices", pickDevice: "Select a device on the left", allDevices: "All devices",
-                targets: "Targets", targetPlaceholder: "Select target devices (multiple)",
-                targetsHint: "SSH credentials come from each device's Device SSH config; unconfigured devices will fail at run time",
-                device: "Device",
-                executeSubmitted: "Submitted to {n} device(s)", executeFailCount: "{n} device(s) failed",
-                name: "Task name", description: "Description", scriptContent: "Script content", scriptType: "Script type",
-                triggerType: "Trigger", triggerOnce: "Once", triggerCron: "Cron", triggerOnBoot: "On boot",
-                triggerManualHint: "Never runs automatically; use Run in the list to execute it.",
-                executeAt: "Execute at", cronExpression: "Cron expression",
-                sshHost: "SSH host", sshPort: "Port", sshUser: "SSH user",
-                privateKey: "SSH private key", privateKeyHint: "Key authentication only. Leave empty on edit to keep the existing key.",
-                passphrase: "Key passphrase", passphraseHint: "Leave empty if the key has no passphrase.",
-                sudoPassword: "sudo password", sudoHintTitle: "Passwordless sudo example",
-                sudoHint: "Leave empty to use sudo -n, which requires a NOPASSWD entry for the SSH user (or the user is root). Example:",
-                shutdownMode: "Shutdown", shutdownNone: "Never", shutdownImmediate: "Immediate", shutdownDelayed: "Delayed",
-                shutdownDelay: "Delay (seconds)", enabled: "Enabled",
-                execute: "Run", shutdown: "Shut down", logs: "Logs", delete: "Delete",
-                lastResult: "Last result", never: "Never", success: "OK", failed: "Failed", running: "Running",
-                triggeredBy: "Trigger", exitCode: "Exit", startedAt: "Started", finishedAt: "Finished",
-                triggerSchedule: "Schedule", triggerHeartbeat: "Boot", triggerManual: "Manual",
-                sshTest: "Test connection", sshTestOk: "Connected, host fingerprint: {fp}",
-                sshRequired: "Fill in host, port, user and private key first",
-                executed: "Submitted, running in background…",
-                executeOk: "Succeeded (exit code 0)", executeFail: "Failed (exit code {code}) {msg}",
-                confirmDelete: "Delete task “{name}”?", deleteTitle: "Delete task",
-                confirmExecute: "Run task “{name}” now?",
-                confirmShutdown: "Shut down all targets of “{name}” now?",
-                stdout: "stdout", stderr: "stderr", detail: "Execution detail"
-            },
-            scriptCheck: {
-                run: "Check", checking: "Checking…",
-                noIssues: "No problems found.", statusOk: "No problems",
-                problems: "Problems",
-                errors: "{n} error(s)", warnings: "{n} warning(s)", error: "Error", warning: "Warning",
-                hint: "Structural checks only (quotes/brackets/here-doc/keyword pairing); it cannot guarantee runtime correctness.",
-                msg: {
-                    unterminatedSingle: "Unterminated single quote",
-                    unterminatedDouble: "Unterminated double quote",
-                    unterminatedBacktick: "Unterminated backtick",
-                    unterminatedHeredoc: "Unterminated here-document",
-                    unterminatedHereString: "Unterminated here-string (missing {term})",
-                    unterminatedBlockComment: "Unterminated block comment (missing #>)",
-                    unclosedParen: "Unclosed (",
-                    unclosedBrace: "Unclosed {",
-                    unclosedBracket: "Unclosed [",
-                    unmatchedCloseParen: "Unmatched )",
-                    unmatchedCloseBrace: "Unmatched }",
-                    unmatchedCloseBracket: "Unmatched ]",
-                    crlf: "Windows line endings (CRLF) detected; may fail on Linux",
-                    missingFi: "Possibly missing {n} fi (unclosed if)",
-                    extraFi: "Possibly extra {n} fi",
-                    missingDone: "Possibly missing {n} done (unclosed loop)",
-                    extraDone: "Possibly extra {n} done",
-                    missingEsac: "Possibly missing {n} esac (unclosed case)",
-                    extraEsac: "Possibly extra {n} esac"
-                }
-            },
-            scriptExplorer: {
-                title: "Script Explorer", new: "New script",
-                allScripts: "All scripts", devices: "Devices",
-                noTarget: "No scripts target this device", noTasks: "No targeted scripts",
-                untitled: "Untitled", back: "Back to list", config: "Configuration",
-                unsaved: "You have unsaved changes. Leave anyway?"
-            },
-            deviceSsh: {
-                title: "Device SSH", button: "Device SSH", hint: "Used for device-level shutdown, independent of script tasks.",
-                host: "SSH host", port: "Port", user: "SSH user", type: "Target OS",
-                privateKey: "SSH private key", privateKeyHint: "Required on first setup; leave empty to keep it. Use an OpenSSH-format key (from ssh-keygen), not a PuTTY .ppk.",
-                passphrase: "Key passphrase", sudoPassword: "sudo password",
-                sudoWindowsHint: "Windows targets have no sudo: shutdown requires the SSH user to be an administrator, so this password does not apply.",
-                save: "Save", test: "Test connection", testOk: "Connected, host fingerprint: {fp}",
-                notConfigured: "Not configured", saved: "Saved", required: "Fill in host, port and user"
-            },
-            update: {
-                title: "Version update", available: "New version {latest}", upToDate: "You are up to date",
-                current: "Current", latest: "Latest", deployedAs: "Deployment",
-                check: "Check now", checking: "Checking…", command: "Update command", copy: "Copy command",
-                copied: "Command copied", copyFailed: "Copy failed, please copy manually",
-                afterPull: "After pulling, restart the container your usual way (e.g. docker compose up -d / docker restart <name>).",
-                notes: "Release notes", watchdog: "Download watchdog script",
-                enableDirect: "Allow direct update (bare-metal only)",
-                directHint: "When enabled you can download and replace the running app here; the watchdog script restarts it after the process exits. Docker deployments are not supported.",
-                direct: "Update now",
-                confirmDirect: "Download and update to {latest} now? The process will exit and the watchdog will start the new version."
-            },
-            profile: { title: "Change username", username: "Username", password: "Change password" },
-            password: {
-                title: "Change password", old: "Current password", new: "New password",
-                hint: "Your current session is refreshed automatically after the change.",
-                changed: "Password updated"
-            },
-            theme: { light: "Light", dark: "Dark", toggle: "Toggle theme" },
-            admin: {
-                title: "User management", search: "Search users", addUser: "New user", refresh: "Refresh",
-                id: "ID", name: "Username", role: "Role", actions: "Actions",
-                changePwd: "Password", newPassword: "New password", adminPassword: "Admin password",
-                createTitle: "New user", username: "Username", password: "Password",
-                confirmDelete: "Delete user {name}?", deleteTitle: "Delete user"
-            },
-            common: {
-                save: "Save", cancel: "Cancel", close: "Close", logout: "Sign out",
-                confirm: "Confirm", success: "Done"
-            },
-            error: {
-                credentials: "Please enter username and password", unauthorized: "Session expired, please sign in again",
-                request: "Request failed", invalidMac: "Invalid MAC address", invalidIp: "Please enter an IP address",
-                pingTimeout: "Ping timeout must be smaller than the check interval", passwordLength: "Password must be 6-32 characters"
-            }
-        }
-    };
+    const MESSAGES = { zh: null, en: null };
+
+    const SUPPORTED_LANGS = ["zh", "en"];
+
+    async function loadI18n() {
+        await Promise.all(SUPPORTED_LANGS.map(async (lang) => {
+            const res = await fetch("/i18n/" + lang + ".json", { cache: "no-cache" });
+            if (!res.ok) throw new Error("Failed to load i18n/" + lang + ".json: HTTP " + res.status);
+            MESSAGES[lang] = await res.json();
+        }));
+    }
 
     /* -------------------- 工具函数 -------------------- */
     const MAC_REGEX = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
@@ -355,6 +66,7 @@
 
     /* -------------------- 应用 -------------------- */
     const template = `
+<el-config-provider :locale="elLocale">
 <div v-if="!authed" class="login">
   <div class="login__card glass">
     <div class="login__logo">
@@ -417,14 +129,9 @@
       <el-icon><Download/></el-icon><span>{{ t('update.available', {latest: latestVersion}) }}</span>
     </button>
     <div class="live-dot"><i></i>{{ t('toolbar.live') }}</div>
-    <button class="theme-toggle" :title="t('theme.toggle')" @click="toggleTheme">
-      <el-icon v-if="theme==='light'"><Moon/></el-icon>
-      <el-icon v-else><Sunny/></el-icon>
+    <button class="theme-toggle" :title="t('settings.title')" @click="settingsDialog.visible = true">
+      <el-icon><Setting/></el-icon>
     </button>
-    <div class="lang-switch">
-      <button :class="{active: lang==='zh'}" @click="setLang('zh')">中</button>
-      <button :class="{active: lang==='en'}" @click="setLang('en')">EN</button>
-    </div>
     <el-dropdown trigger="click" @command="onUserCommand">
       <div class="user-chip">
         <div class="user-chip__avatar">{{ avatarText }}</div>
@@ -781,7 +488,24 @@
       <el-button v-if="isAdmin && versionInfo && versionInfo.directUpdateSupported" type="primary" :loading="saving" @click="doDirectUpdate">{{ t('update.direct') }}</el-button>
     </template>
   </el-dialog>
+  <el-dialog v-model="settingsDialog.visible" :title="t('settings.title')" width="380px">
+    <div class="settings-row">
+      <span class="settings-row__label">{{ t('settings.language') }}</span>
+      <el-radio-group v-model="lang" size="small">
+        <el-radio-button label="zh">中文</el-radio-button>
+        <el-radio-button label="en">English</el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="settings-row">
+      <span class="settings-row__label">{{ t('settings.theme') }}</span>
+      <el-radio-group v-model="theme" size="small">
+        <el-radio-button label="light">{{ t('settings.light') }}</el-radio-button>
+        <el-radio-button label="dark">{{ t('settings.dark') }}</el-radio-button>
+      </el-radio-group>
+    </div>
+  </el-dialog>
 </div>
+</el-config-provider>
 `;
 
     const HintIcon = {
@@ -809,10 +533,11 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.7",
+                version: "1.0.8",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },
+                settingsDialog: { visible: false },
                 versionSettings: { directUpdateEnabled: false },
                 lang: localStorage.getItem("devicemanager.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
                 theme: localStorage.getItem("devicemanager.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
@@ -858,6 +583,9 @@
             },
             latestVersion() {
                 return (this.versionInfo && this.versionInfo.latest) || "";
+            },
+            elLocale() {
+                return this.lang === "zh" && window.ElementPlusLocaleZhCn ? window.ElementPlusLocaleZhCn : undefined;
             },
             avatarText() {
                 return (this.user.username || "?").charAt(0).toUpperCase();
@@ -931,7 +659,7 @@
         methods: {
             /* ---------- i18n ---------- */
             t(path, params) {
-                const dict = MESSAGES[this.lang] || MESSAGES.zh;
+                const dict = MESSAGES[this.lang] || MESSAGES.zh || {};
                 let value = path.split(".").reduce((o, k) => (o && o[k] != null ? o[k] : null), dict);
                 if (value == null) value = path;
                 if (params) value = value.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
@@ -1683,6 +1411,8 @@
     for (const [name, comp] of Object.entries(ElementPlusIconsVue)) {
         app.component(name, comp);
     }
-    app.mount("#app");
+    loadI18n()
+        .catch((err) => console.error("i18n load failed; falling back to message keys", err))
+        .finally(() => app.mount("#app"));
 
 })();

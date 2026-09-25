@@ -509,24 +509,15 @@ html.dark {
     word-break: break-word;
 }
 
-.lang-switch {
-    display: inline-flex;
-    padding: 3px;
-    border-radius: 999px;
-    background: var(--fill);
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
 }
-.lang-switch button {
-    border: 0;
-    background: transparent;
-    color: var(--text-mid);
-    padding: 5px 12px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 12.5px;
-    font-weight: 600;
-    transition: all 0.18s ease;
-}
-.lang-switch button.active { color: var(--text-hi); background: var(--surface-solid); box-shadow: var(--shadow-sm); }
+.settings-row + .settings-row { border-top: 1px solid var(--stroke); }
+.settings-row__label { color: var(--text-mid); font-size: 13px; font-weight: 600; }
 
 .user-chip {
     display: inline-flex;
