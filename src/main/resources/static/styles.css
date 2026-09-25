@@ -691,7 +691,7 @@ html.dark .status-badge.s-unknown { color: #a5a3ff; }
 
 /* ---------- 管理端 ---------- */
 .admin-panel { padding: 20px 22px; border-radius: var(--radius-md); }
-.admin-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.admin-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .admin-toolbar__spacer { flex: 1; }
 
 /* ---------- 脚本预览 ---------- */
@@ -759,7 +759,6 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.32
     .topbar__nav { order: 3; width: 100%; margin-left: 0; }
     main.main { padding: 22px 16px 54px; }
     .stat__value { font-size: 28px; }
-    .script-layout { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
     .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -794,7 +793,8 @@ html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.32
 
 /* ---------- 脚本任务面板 ---------- */
 .stp__list { max-width: 1240px; }
-.stp__bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.stp__bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.stp__device-select { width: 200px; }
 .stp__spacer { flex: 1; }
 .stp__name { font-weight: 600; color: var(--text-hi); }
 .stp__desc { font-size: 12px; color: var(--text-low); margin-top: 2px; }
@@ -820,37 +820,6 @@ html.dark .stp__ok { color: #6ee78a; }
     word-break: break-word;
     margin: 0;
 }
-
-/* ---------- 脚本任务页 ---------- */
-.script-layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
-.script-side { padding: 14px; border-radius: var(--radius-md); }
-.script-side__title {
-    font-size: 11.5px; color: var(--text-low); letter-spacing: 0.6px;
-    text-transform: uppercase; margin: 4px 6px 10px; font-weight: 600;
-}
-.script-device {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 10px; border-radius: 10px; cursor: pointer;
-    transition: background 0.15s ease;
-}
-.script-device:hover { background: var(--hover); }
-.script-device.active { background: var(--surface-solid); box-shadow: var(--shadow-sm); }
-.script-device__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #8e8e93; }
-.script-device__dot.s-online { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-.script-device__dot.s-offline { background: #8e8e93; }
-.script-device__dot.s-probe { background: var(--accent-orange); }
-.script-device__dot.s-unknown { background: var(--accent-indigo); }
-.script-device__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-
-.script-main { display: flex; flex-direction: column; gap: 16px; }
-.script-main.glass { padding: 44px; border-radius: var(--radius-md); }
-.script-ssh { padding: 16px 18px; border-radius: var(--radius-md); }
-.script-ssh__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.script-ssh__head h3 { margin: 0; font-size: 14px; color: var(--text-mid); font-weight: 600; }
-.script-ssh__body { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
-
-.chip--warn { background: rgba(255, 149, 0, 0.14); color: #b26a00; }
-html.dark .chip--warn { background: rgba(255, 159, 10, 0.18); color: #ffc266; }
 
 /* 目标设备列：单行显示前 2 个 + 「+N」，其余悬浮查看 */
 .stp__targets-cell .cell { white-space: normal; }
@@ -954,7 +923,7 @@ html.dark .scp__item.warning .scp__sev { color: #ffc266; }
    VS Code 排版 · 脚本全页编辑器
    排版：左 Explorer | 中（标签/Monaco/Problems/状态栏）| 右配置
    ============================================================ */
-.stp__editor { height: calc(100vh - 158px); min-height: 520px; }
+.stp__editor { height: calc(100vh - 158px); height: calc(100dvh - 158px); min-height: 520px; }
 .vsc {
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr) 300px;
@@ -1182,3 +1151,121 @@ html.dark .vsc__tab.active { background: #2d2d30; }
 .vsc-push-leave-to { opacity: 0; transform: translateX(32px); }
 .vsc-push-enter-active,
 .vsc-push-leave-active { transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1); }
+
+/* ============================================================
+   移动端 / 平板适配
+   ≤1024 平板：配置栏改为右侧抽屉（保留左 Explorer）
+   ≤768  手机：单栏 + 左右双抽屉 + 脚本列表卡片化
+   ============================================================ */
+
+/* ---- 抽屉通用 ---- */
+.vsc { position: relative; }
+.vsc__scrim {
+    display: none; position: fixed; inset: 0; z-index: 38;
+    background: rgba(0, 0, 0, 0.42);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.vsc__scrim.on { opacity: 1; pointer-events: auto; }
+.vsc__drawer-btn,
+.vsc__pane-close { display: none; }
+.vsc__drawer-btn {
+    flex: 0 0 auto; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 8px;
+    color: var(--text-mid); cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.vsc__drawer-btn:hover { background: var(--hover); color: var(--text-hi); }
+.vsc__pane-head { gap: 8px; }
+.vsc__pane-close {
+    flex: 0 0 auto; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 7px; margin-left: auto;
+    color: var(--text-low); cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.vsc__pane-close:hover { background: var(--hover); color: var(--text-hi); }
+
+/* ---- 脚本列表：手机端卡片 ---- */
+.stp-cards { display: flex; flex-direction: column; gap: 12px; }
+.stp-card { padding: 14px 15px; border-radius: var(--radius-md); }
+.stp-card__head { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
+.stp-card__title { flex: 1; min-width: 0; }
+.stp-card__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.stp-card .stp__targets { flex-wrap: wrap; overflow: visible; margin-top: 10px; }
+.stp-card__actions {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--stroke);
+}
+.stp-card__actions .el-button { margin: 0; flex: 1 1 0; min-width: 58px; }
+
+/* ---- 平板：配置栏变右侧抽屉 ---- */
+@media (max-width: 1024px) {
+    .vsc { grid-template-columns: 220px minmax(0, 1fr); }
+    .vsc__scrim { display: block; }
+    .vsc__inspector {
+        position: fixed; top: 0; right: 0; bottom: 0; left: auto;
+        width: min(340px, 88vw); z-index: 40;
+        background: var(--surface-solid);
+        border-left: 1px solid var(--stroke); border-radius: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(100%);
+        transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .vsc__inspector.is-open { transform: none; }
+    .vsc__drawer-btn--right { display: inline-flex; }
+    .vsc__inspector .vsc__pane-close { display: inline-flex; }
+}
+
+/* ---- 手机：单栏 + 左右双抽屉 ---- */
+@media (max-width: 768px) {
+    .vsc { grid-template-columns: minmax(0, 1fr); }
+
+    .vsc__explorer {
+        position: fixed; top: 0; bottom: 0; left: 0; right: auto;
+        width: min(300px, 86vw); z-index: 40;
+        background: var(--surface-solid);
+        border-right: 1px solid var(--stroke); border-radius: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(-100%);
+        transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .vsc__explorer.is-open { transform: none; }
+    .vsc__drawer-btn { display: inline-flex; }
+    .vsc__explorer .vsc__pane-close { display: inline-flex; }
+
+    .stp__editor {
+        height: calc(100vh - var(--header-h, 96px) - 78px);
+        height: calc(100dvh - var(--header-h, 96px) - 78px);
+        min-height: 0;
+    }
+    .section-title--compact-hidden { display: none; }
+
+    .topbar { padding-top: max(12px, env(safe-area-inset-top)); }
+    .live-dot { display: none; }
+    .nav-pill { padding: 8px 13px; }
+
+    .el-input__inner,
+    .el-textarea__inner,
+    .el-input-number .el-input__inner,
+    .el-select__input { font-size: 16px !important; }
+
+    .stp__list { max-width: 100%; }
+    .stp__device-select { width: 100%; }
+    .stp__bar .el-select { flex: 1 1 100%; }
+    .admin-toolbar .el-input { max-width: none !important; width: 100%; }
+
+    main.main { padding-bottom: max(54px, env(safe-area-inset-bottom)); }
+
+    .el-dialog:not(.is-fullscreen) {
+        width: calc(100vw - 20px) !important;
+        margin-top: 3vh !important;
+        padding: 18px;
+    }
+    .el-dialog__title { font-size: 16px; }
+    .el-message-box { width: calc(100vw - 40px) !important; }
+}

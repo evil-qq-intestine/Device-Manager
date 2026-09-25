@@ -248,6 +248,9 @@
             var self = this;
             this._observer = new MutationObserver(function () { self.syncTheme(); });
             this._observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+            this._mqNarrow = window.matchMedia("(max-width: 768px)");
+            this._onNarrowChange = function () { self.applyViewportOptions(); };
+            this._mqNarrow.addEventListener("change", this._onNarrowChange);
             loadMonaco()
                 .then(function () {
                     registerCompletions();
@@ -257,10 +260,23 @@
         },
         beforeUnmount: function () {
             if (this._observer) this._observer.disconnect();
+            if (this._mqNarrow) this._mqNarrow.removeEventListener("change", this._onNarrowChange);
             if (this._contentDisposable) this._contentDisposable.dispose();
             if (this.editor) this.editor.dispose();
         },
         methods: {
+            isNarrow: function () {
+                return window.matchMedia("(max-width: 768px)").matches;
+            },
+            applyViewportOptions: function () {
+                if (!this.editor) return;
+                var narrow = this.isNarrow();
+                this.editor.updateOptions({
+                    fontSize: narrow ? 13 : 12.5,
+                    wordWrap: narrow ? "on" : "off",
+                    minimap: { enabled: !narrow }
+                });
+            },
             initEditor: function () {
                 var self = this;
                 this.editor = window.monaco.editor.create(this.$refs.host, {
@@ -268,12 +284,12 @@
                     language: langId(this.language),
                     theme: isDark() ? "vs-dark" : "vs",
                     automaticLayout: true,
-                    fontSize: 12.5,
+                    fontSize: this.isNarrow() ? 13 : 12.5,
                     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace",
                     lineHeight: 20,
-                    minimap: { enabled: true },
+                    minimap: { enabled: !this.isNarrow() },
                     scrollBeyondLastLine: false,
-                    wordWrap: "off",
+                    wordWrap: this.isNarrow() ? "on" : "off",
                     tabSize: 4,
                     insertSpaces: true,
                     bracketPairColorization: { enabled: true },

@@ -36,14 +36,42 @@
     <div v-if="mode === 'list'" key="list" class="stp__list">
       <div class="stp__bar">
         <el-button type="primary" @click="openCreate"><el-icon><Plus/></el-icon>&nbsp;{{ t('scriptTask.add') }}</el-button>
-        <el-select v-model="selectedDeviceId" clearable filterable :placeholder="t('scriptTask.allDevices')" style="width:200px">
+        <el-select v-model="selectedDeviceId" clearable filterable :placeholder="t('scriptTask.allDevices')" class="stp__device-select">
           <el-option v-for="d in devices" :key="d.id" :value="d.id" :label="d.name || d.mac" />
         </el-select>
         <div class="stp__spacer"></div>
         <el-button @click="load" :loading="loading"><el-icon><Refresh/></el-icon></el-button>
       </div>
 
-      <el-table v-if="filteredTasks.length" :data="filteredTasks" v-loading="loading" style="width:100%">
+      <template v-if="filteredTasks.length">
+      <div v-if="phone" class="stp-cards" v-loading="loading">
+        <div v-for="row in filteredTasks" :key="row.id" class="stp-card glass">
+          <div class="stp-card__head">
+            <div class="stp-card__title">
+              <div class="stp__name">{{ row.name }}</div>
+              <div class="stp__desc" v-if="row.description">{{ row.description }}</div>
+            </div>
+            <el-switch :model-value="row.enabled" @change="toggle(row)" />
+          </div>
+          <div class="stp-card__meta">
+            <span class="chip">{{ triggerLabel(row.triggerType) }}</span>
+            <span :class="resultSummary(row).cls">{{ resultSummary(row).text }}</span>
+          </div>
+          <div class="stp__targets" v-if="row.targets && row.targets.length">
+            <span v-for="tg in row.targets" :key="tg.deviceId" class="chip" :class="{ 'chip--warn': !tg.sshConfigured }">
+              {{ tg.name || tg.mac }}
+            </span>
+          </div>
+          <div class="stp-card__actions">
+            <el-button size="small" type="primary" @click="execute(row)">{{ t('scriptTask.execute') }}</el-button>
+            <el-button size="small" @click="openLogs(row)">{{ t('scriptTask.logs') }}</el-button>
+            <el-button size="small" type="warning" plain @click="shutdown(row)">{{ t('scriptTask.shutdown') }}</el-button>
+            <el-button size="small" @click="openEdit(row)"><el-icon><Edit/></el-icon></el-button>
+            <el-button size="small" type="danger" @click="remove(row)"><el-icon><Delete/></el-icon></el-button>
+          </div>
+        </div>
+      </div>
+      <el-table v-else :data="filteredTasks" v-loading="loading" style="width:100%">
         <el-table-column :label="t('scriptTask.name')" min-width="150">
           <template #default="{ row }">
             <div class="stp__name">{{ row.name }}</div>
@@ -57,7 +85,7 @@
                     class="chip" :class="{ 'chip--warn': !tg.sshConfigured }">
                 {{ tg.name || tg.mac }}
               </span>
-              <el-popover v-if="row.targets && row.targets.length > 1" placement="top" trigger="hover"
+              <el-popover v-if="row.targets && row.targets.length > 1" placement="top" :trigger="phone ? 'click' : 'hover'"
                           :width="240" popper-class="stp__targets-popper">
                 <template #reference>
                   <span class="chip chip--more">+{{ row.targets.length - 1 }}</span>
@@ -98,14 +126,17 @@
           </template>
         </el-table-column>
       </el-table>
+      </template>
       <el-empty v-else :description="t('scriptTask.empty')" v-loading="loading" />
     </div>
 
     <div v-else key="editor" class="stp__editor">
       <div class="vsc">
-        <aside class="vsc__pane vsc__explorer">
+        <div class="vsc__scrim" :class="{ on: !!drawer }" @click="drawer = null"></div>
+        <aside class="vsc__pane vsc__explorer" :class="{ 'is-open': drawer === 'explorer' }">
           <div class="vsc__pane-head">
             <span class="vsc__pane-title">{{ t('scriptExplorer.title') }}</span>
+            <span class="vsc__pane-close" @click="drawer = null"><el-icon><Close/></el-icon></span>
             <el-button size="small" type="primary" plain @click="openCreate">
               <el-icon><Plus/></el-icon>&nbsp;{{ t('scriptExplorer.new') }}</el-button>
           </div>
@@ -160,6 +191,7 @@
 
         <section class="vsc__center">
           <div class="vsc__tabs">
+            <span class="vsc__drawer-btn" @click="drawer = drawer === 'explorer' ? null : 'explorer'"><el-icon><Menu/></el-icon></span>
             <span class="vsc__back" @click="closeActive"><el-icon><Back/></el-icon>&nbsp;{{ t('scriptExplorer.back') }}</span>
             <div class="vsc__tabs-fade" :class="{ 'is-left': tabsView.left, 'is-right': tabsView.right }">
               <div class="vsc__tabs-track" ref="tabsTrack" @scroll="onTabsScroll">
@@ -175,6 +207,7 @@
               <span class="vsc__tabs-arrow" :class="{ off: !tabsView.left }" @click="scrollTabs(-1)"><el-icon><ArrowLeft/></el-icon></span>
               <span class="vsc__tabs-arrow" :class="{ off: !tabsView.right }" @click="scrollTabs(1)"><el-icon><ArrowRight/></el-icon></span>
             </div>
+            <span class="vsc__drawer-btn vsc__drawer-btn--right" @click="drawer = drawer === 'config' ? null : 'config'"><el-icon><Setting/></el-icon></span>
           </div>
           <div class="vsc__editor">
             <script-check-panel ref="scp" v-model="editor.form.scriptContent" :language="editor.lang"
@@ -208,8 +241,11 @@
           </div>
         </section>
 
-        <aside class="vsc__pane vsc__inspector">
-          <div class="vsc__pane-head"><span class="vsc__pane-title">{{ t('scriptExplorer.config') }}</span></div>
+        <aside class="vsc__pane vsc__inspector" :class="{ 'is-open': drawer === 'config' }">
+          <div class="vsc__pane-head">
+            <span class="vsc__pane-title">{{ t('scriptExplorer.config') }}</span>
+            <span class="vsc__pane-close" @click="drawer = null"><el-icon><Close/></el-icon></span>
+          </div>
           <div class="vsc__inspector-body">
             <el-form label-position="top">
               <el-form-item :label="t('scriptTask.name')">
@@ -268,7 +304,7 @@
     </div>
   </transition>
 
-  <el-dialog v-model="logs.visible" :title="t('scriptTask.logs') + (logs.taskName ? ' · ' + logs.taskName : '')" width="820px" append-to-body>
+  <el-dialog v-model="logs.visible" :title="t('scriptTask.logs') + (logs.taskName ? ' · ' + logs.taskName : '')" width="820px" :fullscreen="phone" append-to-body>
     <el-table :data="logs.items" v-loading="logs.loading" style="width:100%" @row-click="openLogDetail">
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column :label="t('scriptTask.device')" min-width="130">
@@ -315,10 +351,14 @@
                 activeKey: null,
                 _tabSeq: 0,
                 tabsView: { overflow: false, left: false, right: false },
+                drawer: null,
                 logs: { visible: false, taskId: null, taskName: "", items: [], total: 0, page: 0, size: 10, loading: false, detail: null }
             };
         },
         computed: {
+            phone() {
+                return !!(this.nd && this.nd.viewport && this.nd.viewport.phone);
+            },
             filteredTasks() {
                 if (this.selectedDeviceId == null) return this.tasks;
                 return this.tasks.filter((t) => (t.targets || []).some((tg) => tg.deviceId === this.selectedDeviceId));
@@ -346,6 +386,7 @@
         watch: {
             mode(v) {
                 this.$emit("mode-change", v);
+                this.drawer = null;
                 this.scheduleTabsMeasure();
             },
             activeKey() {
@@ -422,6 +463,7 @@
                 const existing = this.tabs.find((t) => t.taskId === row.id);
                 if (existing) {
                     this.activeKey = existing.key;
+                    this.drawer = null;
                     this.mode = "editor";
                     return;
                 }
@@ -441,6 +483,7 @@
                 this.tabs.push(tab);
                 this.activeKey = tab.key;
                 this.problems.items = [];
+                this.drawer = null;
                 this.mode = "editor";
             },
             activate(tab) {

@@ -248,7 +248,7 @@
     </template>
 
     <template v-else-if="view==='script'">
-      <div class="section-title"><span class="spark"></span><h2>{{ t('nav.script') }}</h2></div>
+      <div class="section-title" :class="{ 'section-title--compact-hidden': scriptEditorMode === 'editor' }"><span class="spark"></span><h2>{{ t('nav.script') }}</h2></div>
       <script-task-panel :devices="devices" @mode-change="scriptEditorMode = $event" />
     </template>
 
@@ -342,7 +342,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="scriptDialog.visible" :title="t('script.title')" width="640px">
+  <el-dialog v-model="scriptDialog.visible" :title="t('script.title')" width="640px" :fullscreen="viewport.phone">
     <el-radio-group v-model="scriptDialog.os" @change="loadScript" style="margin-bottom:14px">
       <el-radio-button label="linux">Linux</el-radio-button>
       <el-radio-button label="windows">Windows</el-radio-button>
@@ -418,7 +418,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="deviceSshDialog.visible" :title="t('deviceSsh.title')" width="540px" @closed="clearDeviceSshSecrets">
+  <el-dialog v-model="deviceSshDialog.visible" :title="t('deviceSsh.title')" width="540px" :fullscreen="viewport.phone" @closed="clearDeviceSshSecrets">
     <el-form label-position="top">
       <div class="field-hint" style="margin-bottom:12px">{{ t('deviceSsh.hint') }}</div>
       <el-row :gutter="12">
@@ -460,7 +460,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="updateDialog.visible" :title="t('update.title')" width="620px">
+  <el-dialog v-model="updateDialog.visible" :title="t('update.title')" width="620px" :fullscreen="viewport.phone">
     <div class="update-row"><span>{{ t('update.current') }}</span><span class="mono">v{{ versionInfo ? versionInfo.current : version }}</span></div>
     <div class="update-row"><span>{{ t('update.latest') }}</span><span class="mono">{{ latestVersion ? ('v' + latestVersion) : '-' }}</span></div>
     <template v-if="updateAvailable">
@@ -504,7 +504,8 @@
     const HintIcon = {
         name: "HintIcon",
         props: { text: { type: String, default: "" } },
-        template: `<el-tooltip placement="top" effect="dark" :show-after="120" popper-class="hint-popper">
+        inject: ["nd"],
+        template: `<el-tooltip placement="top" effect="dark" :show-after="120" :trigger="nd.viewport.phone ? 'click' : 'hover'" popper-class="hint-popper">
             <el-icon class="hint-icon"><QuestionFilled/></el-icon>
             <template #content><slot>{{ text }}</slot></template>
           </el-tooltip>`
@@ -534,6 +535,10 @@
                 versionSettings: { directUpdateEnabled: false },
                 lang: localStorage.getItem("devicemanager.lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en"),
                 theme: localStorage.getItem("devicemanager.theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+                viewport: {
+                    phone: window.matchMedia("(max-width: 768px)").matches,
+                    tablet: window.matchMedia("(min-width: 769px) and (max-width: 1024px)").matches
+                },
                 view: "dashboard",
                 scriptEditorMode: "list",
                 loggingIn: false,
@@ -563,7 +568,8 @@
             return {
                 nd: {
                     t: (key, params) => self.t(key, params),
-                    api: (path, options) => self.api(path, options)
+                    api: (path, options) => self.api(path, options),
+                    get viewport() { return self.viewport; }
                 }
             };
         },
@@ -626,10 +632,19 @@
             },
             theme() {
                 this.applyTheme();
+            },
+            authed() {
+                nextTick(() => this.measureHeader());
             }
         },
         mounted() {
             window.addEventListener("resize", this.onResize);
+            this._mqPhone = window.matchMedia("(max-width: 768px)");
+            this._mqTablet = window.matchMedia("(min-width: 769px) and (max-width: 1024px)");
+            this._onMq = () => this.syncViewport();
+            this._mqPhone.addEventListener("change", this._onMq);
+            this._mqTablet.addEventListener("change", this._onMq);
+            this.syncViewport();
             this.applyTheme();
             this.fetchVersion();
             if (this.token) {
@@ -646,6 +661,8 @@
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.onResize);
+            if (this._mqPhone) this._mqPhone.removeEventListener("change", this._onMq);
+            if (this._mqTablet) this._mqTablet.removeEventListener("change", this._onMq);
             this.stopPolling();
             this.disposeCharts();
         },
@@ -1372,9 +1389,20 @@
                 if (statusChart) { statusChart.dispose(); statusChart = null; }
                 if (rateChart) { rateChart.dispose(); rateChart = null; }
             },
+            syncViewport() {
+                if (this._mqPhone) this.viewport.phone = this._mqPhone.matches;
+                if (this._mqTablet) this.viewport.tablet = this._mqTablet.matches;
+                this.measureHeader();
+            },
+            measureHeader() {
+                const header = this.$el && this.$el.querySelector ? this.$el.querySelector(".topbar") : null;
+                const h = header ? header.offsetHeight : 0;
+                document.documentElement.style.setProperty("--header-h", (h || 0) + "px");
+            },
             onResize() {
                 if (statusChart) statusChart.resize();
                 if (rateChart) rateChart.resize();
+                this.measureHeader();
             }
         }
     });
