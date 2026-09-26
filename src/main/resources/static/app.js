@@ -527,7 +527,7 @@
                 authed: false,
                 token: localStorage.getItem("devicemanager.token") || "",
                 user: { username: "", role: "", userId: null },
-                version: "1.0.9",
+                version: "1.1.0",
                 versionInfo: null,
                 checkingVersion: false,
                 updateDialog: { visible: false },
