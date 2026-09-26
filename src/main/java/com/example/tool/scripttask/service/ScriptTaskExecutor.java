@@ -1,7 +1,9 @@
 package com.example.tool.scripttask.service;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.device.entity.DeviceStatusEnum;
 import com.example.tool.device.repository.DeviceRepository;
+import com.example.tool.device.service.WolService;
 import com.example.tool.scripttask.entity.ScriptTask;
 import com.example.tool.scripttask.entity.ScriptTaskLog;
 import com.example.tool.scripttask.entity.ScriptType;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.time.LocalDateTime;
 
 /**
@@ -35,6 +39,7 @@ public class ScriptTaskExecutor {
     private final DeviceRepository deviceRepository;
     private final CryptoService cryptoService;
     private final SshExecutor sshExecutor;
+    private final WolService wolService;
 
     @Value("${app.script.ssh.command-timeout-ms:120000}")
     private long commandTimeoutMs;
@@ -43,12 +48,14 @@ public class ScriptTaskExecutor {
                               ScriptTaskLogRepository logRepository,
                               DeviceRepository deviceRepository,
                               CryptoService cryptoService,
-                              SshExecutor sshExecutor) {
+                              SshExecutor sshExecutor,
+                              WolService wolService) {
         this.taskRepository = taskRepository;
         this.logRepository = logRepository;
         this.deviceRepository = deviceRepository;
         this.cryptoService = cryptoService;
         this.sshExecutor = sshExecutor;
+        this.wolService = wolService;
     }
 
     @Async("scriptTaskThreadPool")
@@ -82,6 +89,10 @@ public class ScriptTaskExecutor {
                     cryptoService.decrypt(device.getSshKeyPassphraseEncrypted()));
             ScriptType type = device.getSshType() != null ? device.getSshType() : ScriptType.BASH;
 
+            if (device.getStatus() != DeviceStatusEnum.ONLINE) {
+                wakeAndWait(device, config);
+            }
+
             SshResult result = sshExecutor.executeScript(config, type, task.getScriptContent(), commandTimeoutMs);
 
             boolean shutdown = false;
@@ -94,6 +105,43 @@ public class ScriptTaskExecutor {
             log.error("Script task {} execution error on device {}", taskId, deviceId, e);
             finish(logEntry, -1, null, null, e.getMessage(), false);
             updateTaskResult(task, -1, e.getMessage());
+        }
+    }
+
+    /**
+     * 目标非在线时先发唤醒魔术包，再轮询 SSH 端口，直到可达或设备 wakeTimeout 超时。
+     * 超时抛异常，由 run() 统一记为执行失败；只探测端口，不重复执行脚本。
+     */
+    private void wakeAndWait(Device device, SshConfig config) {
+        try {
+            wolService.wake(device);
+            log.info("Woke device {} before script execution", device.getDeviceId());
+        } catch (Exception e) {
+            log.warn("Wake device {} before script execution failed: {}", device.getDeviceId(), e.getMessage());
+        }
+        long timeoutSeconds = device.getWakeTimeout() != null ? device.getWakeTimeout() : 120;
+        long deadline = System.currentTimeMillis() + timeoutSeconds * 1000L;
+        while (System.currentTimeMillis() < deadline) {
+            if (isReachable(config.host(), config.port())) {
+                log.info("Device {} reachable, proceeding with script execution", device.getDeviceId());
+                return;
+            }
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+        throw new IllegalStateException("设备未上线（等待 " + timeoutSeconds + " 秒超时）");
+    }
+
+    private boolean isReachable(String host, int port) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(host, port), 2000);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

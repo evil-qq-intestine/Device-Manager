@@ -33,6 +33,11 @@ public class WolService {
             throw new BusinessException("deviceId is null");
         }
         Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new BusinessException("Device not found, id: " + deviceId));
+        wake(device);
+    }
+
+    /** 发送魔术包并把设备置为 PROBE（无归属校验，供调度与脚本执行内部调用）。 */
+    public void wake(Device device) {
         boolean sendSuccess = ipStrategy(device, device.getMac());
         if (!sendSuccess) {
             throw new BusinessException("device send magic packet failed");

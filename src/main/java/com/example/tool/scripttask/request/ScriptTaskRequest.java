@@ -37,6 +37,9 @@ public class ScriptTaskRequest {
 
     private Integer shutdownDelaySeconds;
 
+    /** ONCE/CRON 提前唤醒秒数，null/0=关闭 */
+    private Integer wakeLeadSeconds;
+
     private Boolean enabled;
 
     /** 目标设备，至少一台；SSH 连接信息取各设备的设备 SSH 配置 */

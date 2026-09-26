@@ -64,4 +64,20 @@ class ScriptTaskValidatorTest {
     void onBootNeedsNoExtraConfig() {
         assertDoesNotThrow(() -> validator.validate(base(), true));
     }
+
+    @Test
+    void wakeLeadMustBeWithinRange() {
+        ScriptTaskRequest r = base();
+        r.setWakeLeadSeconds(-1);
+        assertThrows(BusinessException.class, () -> validator.validate(r, true));
+
+        r.setWakeLeadSeconds(86401);
+        assertThrows(BusinessException.class, () -> validator.validate(r, true));
+
+        r.setWakeLeadSeconds(0);
+        assertDoesNotThrow(() -> validator.validate(r, true));
+
+        r.setWakeLeadSeconds(600);
+        assertDoesNotThrow(() -> validator.validate(r, true));
+    }
 }

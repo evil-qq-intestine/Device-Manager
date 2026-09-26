@@ -18,6 +18,7 @@
             cronExpression: "",
             shutdownMode: "NONE",
             shutdownDelaySeconds: 60,
+            wakeLeadSeconds: 0,
             enabled: true,
             targetDeviceIds: []
         };
@@ -276,6 +277,10 @@
               <el-form-item v-if="editor.form.triggerType === 'CRON'" :label="t('scriptTask.cronExpression')">
                 <el-input v-model="editor.form.cronExpression" placeholder="0 0 3 * * *" class="mono" />
               </el-form-item>
+              <el-form-item v-if="editor.form.triggerType === 'ONCE' || editor.form.triggerType === 'CRON'" :label="t('scriptTask.wakeLead')">
+                <el-input-number v-model="editor.form.wakeLeadSeconds" :min="0" :max="86400" style="width:100%" />
+                <div class="field-hint">{{ t('scriptTask.wakeLeadHint') }}</div>
+              </el-form-item>
               <el-form-item :label="t('scriptTask.shutdownMode')">
                 <el-select v-model="editor.form.shutdownMode" style="width:100%">
                   <el-option :label="t('scriptTask.shutdownNone')" value="NONE" />
@@ -476,6 +481,7 @@
                     cronExpression: row.cronExpression || "",
                     shutdownMode: row.shutdownMode || "NONE",
                     shutdownDelaySeconds: row.shutdownDelaySeconds || 60,
+                    wakeLeadSeconds: row.wakeLeadSeconds || 0,
                     enabled: !!row.enabled,
                     targetDeviceIds: (row.targets || []).map((tg) => tg.deviceId)
                 };
@@ -595,6 +601,7 @@
                     cronExpression: f.triggerType === "CRON" ? f.cronExpression : null,
                     shutdownMode: f.shutdownMode,
                     shutdownDelaySeconds: f.shutdownMode === "DELAYED" ? Number(f.shutdownDelaySeconds) : null,
+                    wakeLeadSeconds: (f.triggerType === "ONCE" || f.triggerType === "CRON") ? (Number(f.wakeLeadSeconds) || 0) : null,
                     enabled: !!f.enabled,
                     targetDeviceIds: f.targetDeviceIds
                 };

@@ -156,7 +156,9 @@
     "confirmShutdown": "Shut down all targets of “{name}” now?",
     "stdout": "stdout",
     "stderr": "stderr",
-    "detail": "Execution detail"
+    "detail": "Execution detail",
+    "wakeLead": "Wake ahead (seconds)",
+    "wakeLeadHint": "Scheduled tasks wake offline target devices this many seconds before the trigger time so they are booted on time; 0 disables pre-wake."
   },
   "scriptCheck": {
     "run": "Check",

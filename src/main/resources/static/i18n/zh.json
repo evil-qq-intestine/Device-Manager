@@ -156,7 +156,9 @@
     "confirmShutdown": "确定立即关闭「{name}」的所有目标设备吗？",
     "stdout": "标准输出",
     "stderr": "错误输出",
-    "detail": "执行详情"
+    "detail": "执行详情",
+    "wakeLead": "提前唤醒(秒)",
+    "wakeLeadHint": "定时任务会在触发时间前这么久唤醒离线目标设备，确保到点已开机；0 表示不提前唤醒。"
   },
   "scriptCheck": {
     "run": "检查代码",

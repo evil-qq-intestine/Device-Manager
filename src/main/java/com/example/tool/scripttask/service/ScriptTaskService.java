@@ -1,8 +1,10 @@
 package com.example.tool.scripttask.service;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.device.entity.DeviceStatusEnum;
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.repository.DeviceRepository;
+import com.example.tool.device.service.WolService;
 import com.example.tool.scripttask.entity.ScriptTask;
 import com.example.tool.scripttask.entity.ScriptTaskLog;
 import com.example.tool.scripttask.entity.ScriptType;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +52,7 @@ public class ScriptTaskService {
     private final ScriptTaskValidator validator;
     private final ScriptTaskExecutor scriptTaskExecutor;
     private final SshExecutor sshExecutor;
+    private final WolService wolService;
 
     @Value("${app.script.ssh.connect-timeout-ms:10000}")
     private long connectTimeoutMs;
@@ -63,7 +67,8 @@ public class ScriptTaskService {
                              CryptoService cryptoService,
                              ScriptTaskValidator validator,
                              ScriptTaskExecutor scriptTaskExecutor,
-                             SshExecutor sshExecutor) {
+                             SshExecutor sshExecutor,
+                             WolService wolService) {
         this.taskRepository = taskRepository;
         this.logRepository = logRepository;
         this.deviceRepository = deviceRepository;
@@ -72,6 +77,7 @@ public class ScriptTaskService {
         this.validator = validator;
         this.scriptTaskExecutor = scriptTaskExecutor;
         this.sshExecutor = sshExecutor;
+        this.wolService = wolService;
     }
 
     /* ---------------- 查询 ---------------- */
@@ -141,6 +147,7 @@ public class ScriptTaskService {
                 .cronExpression(request.getTriggerType() == TriggerType.CRON ? request.getCronExpression() : null)
                 .shutdownMode(request.getShutdownMode())
                 .shutdownDelaySeconds(request.getShutdownDelaySeconds())
+                .wakeLeadSeconds(normalizeWakeLead(request))
                 .enabled(request.getEnabled() == null || request.getEnabled())
                 .build();
 
@@ -161,6 +168,8 @@ public class ScriptTaskService {
         task.setCronExpression(request.getTriggerType() == TriggerType.CRON ? request.getCronExpression() : null);
         task.setShutdownMode(request.getShutdownMode());
         task.setShutdownDelaySeconds(request.getShutdownDelaySeconds());
+        task.setWakeLeadSeconds(normalizeWakeLead(request));
+        task.setLastWokenAt(null);
         if (request.getEnabled() != null) {
             task.setEnabled(request.getEnabled());
         }
@@ -188,6 +197,96 @@ public class ScriptTaskService {
                 request.getSshPrivateKey(), blankToNull(request.getSshKeyPassphrase()));
         String fingerprint = sshExecutor.testConnection(config, connectTimeoutMs);
         return Map.of("ok", true, "fingerprint", fingerprint);
+    }
+
+    /** 提前唤醒仅对 ONCE/CRON 有意义，其余触发方式与 <=0 一律视为关闭。 */
+    private Integer normalizeWakeLead(ScriptTaskRequest request) {
+        Integer lead = request.getWakeLeadSeconds();
+        if (lead == null || lead <= 0) {
+            return null;
+        }
+        TriggerType type = request.getTriggerType();
+        if (type == TriggerType.ONCE || type == TriggerType.CRON) {
+            return lead;
+        }
+        return null;
+    }
+
+    /* ---------------- 提前唤醒 ---------------- */
+
+    /**
+     * 定时任务预唤醒：在触发点前 {@code wakeLeadSeconds} 秒唤醒离线目标设备，
+     * 使其在到点时已经开机。每个触发周期只唤醒一次，由 {@code lastWokenAt} 防重复。
+     */
+    @Transactional
+    public void preWakeDueTasks(LocalDateTime now) {
+        for (ScriptTask task : taskRepository.findByTriggerTypeAndEnabledTrue(TriggerType.ONCE)) {
+            preWakeOnce(task, now);
+        }
+        for (ScriptTask task : taskRepository.findByTriggerTypeAndEnabledTrue(TriggerType.CRON)) {
+            preWakeCron(task, now);
+        }
+    }
+
+    private void preWakeOnce(ScriptTask task, LocalDateTime now) {
+        Integer lead = task.getWakeLeadSeconds();
+        if (lead == null || lead <= 0 || task.getExecuteAt() == null) {
+            return;
+        }
+        preWake(task, task.getExecuteAt(), now, lead);
+    }
+
+    private void preWakeCron(ScriptTask task, LocalDateTime now) {
+        Integer lead = task.getWakeLeadSeconds();
+        if (lead == null || lead <= 0 || task.getCronExpression() == null || task.getCronExpression().isBlank()) {
+            return;
+        }
+        CronExpression expression;
+        try {
+            expression = CronExpression.parse(task.getCronExpression());
+        } catch (Exception e) {
+            return;
+        }
+        LocalDateTime reference = task.getLastExecutedAt() != null
+                ? task.getLastExecutedAt()
+                : (task.getCreatedAt() != null ? task.getCreatedAt() : now.minusMinutes(1));
+        LocalDateTime next = expression.next(reference);
+        if (next != null) {
+            preWake(task, next, now, lead);
+        }
+    }
+
+    private void preWake(ScriptTask task, LocalDateTime fireAt, LocalDateTime now, int leadSeconds) {
+        LocalDateTime wakeTime = fireAt.minusSeconds(leadSeconds);
+        if (now.isBefore(wakeTime) || !now.isBefore(fireAt)) {
+            return;
+        }
+        if (task.getLastWokenAt() != null && !task.getLastWokenAt().isBefore(wakeTime)) {
+            return;
+        }
+        boolean attempted = false;
+        boolean succeeded = false;
+        for (Device device : task.getTargets()) {
+            if (device.getStatus() == DeviceStatusEnum.ONLINE) {
+                continue;
+            }
+            attempted = true;
+            try {
+                wolService.wake(device);
+                succeeded = true;
+                log.info("Pre-wake device {} for scheduled task {} (fire at {}, lead {}s)",
+                        device.getDeviceId(), task.getId(), fireAt, leadSeconds);
+            } catch (Exception e) {
+                log.warn("Pre-wake device {} for scheduled task {} failed: {}",
+                        device.getDeviceId(), task.getId(), e.getMessage());
+            }
+        }
+        if (attempted && !succeeded) {
+            // 全部唤醒失败，留给下一次扫描重试
+            return;
+        }
+        task.setLastWokenAt(now);
+        taskRepository.save(task);
     }
 
     /* ---------------- 执行 ---------------- */

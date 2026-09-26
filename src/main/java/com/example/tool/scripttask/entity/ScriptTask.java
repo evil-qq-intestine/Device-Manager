@@ -66,6 +66,12 @@ public class ScriptTask {
 
     private Integer shutdownDelaySeconds;
 
+    /** 定时任务提前唤醒秒数：在触发点前这么久唤醒离线目标（仅 ONCE/CRON 有意义，null/0=关闭） */
+    private Integer wakeLeadSeconds;
+
+    /** 本周期最近一次发出唤醒的时间，防止重复唤醒 */
+    private LocalDateTime lastWokenAt;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean enabled = true;

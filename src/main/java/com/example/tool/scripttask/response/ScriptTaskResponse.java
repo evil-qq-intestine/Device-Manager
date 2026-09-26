@@ -29,6 +29,7 @@ public class ScriptTaskResponse {
     private String cronExpression;
     private ShutdownMode shutdownMode;
     private Integer shutdownDelaySeconds;
+    private Integer wakeLeadSeconds;
     private Boolean enabled;
     private LocalDateTime lastExecutedAt;
     private LocalDateTime createdAt;
@@ -77,6 +78,7 @@ public class ScriptTaskResponse {
         r.cronExpression = task.getCronExpression();
         r.shutdownMode = task.getShutdownMode();
         r.shutdownDelaySeconds = task.getShutdownDelaySeconds();
+        r.wakeLeadSeconds = task.getWakeLeadSeconds();
         r.enabled = task.getEnabled();
         r.lastExecutedAt = task.getLastExecutedAt();
         r.createdAt = task.getCreatedAt();

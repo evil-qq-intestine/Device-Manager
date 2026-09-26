@@ -29,6 +29,16 @@ public class ScriptTaskValidator {
             }
         }
 
+        Integer wakeLead = request.getWakeLeadSeconds();
+        if (wakeLead != null) {
+            if (wakeLead < 0) {
+                throw new BusinessException("提前唤醒时间不能为负数");
+            }
+            if (wakeLead > 86400) {
+                throw new BusinessException("提前唤醒时间过长（最多 86400 秒）");
+            }
+        }
+
         if (request.getShutdownMode() == ShutdownMode.DELAYED) {
             if (request.getShutdownDelaySeconds() == null || request.getShutdownDelaySeconds() < 1) {
                 throw new BusinessException("延迟关机必须设置大于 0 的延迟秒数");

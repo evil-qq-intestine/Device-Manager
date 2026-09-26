@@ -29,6 +29,11 @@ public class ScriptTaskScheduler {
     @Scheduled(fixedDelayString = "${app.script.scan-interval-ms:60000}")
     public void scan() {
         LocalDateTime now = LocalDateTime.now();
+        try {
+            scriptTaskService.preWakeDueTasks(now);
+        } catch (Exception e) {
+            log.error("Pre-wake scan failed", e);
+        }
         scanOnce(now);
         scanCron(now);
     }

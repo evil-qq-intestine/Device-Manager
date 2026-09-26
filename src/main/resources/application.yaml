@@ -60,7 +60,7 @@ app:
   script:
     # 未设置环境变量 APP_MASTER_KEY 时，读取/自动生成该本地密钥文件
     master-key-file: ./.master-key
-    scan-interval-ms: 60000          # 定时扫描 ONCE / CRON 的间隔
+    scan-interval-ms: 10000          # 定时扫描 ONCE / CRON 的间隔（含提前唤醒）
     on-boot-cooldown-seconds: 300    # ON_BOOT 同一任务冷却时间
     ssh:
       connect-timeout-ms: 10000      # SSH 连接/认证超时
