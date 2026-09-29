@@ -33,7 +33,7 @@ public class McpTokenAuthenticationProvider implements AuthenticationProvider {
         if (!(p instanceof String raw) || raw.isBlank())
             throw new BadCredentialsException("MCP token is missing");
 
-        McpTokenPrincipal t = mcpTokenService.findValid(raw, clientIp(authentication));   // 查库 + enabled + 过期 + 回写
+        McpTokenPrincipal t = mcpTokenService.findValidMcpToken(raw, clientIp(authentication));   // 查库 + enabled + 过期 + 回写
         if (t == null) throw new BadCredentialsException("MCP token is invalid, disabled or expired");
 
         List<GrantedAuthority> grants = new ArrayList<>();

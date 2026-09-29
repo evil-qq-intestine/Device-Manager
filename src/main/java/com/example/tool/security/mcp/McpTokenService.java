@@ -3,9 +3,9 @@ package com.example.tool.security.mcp;
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.security.mcp.entity.McpToken;
 import com.example.tool.security.mcp.entity.McpTokenPermission;
+import com.example.tool.security.mcp.request.DeleteMcpTokenRequest;
 import com.example.tool.security.mcp.response.CreateMcpTokenResponse;
 import com.example.tool.security.mcp.response.FindMcpTokenResponse;
-import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class McpTokenService {
      * <p>TODO 尚未实现：{@code allowedIp} 校验（目前该列只是展示用）。
      */
     @Transactional
-    public McpTokenPrincipal findValid(String rawToken, String clientIp) {
+    public McpTokenPrincipal findValidMcpToken(String rawToken, String clientIp) {
         McpToken t = mcpTokenRepository.findByTokenHash(sha256Hex(rawToken)).orElse(null);
         if (t == null || !Boolean.TRUE.equals(t.getIsEnabled())) return null;
         Instant now = Instant.now();
@@ -62,7 +62,7 @@ public class McpTokenService {
      * 后续要暴露给管理端的话，把入参换成请求 DTO 即可。
      */
     @Transactional
-    public CreateMcpTokenResponse create(McpTokenPrincipal principal, Integer userId) {
+    public CreateMcpTokenResponse createMcpToken(McpTokenPrincipal principal, Integer userId) {
         String rawToken = TOKEN_PREFIX + randomPart();
         McpToken token = new McpToken();
         token.setUser(userRepository.findById(userId).orElseThrow(() -> new BusinessException("user not found")));
@@ -75,23 +75,24 @@ public class McpTokenService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindMcpTokenResponse> findAll(McpTokenPrincipal principal, Integer userId) {
-        return
+    public List<FindMcpTokenResponse> findAllMcpToken(Integer userId) {
+        List<McpToken> tokens = mcpTokenRepository.findByUserId(userId);
+        return FindMcpTokenResponse.from(tokens);
     }
 
     @Transactional
-    public void deleteMcpToken(McpTokenPrincipal principal, Integer userId) {
-        McpToken existingMcpToken = mcpTokenRepository.findByMcpIdAndUserId(principal.id(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+    public void deleteMcpToken(Integer userId, DeleteMcpTokenRequest deleteMcpTokenRequest) {
+        McpToken existingMcpToken = mcpTokenRepository.findByMcpIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
         mcpTokenRepository.delete(existingMcpToken);
-        log.info("delete mcp token, token ID : {}", principal.id());
+        log.info("delete mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
     }
 
     @Transactional
-    public FindMcpTokenResponse deprecatedMcpToken(McpTokenPrincipal principal, Integer userId) {
-        McpToken mcpToken = mcpTokenRepository.findByMcpIdAndUserId(principal.id(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+    public FindMcpTokenResponse deprecatedMcpToken(DeleteMcpTokenRequest deleteMcpTokenRequest, Integer userId) {
+        McpToken mcpToken = mcpTokenRepository.findByMcpIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
         mcpToken.setIsEnabled(false);
         mcpTokenRepository.save(mcpToken);
-        log.info("deprecated mcp token, token ID : {}", principal.id());
+        log.info("deprecated mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
         return FindMcpTokenResponse.from(mcpToken);
     }
 

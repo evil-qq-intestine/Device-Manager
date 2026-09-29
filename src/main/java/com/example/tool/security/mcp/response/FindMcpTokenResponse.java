@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,5 +61,9 @@ public class FindMcpTokenResponse {
         r.usedIp = token.getUsedIp();
         r.enabled = token.getIsEnabled();
         return r;
+    }
+
+    public static List<FindMcpTokenResponse> from(List<McpToken> tokens) {
+        return tokens.stream().map(FindMcpTokenResponse::from).collect(Collectors.toList());
     }
 }
