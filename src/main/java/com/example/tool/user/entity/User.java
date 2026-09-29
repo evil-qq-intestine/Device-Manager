@@ -1,7 +1,7 @@
 package com.example.tool.user.entity;
 
 import com.example.tool.device.entity.Device;
-import com.example.tool.security.mcp.entity.McpJwtToken;
+import com.example.tool.security.mcp.entity.McpToken;
 import com.example.tool.user.request.CreateUserRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -41,7 +41,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     @ToString.Exclude
-    private List<McpJwtToken> mcpJwtTokens = new ArrayList<>();
+    private List<McpToken> mcpTokens = new ArrayList<>();
 
     public void addDevice(Device device) {
         devices.add(device);

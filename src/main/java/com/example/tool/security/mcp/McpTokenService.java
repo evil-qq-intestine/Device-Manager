@@ -1,10 +1,14 @@
 package com.example.tool.security.mcp;
 
-import com.example.tool.security.mcp.entity.McpJwtToken;
+import com.example.tool.device.exception.BusinessException;
+import com.example.tool.security.mcp.entity.McpToken;
 import com.example.tool.security.mcp.entity.McpTokenPermission;
-import com.example.tool.security.mcp.response.CreateMcpJwtTokenResponse;
+import com.example.tool.security.mcp.response.CreateMcpTokenResponse;
+import com.example.tool.security.mcp.response.FindMcpTokenResponse;
+import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,13 +17,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HexFormat;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class McpTokenService {
@@ -42,7 +43,7 @@ public class McpTokenService {
      */
     @Transactional
     public McpTokenPrincipal findValid(String rawToken, String clientIp) {
-        McpJwtToken t = mcpTokenRepository.findByTokenHash(sha256Hex(rawToken)).orElse(null);
+        McpToken t = mcpTokenRepository.findByTokenHash(sha256Hex(rawToken)).orElse(null);
         if (t == null || !Boolean.TRUE.equals(t.getIsEnabled())) return null;
         Instant now = Instant.now();
         if (t.getExpiresAt() != null && t.getExpiresAt().isBefore(now)) return null;
@@ -61,16 +62,37 @@ public class McpTokenService {
      * 后续要暴露给管理端的话，把入参换成请求 DTO 即可。
      */
     @Transactional
-    public CreateMcpJwtTokenResponse create(McpTokenPrincipal principal) {
+    public CreateMcpTokenResponse create(McpTokenPrincipal principal, Integer userId) {
         String rawToken = TOKEN_PREFIX + randomPart();
-        McpJwtToken token = new McpJwtToken();
-        token.setUser(userRepository.getReferenceById(principal.ownerId()));
+        McpToken token = new McpToken();
+        token.setUser(userRepository.findById(userId).orElseThrow(() -> new BusinessException("user not found")));
         token.setTier(principal.tier());
         token.setMcpTokenPermission(Set.copyOf(principal.permissions()));
         token.setTokenHash(sha256Hex(rawToken));
         mcpTokenRepository.save(token);
 
-        return new CreateMcpJwtTokenResponse(rawToken, scopesOf(token.getMcpTokenPermission()), token.getName());
+        return new CreateMcpTokenResponse(rawToken, scopesOf(token.getMcpTokenPermission()), token.getName());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FindMcpTokenResponse> findAll(McpTokenPrincipal principal, Integer userId) {
+        return
+    }
+
+    @Transactional
+    public void deleteMcpToken(McpTokenPrincipal principal, Integer userId) {
+        McpToken existingMcpToken = mcpTokenRepository.findByMcpIdAndUserId(principal.id(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+        mcpTokenRepository.delete(existingMcpToken);
+        log.info("delete mcp token, token ID : {}", principal.id());
+    }
+
+    @Transactional
+    public FindMcpTokenResponse deprecatedMcpToken(McpTokenPrincipal principal, Integer userId) {
+        McpToken mcpToken = mcpTokenRepository.findByMcpIdAndUserId(principal.id(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+        mcpToken.setIsEnabled(false);
+        mcpTokenRepository.save(mcpToken);
+        log.info("deprecated mcp token, token ID : {}", principal.id());
+        return FindMcpTokenResponse.from(mcpToken);
     }
 
     private static String randomPart() {

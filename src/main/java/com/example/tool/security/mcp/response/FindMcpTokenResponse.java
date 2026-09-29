@@ -1,6 +1,6 @@
 package com.example.tool.security.mcp.response;
 
-import com.example.tool.security.mcp.entity.McpJwtToken;
+import com.example.tool.security.mcp.entity.McpToken;
 import com.example.tool.security.mcp.entity.McpTokenPermission;
 import com.example.tool.security.mcp.entity.McpTokenTier;
 import lombok.Getter;
@@ -17,12 +17,11 @@ import java.util.stream.Collectors;
  *   <li>{@code jti} —— JWT 时代的遗留列，{@code dm_} 是不透明串、没有 jti claim，已废弃。</li>
  * </ul>
  *
- * <p>映射只走 {@link #from(McpJwtToken)}，别在外部手抄字段 —— 多抄一个字段（比如曾经的 jti）
- * 编译期不会报错，只能靠肉眼发现。
+ * <p>映射只走 {@link #from(McpToken)}
  */
 @Getter
 @Setter
-public class FindMcpJwtTokenResponse {
+public class FindMcpTokenResponse {
 
     private Integer id;
 
@@ -46,8 +45,8 @@ public class FindMcpJwtTokenResponse {
     /** 注意不是 {@code isEnabled}：与实体列名解耦，也和 ScriptTaskResponse.enabled 保持一致。 */
     private Boolean enabled;
 
-    public static FindMcpJwtTokenResponse from(McpJwtToken token) {
-        FindMcpJwtTokenResponse r = new FindMcpJwtTokenResponse();
+    public static FindMcpTokenResponse from(McpToken token) {
+        FindMcpTokenResponse r = new FindMcpTokenResponse();
         r.id = token.getId();
         r.name = token.getName();
         r.tier = token.getTier();

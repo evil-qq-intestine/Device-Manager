@@ -19,7 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "jwt_token")
-public class McpJwtToken {
+public class McpToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
