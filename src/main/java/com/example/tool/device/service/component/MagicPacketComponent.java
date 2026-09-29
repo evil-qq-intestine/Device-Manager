@@ -2,6 +2,7 @@ package com.example.tool.device.service.component;
 
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.device.util.MacUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,12 @@ public class MagicPacketComponent {
 
     @Value("${wol.intervalMs:100}")
     private int WOL_INTERVAL_MS;
+
+    @PostConstruct
+    void logEffectiveConfig() {
+        log.info("WOL 魔术包配置: ports={}, retry={}, intervalMs={}",
+                java.util.Arrays.toString(WOL_PORTS), WOL_RETRY, WOL_INTERVAL_MS);
+    }
 
     public void sendMagicPacket(String mac, Set<InetAddress> broadcast) {
         byte[] macBytes = MacUtils.parse(mac);

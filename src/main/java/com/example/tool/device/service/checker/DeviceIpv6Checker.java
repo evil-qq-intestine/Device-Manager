@@ -88,7 +88,9 @@ public class DeviceIpv6Checker implements DeviceIpChecker {
                     continue;
                 }
                 String name = iface.getName();
-                if (name.startsWith("tun") || name.startsWith("tap")) {
+                // 排除到不了局域网的虚拟接口：VPN(tun)、Docker(veth/br-)、libvirt(virbr)、tap
+                if (name.startsWith("tun") || name.startsWith("tap") || name.startsWith("veth")
+                        || name.startsWith("br-") || name.startsWith("virbr")) {
                     continue;
                 }
                 boolean hasIpv6 = false;

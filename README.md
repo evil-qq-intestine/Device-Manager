@@ -50,9 +50,9 @@ Settings live in `src/main/resources/application.yaml` and can be overridden wit
 | Setting / Env | Description |
 | --- | --- |
 | `jwt.secret` / `jwt.expiration` | JWT signing key and lifetime |
-| `wol.ipv4.broadcast-address`, `wol.ipv6.multicast-address`, `wol.port` | Magic packet destination |
+| `wol.ipv4.broadcast-address`, `wol.ipv6.multicast-address`, `wol.ports`, `wol.ipv6.network-cards` | Magic packet destination |
 | `ping.task-time` | Health-check scan interval (seconds) |
-| `app.server-url` / `APP_SERVER_URL` | Server URL baked into the device heartbeat script |
+| `app.server-url` / `APP_SERVER_URL` | Optional override for the server URL baked into the device heartbeat script. **Leave empty** to derive it from the download request (`Host` + `X-Forwarded-*`) — required for nginx / Docker port-mapping |
 | `app.script.master-key-file` / `APP_SCRIPT_MASTER_KEY_FILE` | Master key file path (default `./.master-key`) |
 | `APP_MASTER_KEY` | Master key (Base64, 32 bytes); takes precedence over the file |
 | `app.script.ssh.connect-timeout-ms` / `command-timeout-ms` | SSH connect / command timeouts |

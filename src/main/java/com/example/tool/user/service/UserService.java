@@ -8,7 +8,7 @@ import com.example.tool.user.response.UserResponse;
 import com.example.tool.user.entity.User;
 import com.example.tool.user.reopsitory.UserRepository;
 import com.example.tool.user.util.CustomUserDetails;
-import com.example.tool.user.util.JwtUtils;
+import com.example.tool.security.jwt.JwtUtils;
 import com.example.tool.user.validator.UserValidator;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,7 @@
 package com.example.tool.user.entity;
 
 import com.example.tool.device.entity.Device;
+import com.example.tool.security.mcp.entity.McpJwtToken;
 import com.example.tool.user.request.CreateUserRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -28,12 +29,19 @@ public class User {
     private List<Device> devices = new ArrayList<>();
 
     private String username;
+
+    @JsonIgnore
     private String password;
     private Integer tokenVersion = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<McpJwtToken> mcpJwtTokens = new ArrayList<>();
 
     public void addDevice(Device device) {
         devices.add(device);

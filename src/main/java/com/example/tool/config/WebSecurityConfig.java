@@ -1,7 +1,8 @@
 package com.example.tool.config;
 
-import com.example.tool.user.service.component.JwtAuthenticationFilter;
+import com.example.tool.security.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +28,7 @@ public class WebSecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//不生成JSESSIONID，自己靠JWT
@@ -60,6 +61,22 @@ public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 认领但不注册 —— 同 {@code McpSecurityConfig#mcpBearerFilterRegistration}。
+     *
+     * <p>{@link JwtAuthenticationFilter} 是 {@code @Component} 的 {@code Filter} bean，
+     * 不这样处理会被 Spring Boot 自动注册进 Servlet 容器，在安全链之外对所有请求（含 /mcp）
+     * 再跑一遍；/mcp 带 {@code dm_} 令牌时解析 JWT 必然失败，于是刷
+     * "Failed to parse JWT token" —— 那条「MCP 假告警」的真正来源。
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthenticationFilterRegistration() {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(jwtAuthenticationFilter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean

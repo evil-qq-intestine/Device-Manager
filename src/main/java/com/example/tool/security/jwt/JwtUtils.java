@@ -1,5 +1,6 @@
-package com.example.tool.user.util;
+package com.example.tool.security.jwt;
 
+import com.example.tool.user.util.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

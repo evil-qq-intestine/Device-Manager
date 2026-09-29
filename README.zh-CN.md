@@ -50,9 +50,9 @@ mvnw.cmd spring-boot:run      # Windows
 | 配置 / 环境变量 | 说明 |
 | --- | --- |
 | `jwt.secret` / `jwt.expiration` | JWT 签名密钥与有效期 |
-| `wol.ipv4.broadcast-address`、`wol.ipv6.multicast-address`、`wol.port` | 魔术包目标 |
+| `wol.ipv4.broadcast-address`、`wol.ipv6.multicast-address`、`wol.ports`、`wol.ipv6.network-cards` | 魔术包目标 |
 | `ping.task-time` | 健康检查扫描间隔（秒） |
-| `app.server-url` / `APP_SERVER_URL` | 下发给设备的心跳脚本里使用的服务端地址 |
+| `app.server-url` / `APP_SERVER_URL` | 可选覆盖：下发给设备的心跳脚本里使用的服务端地址。**留空**则按下载脚本那次请求现场推导（`Host` + `X-Forwarded-*`），nginx 反代 / Docker 端口映射下才能写出设备真正访问得到的地址 |
 | `app.script.master-key-file` / `APP_SCRIPT_MASTER_KEY_FILE` | 主密钥文件路径（默认 `./.master-key`） |
 | `APP_MASTER_KEY` | 主密钥（Base64，32 字节）。设置后优先于密钥文件 |
 | `app.script.ssh.connect-timeout-ms` / `command-timeout-ms` | SSH 连接 / 命令超时 |

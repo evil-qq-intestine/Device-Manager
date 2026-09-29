@@ -190,7 +190,11 @@ public class ScriptTaskService {
         taskRepository.delete(task);
     }
 
-    @Transactional
+    /**
+     * 试连 SSH。<b>刻意不加 {@code @Transactional}</b>：本方法自身不访问数据库，
+     * 但 {@code sshExecutor.testConnection} 内部会写 ssh_host_key，事务会把
+     * 唯一的 SQLite 连接一直占到期满（连接池 {@code maximum-pool-size=1}）。
+     */
     public Map<String, Object> testSsh(TestSshRequest request) {
         SshConfig config = new SshConfig(
                 request.getSshHost(), request.getSshPort(), request.getSshUser(),
@@ -345,10 +349,17 @@ public class ScriptTaskService {
 
     /**
      * 手动关机：忽略任务配置，立即关闭所有目标设备。
+     *
+     * <p><b>刻意不加 {@code @Transactional}</b>：这里要逐台走 SSH，单次最长
+     * {@code app.script.ssh.command-timeout-ms}（默认 120s）。SQLite 的 Hikari
+     * 连接池是 {@code maximum-pool-size=1}，事务一旦跨越大段网络 I/O，就会把
+     * 全应用唯一的数据库连接占住 —— SSH 被中断/挂住时表现为整个服务「数据库死锁」。
+     * 所以：用 {@link ScriptTaskRepository#findWithTargetsByIdAndOwner_Id} 一次性
+     * 把 targets 抓出来，之后每台设备的 SSH 与日志写入各自走短事务。
      */
-    @Transactional
     public List<Map<String, Object>> shutdownNow(Long taskId, Integer userId) {
-        ScriptTask task = requireOwned(taskId, userId);
+        ScriptTask task = taskRepository.findWithTargetsByIdAndOwner_Id(taskId, userId)
+                .orElseThrow(() -> new AccessDeniedException("Task not found or access denied"));
         List<Map<String, Object>> results = new ArrayList<>();
         for (Device device : task.getTargets()) {
             results.add(shutdownDevice(task, device));

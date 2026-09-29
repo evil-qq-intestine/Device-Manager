@@ -1,7 +1,6 @@
-package com.example.tool.user.service.component;
+package com.example.tool.security.jwt;
 
 import com.example.tool.user.util.CustomUserDetails;
-import com.example.tool.user.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

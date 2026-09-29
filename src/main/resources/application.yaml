@@ -28,6 +28,14 @@ spring:
               enhance:
                 enableLazyInitialization: true
 
+server:
+  # 反向代理（nginx）与 Docker 端口映射下，让 getScheme()/getServerName()/getServerPort()
+  # 认 X-Forwarded-Proto / X-Forwarded-Host / X-Forwarded-Port。
+  # 必须是 framework（= ForwardedHeaderFilter，信任任何来源的转发头）；
+  # NATIVE（Tomcat RemoteIpValve）只信任 internalProxies 匹配的来源，
+  # Docker 网桥下代理 IP 常常不匹配 → 转发头被丢弃 → 心跳脚本里写进容器内网地址。
+  forward-headers-strategy: framework
+
 jwt:
   # 生产环境务必用环境变量 JWT_SECRET 覆盖（openssl rand -base64 48）；保留占位值可被伪造 token
   secret: your-256-bit-secret-key-here-at-least-32-characters123 #密钥
@@ -36,10 +44,20 @@ jwt:
 wol:
   ipv6:
     multicast-address: ff02::1
-    networkCard: wlp1s0
+    # 组播模式使用的网卡列表，留空 = 自动探测（推荐）。
+    # 属性名是 network-cards，对应 WolIpv6Properties.networkCards。
+    # 旧配置写的是单数 networkCard: wlp1s0 —— 绑不上任何字段（一直是死配置），
+    # 而且 wlp1s0 只在那台机器上存在，写死会直接顶掉自动探测。
+    # network-cards:
+    #   - eth0
   ipv4:
+    # 兜底全局广播。真正生效的是 DeviceIpv4Checker 现场枚举出的各网卡广播地址；
+    # 本服务若跑在 Docker bridge 网络里，广播出不了容器，需要 --network host
+    # 或直接在宿主机部署，否则局域网设备收不到魔术包（启动日志会提示）。
     broadcast-address: "255.255.255.255"
-  port: 9
+  # 魔术包目标端口，可写多个。属性名是复数 ports，对应 MagicPacketComponent 的 int[]。
+  # 旧配置写的是单数 wol.port —— 绑不上，一直用的默认值 9。
+  ports: [9]
 
 ping:
   task-time: 10
@@ -56,7 +74,10 @@ app:
     check-interval-ms: 21600000                    # 定时检测间隔，默认 6 小时
     initial-delay-ms: 15000                    # 启动后首次检测延迟
     asset-prefix: device-manager                   # Release 产物文件名前缀（<prefix>.jar）
-  server-url: http://10.34.70.66:8080
+  # 心跳脚本里写什么服务端地址：默认留空 = 按下载脚本那次 HTTP 请求现场推导
+  # （Host + X-Forwarded-*，见上面的 forward-headers-strategy）。
+  # 只有在「管理员从 localhost 打开页面、但设备要走公网地址」这类场景才需要显式覆盖。
+  server-url:
   script:
     # 未设置环境变量 APP_MASTER_KEY 时，读取/自动生成该本地密钥文件
     master-key-file: ./.master-key

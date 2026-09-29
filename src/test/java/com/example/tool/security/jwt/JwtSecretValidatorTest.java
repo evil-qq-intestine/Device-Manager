@@ -1,4 +1,4 @@
-package com.example.tool.config;
+package com.example.tool.security.jwt;
 
 import org.junit.jupiter.api.Test;
 

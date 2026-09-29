@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
@@ -74,11 +75,15 @@ public class DeviceController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "linux") String os) {
 
-        String script = deviceService.generateHeartbeatScript(deviceId, userDetails.getUserId(), os);
+        // 现场取：用本次请求的 scheme/host/port（已由 ForwardedHeaderFilter 处理
+        // X-Forwarded-Proto/Host/Port），而不是配置里写死的内网地址。
+        String requestBaseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        String script = deviceService.generateHeartbeatScript(deviceId, userDetails.getUserId(), os, requestBaseUrl);
 
+        String extension = "windows".equalsIgnoreCase(os) ? "ps1" : "sh";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"heartbeat-" + deviceId + ".sh\"")
+                        "attachment; filename=\"heartbeat-" + deviceId + "." + extension + "\"")
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(script);
     }

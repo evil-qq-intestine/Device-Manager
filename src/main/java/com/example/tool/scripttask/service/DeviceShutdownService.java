@@ -71,8 +71,13 @@ public class DeviceShutdownService {
 
     /**
      * 立即关机（忽略任何脚本任务）。
+     *
+     * <p><b>刻意不加 {@code @Transactional}</b>：SSH 最长会阻塞
+     * {@code app.script.ssh.command-timeout-ms}（默认 120s）。SQLite 的 Hikari
+     * 连接池是 {@code maximum-pool-size=1}，把网络 I/O 放进事务等于把全应用唯一的
+     * 数据库连接占死 —— SSH 意外中断时表现为整个服务「数据库死锁」。
+     * {@code requireOwned} 走自己的短事务，返回的设备只用到基本列，事务外访问安全。
      */
-    @Transactional
     public Map<String, Object> shutdownNow(Integer deviceId, Integer userId) {
         Device device = requireOwned(deviceId, userId);
         if (device.getSshPrivateKeyEncrypted() == null) {

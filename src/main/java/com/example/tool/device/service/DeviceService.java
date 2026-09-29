@@ -47,8 +47,12 @@ public class DeviceService {
         this.scriptTaskService = scriptTaskService;
     }
 
-    @Value("${app.server-url}")
-    private String serverAddress;
+    /**
+     * 可选覆盖：留空时由调用方传入「本次 HTTP 请求推导出的基地址」，
+     * 这样 nginx 反代 / Docker 端口映射下写进脚本的地址也是设备真正访问得到的那个。
+     */
+    @Value("${app.server-url:}")
+    private String serverAddressOverride;
 
     @Transactional(readOnly = true)
     public List<Device> findDevicesByUserId(Integer userId) {
@@ -154,10 +158,21 @@ public class DeviceService {
     }
 
     @Transactional(readOnly = true)
-    public String generateHeartbeatScript(Integer deviceId, Integer userId, String os) {
+    public String generateHeartbeatScript(Integer deviceId, Integer userId, String os, String requestBaseUrl) {
         Device device = deviceRepository.findByDeviceIdAndUserId(deviceId, userId).orElseThrow(() -> new IdNotDetectedException("Device not found or no access"));
 
         ScriptForClient client = ScriptForClient.fromString(os);
-        return client.render(serverAddress, device.getMac(), device.getDeviceId(), device.getDeviceToken());
+        return client.render(resolveServerBase(requestBaseUrl), device.getMac(), device.getDeviceId(), device.getDeviceToken());
+    }
+
+    /** 显式配置优先；否则用本次请求推导出的基地址（去掉结尾多余的 '/'）。 */
+    private String resolveServerBase(String requestBaseUrl) {
+        String base = (serverAddressOverride != null && !serverAddressOverride.isBlank())
+                ? serverAddressOverride
+                : requestBaseUrl;
+        if (base == null || base.isBlank()) {
+            throw new BusinessException("无法确定服务端地址：请求里没有可用的 Host，请显式配置 app.server-url");
+        }
+        return base.replaceAll("/+$", "");
     }
 }

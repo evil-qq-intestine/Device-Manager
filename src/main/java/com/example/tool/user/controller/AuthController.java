@@ -1,7 +1,7 @@
 package com.example.tool.user.controller;
 
 import com.example.tool.user.request.LoginRequest;
-import com.example.tool.user.util.JwtUtils;
+import com.example.tool.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
