@@ -3,7 +3,7 @@ package com.example.tool.security.mcp;
 import com.example.tool.device.exception.BusinessException;
 import com.example.tool.security.mcp.entity.McpToken;
 import com.example.tool.security.mcp.entity.McpTokenPermission;
-import com.example.tool.security.mcp.request.DeleteMcpTokenRequest;
+import com.example.tool.security.mcp.request.CreateMcpTokenRequest;
 import com.example.tool.security.mcp.response.CreateMcpTokenResponse;
 import com.example.tool.security.mcp.response.FindMcpTokenResponse;
 import com.example.tool.user.reopsitory.UserRepository;
@@ -62,12 +62,12 @@ public class McpTokenService {
      * 后续要暴露给管理端的话，把入参换成请求 DTO 即可。
      */
     @Transactional
-    public CreateMcpTokenResponse createMcpToken(McpTokenPrincipal principal, Integer userId) {
+    public CreateMcpTokenResponse createMcpToken(CreateMcpTokenRequest createMcpTokenRequest, Integer userId) {
         String rawToken = TOKEN_PREFIX + randomPart();
         McpToken token = new McpToken();
         token.setUser(userRepository.findById(userId).orElseThrow(() -> new BusinessException("user not found")));
-        token.setTier(principal.tier());
-        token.setMcpTokenPermission(Set.copyOf(principal.permissions()));
+        token.setTier(createMcpTokenRequest.getTier());
+        token.setMcpTokenPermission(Set.copyOf(createMcpTokenRequest.getPermissions()));
         token.setTokenHash(sha256Hex(rawToken));
         mcpTokenRepository.save(token);
 
@@ -81,17 +81,17 @@ public class McpTokenService {
     }
 
     @Transactional
-    public void deleteMcpToken(Integer userId, DeleteMcpTokenRequest deleteMcpTokenRequest) {
-        McpToken existingMcpToken = mcpTokenRepository.findByIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("删除失败，MCP 令牌不存在或不属于当前用户"));
+    public void deleteMcpToken(Integer userId, Integer tokenId) {
+        McpToken existingMcpToken = mcpTokenRepository.findByIdAndUserId(tokenId, userId).orElseThrow(() -> new BusinessException("删除失败，MCP 令牌不存在或不属于当前用户"));
         mcpTokenRepository.delete(existingMcpToken);
-        log.info("delete mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
+        log.info("delete mcp token, token ID : {}", tokenId);
     }
 
     @Transactional
-    public FindMcpTokenResponse deprecatedMcpToken(DeleteMcpTokenRequest deleteMcpTokenRequest, Integer userId) {
-        McpToken mcpToken = mcpTokenRepository.findByIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("停用失败，MCP 令牌不存在或不属于当前用户"));
+    public FindMcpTokenResponse deprecatedMcpToken(Integer tokenId, Integer userId) {
+        McpToken mcpToken = mcpTokenRepository.findByIdAndUserId(tokenId, userId).orElseThrow(() -> new BusinessException("停用失败，MCP 令牌不存在或不属于当前用户"));
         mcpToken.setIsEnabled(false);
-        log.info("deprecate mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
+        log.info("deprecate mcp token, token ID : {}", tokenId);
         return FindMcpTokenResponse.from(mcpToken);
     }
 

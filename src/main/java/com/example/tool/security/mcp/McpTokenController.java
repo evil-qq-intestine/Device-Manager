@@ -1,9 +1,10 @@
 package com.example.tool.security.mcp;
 
-import com.example.tool.security.mcp.request.DeleteMcpTokenRequest;
+import com.example.tool.security.mcp.request.CreateMcpTokenRequest;
 import com.example.tool.security.mcp.response.CreateMcpTokenResponse;
 import com.example.tool.security.mcp.response.FindMcpTokenResponse;
 import com.example.tool.user.util.CustomUserDetails;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,23 +22,23 @@ public class McpTokenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateMcpTokenResponse createToken(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody McpTokenPrincipal mcpTokenPrincipal) {
-        return mcpTokenService.createMcpToken(mcpTokenPrincipal, userDetails.getUserId());
+    public CreateMcpTokenResponse createToken(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails, @RequestBody CreateMcpTokenRequest createMcpTokenRequest) {
+        return mcpTokenService.createMcpToken(createMcpTokenRequest, userDetails.getUserId());
     }
 
     @GetMapping
-    public List<FindMcpTokenResponse> findAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public List<FindMcpTokenResponse> findAll(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails) {
         return mcpTokenService.findAllMcpToken(userDetails.getUserId());
     }
 
-    @DeleteMapping
-    public void deleteToken(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DeleteMcpTokenRequest deleteMcpTokenRequest) {
-        mcpTokenService.deleteMcpToken(userDetails.getUserId(), deleteMcpTokenRequest);
+    @DeleteMapping("/delete/{id}")
+    public void deleteToken(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails, @PathVariable Integer tokenId) {
+        mcpTokenService.deleteMcpToken(userDetails.getUserId(), tokenId);
     }
 
-    @PatchMapping
+    @PatchMapping("/deprecated/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public FindMcpTokenResponse deprecatedToken(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DeleteMcpTokenRequest deleteMcpTokenRequest) {
-        return mcpTokenService.deprecatedMcpToken(deleteMcpTokenRequest, userDetails.getUserId());
+    public FindMcpTokenResponse deprecatedToken(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails, @PathVariable Integer tokenId) {
+        return mcpTokenService.deprecatedMcpToken(tokenId, userDetails.getUserId());
     }
 }
