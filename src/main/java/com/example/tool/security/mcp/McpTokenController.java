@@ -31,12 +31,12 @@ public class McpTokenController {
         return mcpTokenService.findAllMcpToken(userDetails.getUserId());
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{tokenId}")
     public void deleteToken(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails, @PathVariable Integer tokenId) {
         mcpTokenService.deleteMcpToken(userDetails.getUserId(), tokenId);
     }
 
-    @PatchMapping("/deprecated/{id}")
+    @PatchMapping("/deprecated/{tokenId}")
     @ResponseStatus(HttpStatus.OK)
     public FindMcpTokenResponse deprecatedToken(@AuthenticationPrincipal @NotNull CustomUserDetails userDetails, @PathVariable Integer tokenId) {
         return mcpTokenService.deprecatedMcpToken(tokenId, userDetails.getUserId());
