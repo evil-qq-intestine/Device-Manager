@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/mcp/token")
+@RequestMapping("/api/mcp/token")
 public class McpTokenController {
 
     private final McpTokenService mcpTokenService;
@@ -35,8 +35,8 @@ public class McpTokenController {
         mcpTokenService.deleteMcpToken(userDetails.getUserId(), deleteMcpTokenRequest);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @PatchMapping
+    @ResponseStatus(HttpStatus.OK)
     public FindMcpTokenResponse deprecatedToken(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DeleteMcpTokenRequest deleteMcpTokenRequest) {
         return mcpTokenService.deprecatedMcpToken(deleteMcpTokenRequest, userDetails.getUserId());
     }

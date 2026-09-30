@@ -82,17 +82,16 @@ public class McpTokenService {
 
     @Transactional
     public void deleteMcpToken(Integer userId, DeleteMcpTokenRequest deleteMcpTokenRequest) {
-        McpToken existingMcpToken = mcpTokenRepository.findByMcpIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+        McpToken existingMcpToken = mcpTokenRepository.findByIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("删除失败，MCP 令牌不存在或不属于当前用户"));
         mcpTokenRepository.delete(existingMcpToken);
         log.info("delete mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
     }
 
     @Transactional
     public FindMcpTokenResponse deprecatedMcpToken(DeleteMcpTokenRequest deleteMcpTokenRequest, Integer userId) {
-        McpToken mcpToken = mcpTokenRepository.findByMcpIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("delete fall, mcp token not found"));
+        McpToken mcpToken = mcpTokenRepository.findByIdAndUserId(deleteMcpTokenRequest.getTokenId(), userId).orElseThrow(() -> new BusinessException("停用失败，MCP 令牌不存在或不属于当前用户"));
         mcpToken.setIsEnabled(false);
-        mcpTokenRepository.save(mcpToken);
-        log.info("deprecated mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
+        log.info("deprecate mcp token, token ID : {}", deleteMcpTokenRequest.getTokenId());
         return FindMcpTokenResponse.from(mcpToken);
     }
 

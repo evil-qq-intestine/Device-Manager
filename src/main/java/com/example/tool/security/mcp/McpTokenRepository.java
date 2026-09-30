@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface McpTokenRepository extends JpaRepository<McpToken, Integer> {
     Optional<McpToken> findByTokenHash(String tokenHash);
 
-    Optional<McpToken> findByMcpIdAndUserId(Integer mcpId, Integer userId);
+    Optional<McpToken> findByIdAndUserId(Integer id, Integer userId);
 
     List<McpToken> findByUserId(Integer userId);
 }
