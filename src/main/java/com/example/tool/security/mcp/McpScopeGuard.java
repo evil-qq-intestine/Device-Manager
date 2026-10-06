@@ -1,6 +1,7 @@
 package com.example.tool.security.mcp;
 
 import com.example.tool.security.mcp.entity.McpTokenPermission;
+import com.example.tool.security.mcp.entity.McpTokenTier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +55,62 @@ public final class McpScopeGuard {
 
     public static boolean hasScope(String scope) {
         return hasAuthority(SCOPE_PREFIX + scope);
+    }
+
+    /**
+     * 执行 {@link McpRequires} 声明的校验：先比等级，再逐个查 scope。
+     * 由 {@link McpToolAuthorizationBeanPostProcessor} 在工具调用前自动调用，
+     * 工具方法里通常无需再手写。
+     */
+    public static void enforce(McpRequires requires) {
+        if (requires == null) {
+            return;
+        }
+        requireTier(requires.tier());
+        for (McpTokenPermission permission : requires.scopes()) {
+            require(permission);
+        }
+    }
+
+    /**
+     * 要求当前令牌等级不低于 {@code minimum}（{@code EXTERNAL < TRUSTED}）。
+     * 无认证信息时同样拒绝——缺少上下文不能被当成「任意等级都放行」。
+     */
+    public static void requireTier(McpTokenTier minimum) {
+        if (minimum == null) {
+            return;
+        }
+        String value = tier();
+        if (value == null) {
+            throw new McpAccessDeniedException("当前请求没有 MCP 令牌认证信息，无法执行受保护的操作");
+        }
+        McpTokenTier current;
+        try {
+            current = McpTokenTier.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new McpAccessDeniedException("未知的令牌等级：" + value);
+        }
+        if (rank(current) < rank(minimum)) {
+            throw new McpAccessDeniedException("当前令牌等级 " + current + " 权限不足，需要 " + minimum);
+        }
+    }
+
+    /**
+     * 当前令牌 id，用于写操作审计；来自 {@code McpTokenAuthenticationProvider} 写入的
+     * principal（令牌主键）。无认证信息时返回 null。
+     */
+    public static Integer tokenId() {
+        Authentication authentication = authentication();
+        if (authentication == null) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        return (principal instanceof Integer id) ? id : null;
+    }
+
+    /** EXTERNAL=0 < TRUSTED=1。 */
+    private static int rank(McpTokenTier tier) {
+        return tier == McpTokenTier.TRUSTED ? 1 : 0;
     }
 
     private static boolean hasAuthority(String authority) {
